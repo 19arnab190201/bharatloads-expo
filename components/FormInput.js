@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import { StyleSheet, View, Text, TextInput, Image, Pressable } from "react-native";
+import React from "react";
+import { StyleSheet, View, Text, TextInput, Image } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useAuth } from "../context/AuthProvider";
-import DateTimePicker from '@react-native-community/datetimepicker';
 
 const FormInput = ({
   Icon,
@@ -19,8 +18,6 @@ const FormInput = ({
   ...rest
 }) => {
   const { colour } = useAuth();
-  const [showPicker, setShowPicker] = useState(false);
-
   const handleInputChange = (inputValue) => {
     if (type === "number" && (inputValue < min || inputValue > max)) {
       return;
@@ -71,38 +68,6 @@ const FormInput = ({
     },
   });
 
-  if (type === 'date' || type === 'time') {
-    return (
-      <View>
-        <Pressable 
-          onPress={() => setShowPicker(true)}
-          style={styles.input}>
-          <Text>
-            {value ? (
-              type === 'date' 
-                ? new Date(value).toLocaleDateString()
-                : new Date(value).toLocaleTimeString()
-            ) : placeholder}
-          </Text>
-        </Pressable>
-        
-        {showPicker && (
-          <DateTimePicker
-            value={value ? new Date(value) : new Date()}
-            mode={type}
-            is24Hour={true}
-            onChange={(event, selectedValue) => {
-              setShowPicker(false);
-              if (event.type === 'set' && selectedValue) {
-                onChange(selectedValue.toISOString());
-              }
-            }}
-          />
-        )}
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -128,12 +93,11 @@ const FormInput = ({
                 [name]: itemValue,
               })
             }>
-            <Picker.Item label={placeholder} value="" />
             {options.map((option, index) => (
               <Picker.Item
                 key={index}
-                label={typeof option === 'object' ? option.label : option}
-                value={typeof option === 'object' ? option.value : option}
+                label={option.label || option}
+                value={option.value || option}
               />
             ))}
           </Picker>

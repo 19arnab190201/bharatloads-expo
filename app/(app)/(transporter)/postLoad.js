@@ -126,117 +126,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const StepNavigation = ({ currentStep, onNext, isValid }) => {
-  const { colour } = useAuth();
-  
-  const navigationStyles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: 20,
-      marginBottom: 10,
-    },
-    button: {
-      flex: 1,
-      padding: 15,
-      borderRadius: 12,
-      alignItems: 'center',
-      backgroundColor: isValid ? colour.primaryColor : colour.greyTag,
-    },
-    buttonText: {
-      color: isValid ? '#fff' : colour.inputLabel,
-      fontSize: 16,
-      fontWeight: '600',
-    }
-  });
-
-  return (
-    <View style={navigationStyles.container}>
-      {currentStep < 3 && (
-        <Pressable
-          style={navigationStyles.button}
-          onPress={onNext}
-          disabled={!isValid}>
-          <Text style={navigationStyles.buttonText}>
-            Next
-          </Text>
-        </Pressable>
-      )}
-    </View>
-  );
-};
-
-const LoadDetailsCard = ({ formState, onEdit, showEditButton = true }) => {
-  const styles = StyleSheet.create({
-    summaryCard: {
-      backgroundColor: '#fff',
-      borderWidth: 1,
-      padding: 14,
-      borderRadius: 12,
-      borderColor: "#14B8A6",
-      marginBottom: 15,
-      position: 'relative',
-    },
-    editButton: {
-      position: "absolute",
-      top: -10,
-      right: -10,
-      width: 35,
-      height: 35,
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: 25,
-      backgroundColor: "#f1f1f1",
-      zIndex: 1,
-    },
-    cardTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      marginBottom: 8,
-      color: '#333',
-    },
-    detailRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 4,
-    },
-    boxSkeletonContainer: {
-      position: 'absolute',
-      right: 10,
-      top: 10,
-      opacity: 0.5,
-      zIndex: 0,
-    }
-  });
-
-  return (
-    <Pressable style={styles.summaryCard} onPress={onEdit}>
-      {showEditButton && (
-        <Pressable style={styles.editButton} onPress={onEdit}>
-          <Text>E</Text>
-        </Pressable>
-      )}
-      <View style={styles.boxSkeletonContainer}>
-        <Boxskeleton />
-      </View>
-      <Text style={styles.cardTitle}>Load Details</Text>
-      <View style={styles.detailRow}>
-        <LoadingPoint style={{ marginRight: 8 }} />
-        <Text>{formState.loadingPoint}</Text>
-      </View>
-      <View style={styles.detailRow}>
-        <LoadingPoint style={{ marginRight: 8 }} />
-        <Text>{formState.droppingPoint}</Text>
-      </View>
-      <View style={styles.detailRow}>
-        <LoadingPoint style={{ marginRight: 8 }} />
-        <Text>{`${formState.materialType} • ${formState.quantity} ${formState.unit}`}</Text>
-      </View>
-    </Pressable>
-  );
-};
-
-const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) => {
+const StepOne = ({ formState, setFormState }) => {
   const handleUnitChange = (unit) => {
     setFormState((prev) => ({ ...prev, unit }));
   };
@@ -265,7 +155,6 @@ const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) =>
           label='Loading Point'
           placeholder='Search Loading Point'
           name='loadingPoint'
-          value={formState.loadingPoint}
           onChange={handleFormChange}
         />
         <FormInput
@@ -273,7 +162,6 @@ const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) =>
           label='Droping Point'
           placeholder='Search Droping Point'
           name='droppingPoint'
-          value={formState.droppingPoint}
           onChange={handleFormChange}
         />
       </Pressable>
@@ -290,9 +178,9 @@ const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) =>
         type='select'
         onChange={handleFormChange}
         options={[
-          { label: "Cement", value: "Cement" },
-          { label: "Sand", value: "Sand" },
-          { label: "Gravel", value: "Gravel" },
+          { label: "Cement", value: "cement" },
+          { label: "Sand", value: "sand" },
+          { label: "Gravel", value: "gravel" },
         ]}
       />
       <View
@@ -347,16 +235,11 @@ const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) =>
           </Text>
         </Pressable>
       </View>
-      <StepNavigation
-        currentStep={1}
-        onNext={() => handleStepChange(2)}
-        isValid={validateStep(1)}
-      />
     </View>
   );
 };
 
-const StepTwo = ({ formState, setFormState, handleStepChange, validateStep }) => {
+const StepTwo = ({ formState, setFormState }) => {
   const { colour } = useAuth();
   const handleFormChange = (updatedField) => {
     setFormState((prev) => ({
@@ -448,10 +331,30 @@ const StepTwo = ({ formState, setFormState, handleStepChange, validateStep }) =>
 
   return (
     <View>
-      <LoadDetailsCard 
-        formState={formState} 
-        onEdit={() => handleStepChange(1)} 
-      />
+      <View style={stepTwoStyles.detailsCard}>
+        <Pressable
+          style={{
+            position: "absolute",
+            top: -10,
+            right: -10,
+            width: 35,
+            height: 35,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 25,
+            backgroundColor: "#f1f1f1",
+          }}>
+          <Text>E</Text>
+        </Pressable>
+        <View style={stepTwoStyles.boxSkeletonContainer}>
+          <Boxskeleton />
+        </View>
+        <Text style={{ fontSize: 22, marginBottom: 10 }}>Load Details</Text>
+        <Text>{formState.loadingPoint}</Text>
+        <Text>{formState.droppingPoint}</Text>
+        <Text>Iron Sheet • 50 Tonnes</Text>
+      </View>
 
       <FormInput
         Icon={LoadingPoint}
@@ -461,9 +364,9 @@ const StepTwo = ({ formState, setFormState, handleStepChange, validateStep }) =>
         type='select'
         onChange={handleFormChange}
         options={[
-          { label: 'Open', value: 'Open' },
-          { label: 'Closed', value: 'Closed' },
-          { label: 'Container', value: 'Container' },
+          { label: 'Open', value: 'open' },
+          { label: 'Closed', value: 'closed' },
+          { label: 'Container', value: 'container' },
         ]}
       />
 
@@ -493,8 +396,8 @@ const StepTwo = ({ formState, setFormState, handleStepChange, validateStep }) =>
         type='select'
         onChange={handleFormChange}
         options={[
-          { label: 'Full Body', value: 'Full Body' },
-          { label: 'Half Body', value: 'Half Body' },
+          { label: 'Full Body', value: 'full' },
+          { label: 'Half Body', value: 'half' },
         ]}
       />
 
@@ -520,16 +423,11 @@ const StepTwo = ({ formState, setFormState, handleStepChange, validateStep }) =>
           </Pressable>
         ))}
       </View>
-      <StepNavigation
-        currentStep={2}
-        onNext={() => handleStepChange(3)}
-        isValid={validateStep(2)}
-      />
     </View>
   );
 };
 
-const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) => {
+const StepThree = ({ formState, setFormState }) => {
   const { colour } = useAuth();
   
   const handleFormChange = (updatedField) => {
@@ -630,27 +528,36 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
     halfWidth: {
       flex: 1,
     },
-    boxSkeletonContainer: {
-      position: 'absolute',
-      right: 10,
-      top: 10,
-      opacity: 0.5,
-      zIndex: 0,
-    },
   });
 
   return (
     <View>
-      <LoadDetailsCard 
-        formState={formState} 
-        onEdit={() => handleStepChange(1)} 
-      />
+      {/* Load Details Summary Card */}
+      <View style={stepThreeStyles.summaryCard}>
+        <Pressable style={stepThreeStyles.editButton} onPress={() => setStep(1)}>
+          <Text>E</Text>
+        </Pressable>
+        <View style={stepThreeStyles.boxSkeletonContainer}>
+          <Boxskeleton />
+        </View>
+        <Text style={stepThreeStyles.cardTitle}>Load Details</Text>
+        <View style={stepThreeStyles.detailRow}>
+          <LoadingPoint style={stepThreeStyles.detailIcon} />
+          <Text style={stepThreeStyles.detailText}>{formState.loadingPoint}</Text>
+        </View>
+        <View style={stepThreeStyles.detailRow}>
+          <LoadingPoint style={stepThreeStyles.detailIcon} />
+          <Text style={stepThreeStyles.detailText}>{formState.droppingPoint}</Text>
+        </View>
+        <View style={stepThreeStyles.detailRow}>
+          <LoadingPoint style={stepThreeStyles.detailIcon} />
+          <Text style={stepThreeStyles.detailText}>Iron Sheet    50 Tonnes</Text>
+        </View>
+      </View>
 
       {/* Vehicle Requirements Summary Card */}
-      <Pressable 
-        style={stepThreeStyles.summaryCard} 
-        onPress={() => handleStepChange(2)}>
-        <Pressable style={stepThreeStyles.editButton} onPress={() => handleStepChange(2)}>
+      <View style={stepThreeStyles.summaryCard}>
+        <Pressable style={stepThreeStyles.editButton} onPress={() => setStep(2)}>
           <Text>E</Text>
         </Pressable>
         <Text style={stepThreeStyles.cardTitle}>Vehicle Requirement</Text>
@@ -675,7 +582,7 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
             <Text style={stepThreeStyles.infoValue}>{formState.numTires}</Text>
           </View>
         </View>
-      </Pressable>
+      </View>
 
       {/* Total Offered Amount */}
       <FormInput
@@ -769,8 +676,7 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
               placeholder="Select Date"
               name="scheduleDate"
               type="date"
-              value={formState.scheduleDate}
-              onChange={(value) => handleFormChange({ scheduleDate: value })}
+              onChange={handleFormChange}
             />
           </View>
           <View style={stepThreeStyles.halfWidth}>
@@ -780,8 +686,7 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
               placeholder="Select Time"
               name="scheduleTime"
               type="time"
-              value={formState.scheduleTime}
-              onChange={(value) => handleFormChange({ scheduleTime: value })}
+              onChange={handleFormChange}
             />
           </View>
         </View>
@@ -805,11 +710,6 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
           console.log('Form submitted:', formState);
         }}
         variant="full"
-      />
-      <StepNavigation
-        currentStep={3}
-        onNext={() => handleStepChange(2)}
-        isValid={validateStep(3)}
       />
     </View>
   );
@@ -916,28 +816,13 @@ const PostLoad = () => {
 
       <View style={styles.formContainer}>
         {step === 1 && (
-          <StepOne 
-            formState={formState} 
-            setFormState={setFormState}
-            handleStepChange={handleStepChange}
-            validateStep={validateStep}
-          />
+          <StepOne formState={formState} setFormState={setFormState} />
         )}
         {step === 2 && (
-          <StepTwo 
-            formState={formState} 
-            setFormState={setFormState}
-            handleStepChange={handleStepChange}
-            validateStep={validateStep}
-          />
+          <StepTwo formState={formState} setFormState={setFormState} />
         )}
         {step === 3 && (
-          <StepThree 
-            formState={formState} 
-            setFormState={setFormState}
-            handleStepChange={handleStepChange}
-            validateStep={validateStep}
-          />
+          <StepThree formState={formState} setFormState={setFormState} />
         )}
       </View>
     </ScrollView>
