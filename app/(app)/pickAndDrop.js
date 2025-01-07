@@ -10,10 +10,10 @@ import {
   Alert,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import Geolocation from "@react-native-community/geolocation";
+// import Geolocation from "@react-native-community/geolocation";
 import axios from "axios";
 
-const OLA_MAPS_API_KEY = "YOUR_API_KEY";
+const OLA_MAPS_API_KEY = "wKj1cjhXTNgtfV13C1ROJJkgySVxgvQmn34xh7kH";
 const GEOCODE_API_URL = "https://api.olamaps.com/geocode";
 const PLACES_API_URL = "https://api.olamaps.com/places";
 
@@ -43,21 +43,21 @@ const PickAndDrop = ({ onLocationSelect, onClose }) => {
     };
 
     const fetchCurrentLocation = () => {
-      Geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          });
-        },
-        (error) => {
-          console.error("Location error:", error);
-          Alert.alert("Error", "Unable to fetch location.");
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-      );
+      // Geolocation.getCurrentPosition(
+      //   (position) => {
+      //     setCurrentLocation({
+      //       latitude: position.coords.latitude,
+      //       longitude: position.coords.longitude,
+      //       latitudeDelta: 0.05,
+      //       longitudeDelta: 0.05,
+      //     });
+      //   },
+      //   (error) => {
+      //     console.error("Location error:", error);
+      //     Alert.alert("Error", "Unable to fetch location.");
+      //   },
+      //   { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      // );
     };
 
     requestLocationPermission();

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
+  Pressable,
 } from "react-native";
 import { useAPI } from "../../../utils/api";
 import { useAuth } from "../../../context/AuthProvider";
@@ -17,6 +18,8 @@ import Banner from "../../../components/Banner";
 import LoadCard from "../../../components/LoadCard";
 // import Animated, { Easing } from "react-native-reanimated";
 import { api } from "../../../utils/api";
+import FormInput from "../../../components/FormInput";
+import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 
 export default function Dashboard() {
   const { user, logout, colour } = useAuth();
@@ -68,13 +71,12 @@ export default function Dashboard() {
   }, []);
 
   // console.log("colour", colour);
-
   return (
     <ScrollView style={styles.container}>
       <StatusBar barStyle='dark-content' backgroundColor='#fff' />
       <Header />
       <Banner
-        description='Diven to deliver excellence, powered by unwavering trust.'
+        description='Driven to deliver excellence, powered by unwavering trust.'
         image={require("../../../assets/images/truck.png")}
         cta='Post Load'
         ctaUrl='(transporter)/postLoad'
@@ -82,6 +84,20 @@ export default function Dashboard() {
         backgroundColor='#1E283A'
         textColor='#fff'
       />
+      <TouchableOpacity
+        style={{
+          backgroundColor: colour.inputBackground,
+          borderRadius: 10,
+          padding: 10,
+          paddingVertical: 18,
+          marginTop: 20,
+          flexDirection: "row",
+          gap: 10,
+        }}
+        onPress={() => router.push("/(transporter)/searchTrucks")}>
+        <LoadingPoint />
+        <Text>Search Trucks</Text>
+      </TouchableOpacity>
 
       <View style={{ marginTop: 20 }}>
         <Text style={styles.title}>Your Loads</Text>
