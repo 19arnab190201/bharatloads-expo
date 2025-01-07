@@ -8,12 +8,15 @@ import {
   View,
   Button,
   Pressable,
+  Image,
+  Alert,
 } from "react-native";
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import FormMainButton from "../../../components/FormMainButton";
 import PickAndDrop from "../pickAndDrop";
+import Boxskeleton from "../../../assets/images/icons/Boxskeleton";
 
 const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
   const { colour } = useAuth();
@@ -123,7 +126,65 @@ const styles = StyleSheet.create({
   },
 });
 
-const StepOne = ({ formState, setFormState }) => {
+const StepNavigation = ({ currentStep, onNext, onBack, isValid }) => {
+  const { colour } = useAuth();
+  
+  const navigationStyles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+      marginBottom: 10,
+      gap: 10,
+    },
+    button: {
+      flex: 1,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    nextButton: {
+      backgroundColor: isValid ? colour.primary : colour.disabled,
+    },
+    backButton: {
+      backgroundColor: colour.inputBackground,
+    },
+    buttonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    backButtonText: {
+      color: '#333',
+    },
+  });
+
+  return (
+    <View style={navigationStyles.container}>
+      {currentStep > 1 && (
+        <Pressable
+          style={[navigationStyles.button, navigationStyles.backButton]}
+          onPress={onBack}>
+          <Text style={[navigationStyles.buttonText, navigationStyles.backButtonText]}>
+            Back
+          </Text>
+        </Pressable>
+      )}
+      {currentStep < 3 && (
+        <Pressable
+          style={[navigationStyles.button, navigationStyles.nextButton]}
+          onPress={onNext}
+          disabled={!isValid}>
+          <Text style={navigationStyles.buttonText}>
+            Next
+          </Text>
+        </Pressable>
+      )}
+    </View>
+  );
+};
+
+const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) => {
   const handleUnitChange = (unit) => {
     setFormState((prev) => ({ ...prev, unit }));
   };
@@ -152,6 +213,7 @@ const StepOne = ({ formState, setFormState }) => {
           label='Loading Point'
           placeholder='Search Loading Point'
           name='loadingPoint'
+          value={formState.loadingPoint}
           onChange={handleFormChange}
         />
         <FormInput
@@ -159,6 +221,7 @@ const StepOne = ({ formState, setFormState }) => {
           label='Droping Point'
           placeholder='Search Droping Point'
           name='droppingPoint'
+          value={formState.droppingPoint}
           onChange={handleFormChange}
         />
       </Pressable>
@@ -232,11 +295,17 @@ const StepOne = ({ formState, setFormState }) => {
           </Text>
         </Pressable>
       </View>
+      <StepNavigation
+        currentStep={1}
+        onNext={() => handleStepChange(2)}
+        isValid={validateStep(1)}
+      />
     </View>
   );
 };
 
-const StepTwo = ({ formState, setFormState }) => {
+const StepTwo = ({ formState, setFormState, handleStepChange, validateStep }) => {
+  const { colour } = useAuth();
   const handleFormChange = (updatedField) => {
     setFormState((prev) => ({
       ...prev,
@@ -244,8 +313,16 @@ const StepTwo = ({ formState, setFormState }) => {
     }));
   };
 
+  const vehicleTypes = [
+    { id: 'trailer', label: 'TRAILER', icon: require('../../../assets/images/trucktype/trailer.png') },
+    { id: 'hyva', label: 'HYVA', icon: require('../../../assets/images/trucktype/hyva.png') },
+    { id: 'truck', label: 'TRUCK', icon: require('../../../assets/images/trucktype/truck.png') },
+  ];
+
+  const truckTyres = [10, 12, 14, 16, 'Other'];
+
   const stepTwoStyles = StyleSheet.create({
-    container: {
+    detailsCard: {
       flex: 1,
       justifyContent: "center",
       alignItems: "flex-start",
@@ -253,15 +330,73 @@ const StepTwo = ({ formState, setFormState }) => {
       padding: 14,
       borderRadius: 12,
       borderColor: "#14B8A6",
+      marginBottom: 20,
     },
-    image: {
-      width: 200,
-      height: 200,
+    vehicleTypeContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginVertical: 15,
+      gap: 10,
     },
+    vehicleTypeCard: {
+      flex: 1,
+      aspectRatio: 1,
+      backgroundColor: colour.inputBackground,
+      borderRadius: 12,
+      padding: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: 'transparent',
+    },
+    vehicleTypeCardSelected: {
+      borderColor: '#14B8A6',
+    },
+    vehicleTypeImage: {
+      width: 50,
+      height: 50,
+      marginBottom: 8,
+      resizeMode: 'contain'
+    },
+    vehicleTypeLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: '#333',
+      textAlign: 'center',
+    },
+    tyreContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+      marginTop: 10,
+    },
+    tyreButton: {
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 25,
+      backgroundColor: colour.inputBackground,
+    },
+    tyreButtonSelected: {
+      backgroundColor: '#14B8A6',
+    },
+    tyreText: {
+      fontSize: 16,
+      color: '#333',
+    },
+    tyreTextSelected: {
+      color: '#fff',
+    },
+    boxSkeletonContainer: {
+      position: 'absolute',
+      right: 10,
+      top: 10,
+      opacity: 0.5,
+    }
   });
+
   return (
     <View>
-      <View style={stepTwoStyles.container}>
+      <View style={stepTwoStyles.detailsCard}>
         <Pressable
           style={{
             position: "absolute",
@@ -277,84 +412,95 @@ const StepTwo = ({ formState, setFormState }) => {
           }}>
           <Text>E</Text>
         </Pressable>
-        <Text
-          style={{
-            fontSize: 22,
-          }}>
-          Load Details
-        </Text>
+        <View style={stepTwoStyles.boxSkeletonContainer}>
+          <Boxskeleton />
+        </View>
+        <Text style={{ fontSize: 22, marginBottom: 10 }}>Load Details</Text>
         <Text>{formState.loadingPoint}</Text>
         <Text>{formState.droppingPoint}</Text>
-        <Text>{formState.materialType}</Text>
-        <Text>{formState.quantity} Tonnes</Text>
+        <Text>Iron Sheet • 50 Tonnes</Text>
       </View>
 
       <FormInput
         Icon={LoadingPoint}
         label='Vehicle Body Type'
-        placeholder='Enter Vehicle Body Type'
+        placeholder='Select Vehicle Body Type'
         name='vehicleBodyType'
+        type='select'
         onChange={handleFormChange}
+        options={[
+          { label: 'Open', value: 'open' },
+          { label: 'Closed', value: 'closed' },
+          { label: 'Container', value: 'container' },
+        ]}
       />
-      <FormInput
-        Icon={LoadingPoint}
-        label='Vehicle Type'
-        placeholder='Enter Vehicle Type'
-        name='vehicleType'
-        onChange={handleFormChange}
-      />
+
+      <Text style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 10, color: '#333' }}>
+        Vehicle Type
+      </Text>
+      <View style={stepTwoStyles.vehicleTypeContainer}>
+        {vehicleTypes.map((type) => (
+          <Pressable
+            key={type.id}
+            style={[
+              stepTwoStyles.vehicleTypeCard,
+              formState.vehicleType === type.id && stepTwoStyles.vehicleTypeCardSelected
+            ]}
+            onPress={() => handleFormChange({ vehicleType: type.id })}>
+            <Image source={type.icon} style={stepTwoStyles.vehicleTypeImage} />
+            <Text style={stepTwoStyles.vehicleTypeLabel}>{type.label}</Text>
+          </Pressable>
+        ))}
+      </View>
+
       <FormInput
         Icon={LoadingPoint}
         label='Truck Body Type'
-        placeholder='Enter Truck Body Type'
+        placeholder='Select Truck Body Type'
         name='truckBodyType'
+        type='select'
         onChange={handleFormChange}
+        options={[
+          { label: 'Full Body', value: '' },
+          { label: 'Half Body', value: 'half' },
+        ]}
       />
 
-      <View>
-        <View style={{ flexDirection: "row", marginTop: 20 }}>
-          {[4, 6, 8, 10, 12, 14, 16].map((numTires) => (
-            <Pressable
-              key={numTires}
-              style={
-                formState.numTires === numTires
-                  ? styles.tagButtonSelected
-                  : styles.tagButton
-              }
-              onPress={() => setFormState((prev) => ({ ...prev, numTires }))}>
-              <Text
-                style={
-                  formState.numTires === numTires
-                    ? styles.tagButtonText
-                    : styles.tagButtonTextUnselected
-                }>
-                {numTires}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+      <Text style={{ fontSize: 14, fontWeight: 'bold', marginVertical: 10, color: '#333' }}>
+        Truck Tyre
+      </Text>
+      <View style={stepTwoStyles.tyreContainer}>
+        {truckTyres.map((tyre) => (
+          <Pressable
+            key={tyre}
+            style={[
+              stepTwoStyles.tyreButton,
+              formState.numTires === tyre && stepTwoStyles.tyreButtonSelected
+            ]}
+            onPress={() => handleFormChange({ numTires: tyre })}>
+            <Text
+              style={[
+                stepTwoStyles.tyreText,
+                formState.numTires === tyre && stepTwoStyles.tyreTextSelected
+              ]}>
+              {tyre}
+            </Text>
+          </Pressable>
+        ))}
       </View>
+      <StepNavigation
+        currentStep={2}
+        onNext={() => handleStepChange(3)}
+        onBack={() => handleStepChange(1)}
+        isValid={validateStep(2)}
+      />
     </View>
   );
 };
 
-const StepThree = ({ formState, setFormState }) => {
-  const stepThreeStyles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "flex-start",
-      borderWidth: 1,
-      padding: 14,
-      borderRadius: 12,
-      borderColor: "#14B8A6",
-    },
-    image: {
-      width: 200,
-      height: 200,
-    },
-  });
-
+const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) => {
+  const { colour } = useAuth();
+  
   const handleFormChange = (updatedField) => {
     setFormState((prev) => ({
       ...prev,
@@ -362,190 +508,294 @@ const StepThree = ({ formState, setFormState }) => {
     }));
   };
 
+  const stepThreeStyles = StyleSheet.create({
+    summaryCard: {
+      backgroundColor: '#fff',
+      borderWidth: 1,
+      padding: 14,
+      borderRadius: 12,
+      borderColor: "#14B8A6",
+      marginBottom: 15,
+      position: 'relative',
+    },
+    editButton: {
+      position: "absolute",
+      top: -10,
+      right: -10,
+      width: 35,
+      height: 35,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 25,
+      backgroundColor: "#f1f1f1",
+      zIndex: 1,
+    },
+    cardTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 8,
+      color: '#333',
+    },
+    detailRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    detailIcon: {
+      marginRight: 8,
+    },
+    detailText: {
+      color: '#666',
+      fontSize: 14,
+    },
+    vehicleInfo: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 8,
+    },
+    infoColumn: {
+      flex: 1,
+    },
+    infoLabel: {
+      color: '#999',
+      fontSize: 12,
+    },
+    infoValue: {
+      color: '#333',
+      fontSize: 14,
+      fontWeight: '500',
+    },
+    scheduleContainer: {
+      flexDirection: 'row',
+      marginTop: 15,
+      gap: 10,
+    },
+    scheduleButton: {
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 25,
+      backgroundColor: colour.inputBackground,
+    },
+    scheduleButtonSelected: {
+      backgroundColor: '#14B8A6',
+    },
+    scheduleText: {
+      fontSize: 14,
+      color: '#333',
+    },
+    scheduleTextSelected: {
+      color: '#fff',
+    },
+    dateTimeContainer: {
+      flexDirection: 'row',
+      gap: 10,
+      marginTop: 10,
+    },
+    advanceInputContainer: {
+      flexDirection: 'row',
+      gap: 10,
+      marginTop: 10,
+    },
+    halfWidth: {
+      flex: 1,
+    },
+    boxSkeletonContainer: {
+      position: 'absolute',
+      right: 10,
+      top: 10,
+      opacity: 0.5,
+      zIndex: 0,
+    },
+  });
+
   return (
     <View>
-      <View style={stepThreeStyles.container}>
-        <Pressable
-          style={{
-            position: "absolute",
-            top: -10,
-            right: -10,
-            width: 35,
-            height: 35,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 25,
-            backgroundColor: "#f1f1f1",
-          }}>
+      {/* Load Details Summary Card */}
+      <View style={stepThreeStyles.summaryCard}>
+        <Pressable style={stepThreeStyles.editButton} onPress={() => setStep(1)}>
           <Text>E</Text>
         </Pressable>
-        <Text
-          style={{
-            fontSize: 22,
-          }}>
-          Load Details
-        </Text>
-        <Text>{formState.loadingPoint}</Text>
-        <Text>{formState.droppingPoint}</Text>
-        <Text>{formState.materialType}</Text>
-        <Text>{formState.quantity} Tonnes</Text>
-      </View>
-      <View>
-        <View style={stepThreeStyles.container}>
-          <Pressable
-            style={{
-              position: "absolute",
-              top: -10,
-              right: -10,
-              width: 35,
-              height: 35,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 25,
-              backgroundColor: "#f1f1f1",
-            }}>
-            <Text>E</Text>
-          </Pressable>
-          <Text
-            style={{
-              fontSize: 22,
-            }}>
-            Vehicle Requirement
-          </Text>
-          <Text>{formState.vehicleBodyType}</Text>
-          <Text>{formState.vehicleType}</Text>
-          <Text>{formState.truckBodyType}</Text>
-          <Text>{formState.numTires} Tires</Text>
+        <View style={stepThreeStyles.boxSkeletonContainer}>
+          <Boxskeleton />
+        </View>
+        <Text style={stepThreeStyles.cardTitle}>Load Details</Text>
+        <View style={stepThreeStyles.detailRow}>
+          <LoadingPoint style={stepThreeStyles.detailIcon} />
+          <Text style={stepThreeStyles.detailText}>{formState.loadingPoint}</Text>
+        </View>
+        <View style={stepThreeStyles.detailRow}>
+          <LoadingPoint style={stepThreeStyles.detailIcon} />
+          <Text style={stepThreeStyles.detailText}>{formState.droppingPoint}</Text>
+        </View>
+        <View style={stepThreeStyles.detailRow}>
+          <LoadingPoint style={stepThreeStyles.detailIcon} />
+          <Text style={stepThreeStyles.detailText}>Iron Sheet    50 Tonnes</Text>
         </View>
       </View>
+
+      {/* Vehicle Requirements Summary Card */}
+      <View style={stepThreeStyles.summaryCard}>
+        <Pressable style={stepThreeStyles.editButton} onPress={() => setStep(2)}>
+          <Text>E</Text>
+        </Pressable>
+        <Text style={stepThreeStyles.cardTitle}>Vehicle Requirement</Text>
+        <View style={stepThreeStyles.detailRow}>
+          <Image 
+            source={require('../../../assets/images/trucktype/truck.png')} 
+            style={{ width: 40, height: 40, marginRight: 10 }} 
+          />
+          <Text style={stepThreeStyles.detailText}>TRUCK</Text>
+        </View>
+        <View style={stepThreeStyles.vehicleInfo}>
+          <View style={stepThreeStyles.infoColumn}>
+            <Text style={stepThreeStyles.infoLabel}>Body Type</Text>
+            <Text style={stepThreeStyles.infoValue}>{formState.vehicleBodyType}</Text>
+          </View>
+          <View style={stepThreeStyles.infoColumn}>
+            <Text style={stepThreeStyles.infoLabel}>Truck Body</Text>
+            <Text style={stepThreeStyles.infoValue}>{formState.truckBodyType}</Text>
+          </View>
+          <View style={stepThreeStyles.infoColumn}>
+            <Text style={stepThreeStyles.infoLabel}>Tyre</Text>
+            <Text style={stepThreeStyles.infoValue}>{formState.numTires}</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Total Offered Amount */}
       <FormInput
         Icon={LoadingPoint}
-        label='Total Offered Amount'
-        placeholder='Enter Total Offered Amount'
-        name='totalOfferedAmount'
+        label="Total Offered Amount"
+        placeholder="Enter Offered Amount"
+        name="totalOfferedAmount"
+        type="number"
         onChange={handleFormChange}
-        type='number'
-        min={1}
-        max={1000}
       />
 
+      {/* Advance Amount Selection */}
       <FormInput
         Icon={LoadingPoint}
-        label='How much advance would you like to pay ?'
-        placeholder='Enter Advance Amount'
-        name='advanceAmount'
+        label="How much advance would you like to pay ?"
+        placeholder="Select Advance Amount Percentage"
+        name="advancePercentage"
+        type="number"
         onChange={handleFormChange}
-        type='number'
+        min={10}
+        max={100}
+        step={1}
       />
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: "bold",
-          marginBottom: -8,
-          color: "#333",
-        }}>
+
+      {/* Advance Amount Details */}
+      <Text style={{ fontSize: 14, fontWeight: 'bold', marginVertical: 10, color: '#333' }}>
         Advance Amount
       </Text>
-
-      <View style={{ flex: 1, flexDirection: "row", marginTop: 20 }}>
-        <View style={{ width: "50%", marginRight: 10 }}>
+      <View style={stepThreeStyles.advanceInputContainer}>
+        <View style={stepThreeStyles.halfWidth}>
           <FormInput
             Icon={LoadingPoint}
-            label=''
-            placeholder='Enter Amount'
-            name='cash'
+            placeholder="Cash"
+            name="advanceCash"
+            type="number"
             onChange={handleFormChange}
           />
         </View>
-        <View style={{ width: "50%", marginRight: 10 }}>
+        <View style={stepThreeStyles.halfWidth}>
           <FormInput
             Icon={LoadingPoint}
-            label=''
-            placeholder='Enter Diesel'
-            name='cash'
+            placeholder="Diesel"
+            name="advanceDiesel"
+            type="number"
             onChange={handleFormChange}
           />
         </View>
       </View>
 
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: "bold",
-          marginBottom: -8,
-          color: "#333",
-        }}>
+      {/* Schedule Selection */}
+      <Text style={{ fontSize: 14, fontWeight: 'bold', marginVertical: 10, color: '#333' }}>
         Schedule Your Truck
       </Text>
-      <View style={{ flexDirection: "row", marginTop: 20 }}>
+      <View style={stepThreeStyles.scheduleContainer}>
         <Pressable
-          style={
-            formState.schedule === "immediately"
-              ? styles.tagButtonSelected
-              : styles.tagButton
-          }
-          onPress={() =>
-            setFormState((prev) => ({ ...prev, schedule: "immediately" }))
-          }>
+          style={[
+            stepThreeStyles.scheduleButton,
+            formState.schedule === 'immediately' && stepThreeStyles.scheduleButtonSelected
+          ]}
+          onPress={() => handleFormChange({ schedule: 'immediately' })}>
           <Text
-            style={
-              formState.schedule === "immediately"
-                ? styles.tagButtonText
-                : styles.tagButtonTextUnselected
-            }>
+            style={[
+              stepThreeStyles.scheduleText,
+              formState.schedule === 'immediately' && stepThreeStyles.scheduleTextSelected
+            ]}>
             Immediately
           </Text>
         </Pressable>
         <Pressable
-          style={
-            formState.schedule === "later"
-              ? styles.tagButtonSelected
-              : styles.tagButton
-          }
-          onPress={() =>
-            setFormState((prev) => ({ ...prev, schedule: "later" }))
-          }>
+          style={[
+            stepThreeStyles.scheduleButton,
+            formState.schedule === 'later' && stepThreeStyles.scheduleButtonSelected
+          ]}
+          onPress={() => handleFormChange({ schedule: 'later' })}>
           <Text
-            style={
-              formState.schedule === "later"
-                ? styles.tagButtonText
-                : styles.tagButtonTextUnselected
-            }>
+            style={[
+              stepThreeStyles.scheduleText,
+              formState.schedule === 'later' && stepThreeStyles.scheduleTextSelected
+            ]}>
             Schedule
           </Text>
         </Pressable>
       </View>
-      {formState.schedule === "later" && (
-        <View
-          style={{
-            flexDirection: "row",
-            marginTop: 10,
-            width: "100%",
-          }}>
-          <View style={{ width: "50%", marginRight: 10 }}>
+
+      {formState.schedule === 'later' && (
+        <View style={stepThreeStyles.dateTimeContainer}>
+          <View style={stepThreeStyles.halfWidth}>
             <FormInput
               Icon={LoadingPoint}
-              label='Date'
-              placeholder='Select Date'
-              name='scheduleDate'
-              type='date'
-              onChange={handleFormChange}
+              label="Date"
+              placeholder="Select Date"
+              name="scheduleDate"
+              type="date"
+              value={formState.scheduleDate}
+              onChange={(value) => handleFormChange({ scheduleDate: value })}
             />
           </View>
-          <View style={{ width: "50%", marginRight: 10 }}>
+          <View style={stepThreeStyles.halfWidth}>
             <FormInput
               Icon={LoadingPoint}
-              label='Time'
-              placeholder='Select Time'
-              name='scheduleTime'
-              type='time'
-              onChange={handleFormChange}
+              label="Time"
+              placeholder="Select Time"
+              name="scheduleTime"
+              type="time"
+              value={formState.scheduleTime}
+              onChange={(value) => handleFormChange({ scheduleTime: value })}
             />
           </View>
         </View>
       )}
+
+      {/* Additional Notes */}
+      <FormInput
+        Icon={LoadingPoint}
+        label="Additional Notes"
+        placeholder="Type Here..."
+        name="additionalNotes"
+        type="textarea"
+        onChange={handleFormChange}
+      />
+
+      {/* Submit Button */}
+      <FormMainButton
+        text="Swipe to Post Load"
+        onPress={() => {
+          // Handle submission
+          console.log('Form submitted:', formState);
+        }}
+        variant="full"
+      />
+      <StepNavigation
+        currentStep={3}
+        onBack={() => handleStepChange(2)}
+        isValid={validateStep(3)}
+      />
     </View>
   );
 };
@@ -562,7 +812,61 @@ const PostLoad = () => {
     vehicleBodyType: "",
     vehicleType: "",
     truckBodyType: "",
+    numTires: null,
+    totalOfferedAmount: "",
+    advancePercentage: null,
+    advanceCash: "",
+    advanceDiesel: "",
+    schedule: "immediately",
+    scheduleDate: null,
+    scheduleTime: null,
+    additionalNotes: "",
   });
+
+  const validateStep = (stepNumber) => {
+    switch (stepNumber) {
+      case 1:
+        return !!(
+          formState.loadingPoint &&
+          formState.droppingPoint &&
+          formState.materialType &&
+          formState.quantity &&
+          formState.unit
+        );
+      case 2:
+        return !!(
+          formState.vehicleBodyType &&
+          formState.vehicleType &&
+          formState.truckBodyType &&
+          formState.numTires
+        );
+      case 3:
+        return !!(
+          formState.totalOfferedAmount &&
+          formState.advancePercentage &&
+          (formState.advanceCash || formState.advanceDiesel) &&
+          formState.schedule &&
+          (formState.schedule === 'immediately' || 
+            (formState.scheduleDate && formState.scheduleTime))
+        );
+      default:
+        return false;
+    }
+  };
+
+  const handleStepChange = (newStep) => {
+    // Only allow moving forward if current step is valid
+    if (newStep > step && !validateStep(step)) {
+      // Show error message or handle invalid step
+      Alert.alert('Please fill all required fields before proceeding');
+      return;
+    }
+    
+    // Allow moving backward or to validated steps
+    if (newStep < step || validateStep(newStep - 1)) {
+      setStep(newStep);
+    }
+  };
 
   useEffect(() => {
     console.log(formState);
@@ -585,53 +889,40 @@ const PostLoad = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <StatusBar style='light ' />
+      <StatusBar style='light' />
       <View style={styles.headerContainer}>
         <Text style={styles.heading}>Post Load</Text>
       </View>
-      <FormStepHeader setSteps={setStep} totalSteps={3} currentStep={step} />
+      <FormStepHeader 
+        setSteps={handleStepChange} 
+        totalSteps={3} 
+        currentStep={step} 
+      />
 
       <View style={styles.formContainer}>
         {step === 1 && (
-          <>
-            <StepOne formState={formState} setFormState={setFormState} />
-
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}>
-              {/* Full Button */}
-              <FormMainButton
-                text='Next'
-                onPress={() => {
-                  setStep(2);
-                  console.log(formState);
-                }}
-                variant='full'
-              />
-            </View>
-          </>
+          <StepOne 
+            formState={formState} 
+            setFormState={setFormState}
+            handleStepChange={handleStepChange}
+            validateStep={validateStep}
+          />
         )}
         {step === 2 && (
-          <>
-            <View>
-              <StepTwo formState={formState} setFormState={setFormState} />
-              {/* Full Button */}
-              <FormMainButton
-                text='Next'
-                onPress={() => {
-                  setStep(3);
-                  console.log(formState);
-                }}
-                variant='full'
-              />
-            </View>
-          </>
+          <StepTwo 
+            formState={formState} 
+            setFormState={setFormState}
+            handleStepChange={handleStepChange}
+            validateStep={validateStep}
+          />
         )}
         {step === 3 && (
-          <StepThree formState={formState} setFormState={setFormState} />
+          <StepThree 
+            formState={formState} 
+            setFormState={setFormState}
+            handleStepChange={handleStepChange}
+            validateStep={validateStep}
+          />
         )}
       </View>
     </ScrollView>
