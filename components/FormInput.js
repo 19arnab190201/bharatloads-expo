@@ -47,12 +47,14 @@ const FormInput = ({
     },
     icon: {
       position: "absolute",
+      zIndex: 1,
       left: 10,
       top: 12,
     },
     input: {
       borderRadius: 12,
       paddingLeft: 40,
+      paddingVertical: 12,
       fontSize: 16,
       backgroundColor: colour.inputBackground,
     },

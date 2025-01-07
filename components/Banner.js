@@ -1,6 +1,7 @@
 import React from "react";
-import { StyleSheet, View, Text, Image, Button, Pressable } from "react-native";
+import { StyleSheet, View, Text, Image, Pressable } from "react-native";
 import { useNavigation } from "expo-router";
+
 const Banner = ({
   description = "Banner Description",
   image = "https://via.placeholder.com/150",
@@ -8,7 +9,7 @@ const Banner = ({
   backgroundColor = "#fff",
   textColor = "#000",
   ctaUrl = "/",
-  onPress = () => {},
+  onPress,
 }) => {
   const navigation = useNavigation();
   const styles = StyleSheet.create({
