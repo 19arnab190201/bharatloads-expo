@@ -1,0 +1,26 @@
+export const materialTypes = [
+  "IRON SHEET",
+  "INDUSTRIAL EQUIPMENT", 
+  "CEMENT",
+  "COAL",
+  "STEEL",
+  "IRON BARS",
+  "PIPES",
+  "METALS",
+  "SCRAPS",
+  "OIL",
+  "RUBBER", 
+  "WOOD",
+  "VEHICLE PARTS",
+  "LEATHER",
+  "WHEAT",
+  "VEGETABLES",
+  "COTTON",
+  "TEXTILES",
+  "RICE",
+  "SPICES",
+  "PACKAGED FOOD",
+  "MEDICINES",
+  "OTHERS"
+] 
+

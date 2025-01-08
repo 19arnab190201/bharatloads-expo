@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect } from "react";
+import { materialTypes } from "../../../constants/data";
 import {
   SafeAreaView,
   StyleSheet,
@@ -17,6 +18,9 @@ import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import FormMainButton from "../../../components/FormMainButton";
 import PickAndDrop from "../pickAndDrop";
 import Boxskeleton from "../../../assets/images/icons/Boxskeleton";
+import useApi from "../../../hooks/useApi";
+import SwipeButton from './components/SwipeButton';
+import AnimatedStepView from './components/AnimatedStepView';
 
 const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
   const { colour } = useAuth();
@@ -103,21 +107,25 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   tagButton: {
-    padding: 10,
-    backgroundColor: "#f1f1f1",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#F8FAFC",
     borderRadius: 50,
     marginRight: 10,
   },
   tagButtonSelected: {
-    padding: 10,
-    backgroundColor: "#4CAF50",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#E7FBF8",
     borderRadius: 50,
     marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#24cab6",
   },
   tagButtonText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#000",
   },
   tagButtonTextUnselected: {
     fontSize: 16,
@@ -126,65 +134,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const StepNavigation = ({ currentStep, onNext, onBack, isValid }) => {
-  const { colour } = useAuth();
-  
-  const navigationStyles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: 20,
-      marginBottom: 10,
-      gap: 10,
-    },
-    button: {
-      flex: 1,
-      padding: 15,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    nextButton: {
-      backgroundColor: isValid ? colour.primary : colour.disabled,
-    },
-    backButton: {
-      backgroundColor: colour.inputBackground,
-    },
-    buttonText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    backButtonText: {
-      color: '#333',
-    },
-  });
-
-  return (
-    <View style={navigationStyles.container}>
-      {currentStep > 1 && (
-        <Pressable
-          style={[navigationStyles.button, navigationStyles.backButton]}
-          onPress={onBack}>
-          <Text style={[navigationStyles.buttonText, navigationStyles.backButtonText]}>
-            Back
-          </Text>
-        </Pressable>
-      )}
-      {currentStep < 3 && (
-        <Pressable
-          style={[navigationStyles.button, navigationStyles.nextButton]}
-          onPress={onNext}
-          disabled={!isValid}>
-          <Text style={navigationStyles.buttonText}>
-            Next
-          </Text>
-        </Pressable>
-      )}
-    </View>
-  );
-};
-
-const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) => {
+const StepOne = ({ formState, setFormState }) => {
   const handleUnitChange = (unit) => {
     setFormState((prev) => ({ ...prev, unit }));
   };
@@ -213,7 +163,6 @@ const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) =>
           label='Loading Point'
           placeholder='Search Loading Point'
           name='loadingPoint'
-          value={formState.loadingPoint}
           onChange={handleFormChange}
         />
         <FormInput
@@ -221,7 +170,6 @@ const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) =>
           label='Droping Point'
           placeholder='Search Droping Point'
           name='droppingPoint'
-          value={formState.droppingPoint}
           onChange={handleFormChange}
         />
       </Pressable>
@@ -237,11 +185,10 @@ const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) =>
         name='materialType'
         type='select'
         onChange={handleFormChange}
-        options={[
-          { label: "Cement", value: "cement" },
-          { label: "Sand", value: "sand" },
-          { label: "Gravel", value: "gravel" },
-        ]}
+        options={materialTypes.map((material) => ({
+          label: material,
+          value: material,
+        }))}
       />
       <View
         style={{
@@ -295,16 +242,11 @@ const StepOne = ({ formState, setFormState, handleStepChange, validateStep }) =>
           </Text>
         </Pressable>
       </View>
-      <StepNavigation
-        currentStep={1}
-        onNext={() => handleStepChange(2)}
-        isValid={validateStep(1)}
-      />
     </View>
   );
 };
 
-const StepTwo = ({ formState, setFormState, handleStepChange, validateStep }) => {
+const StepTwo = ({ formState, setFormState }) => {
   const { colour } = useAuth();
   const handleFormChange = (updatedField) => {
     setFormState((prev) => ({
@@ -461,7 +403,7 @@ const StepTwo = ({ formState, setFormState, handleStepChange, validateStep }) =>
         type='select'
         onChange={handleFormChange}
         options={[
-          { label: 'Full Body', value: '' },
+          { label: 'Full Body', value: 'full' },
           { label: 'Half Body', value: 'half' },
         ]}
       />
@@ -488,19 +430,54 @@ const StepTwo = ({ formState, setFormState, handleStepChange, validateStep }) =>
           </Pressable>
         ))}
       </View>
-      <StepNavigation
-        currentStep={2}
-        onNext={() => handleStepChange(3)}
-        onBack={() => handleStepChange(1)}
-        isValid={validateStep(2)}
-      />
     </View>
   );
 };
 
-const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) => {
+const StepThree = ({ formState, setFormState }) => {
   const { colour } = useAuth();
+  const api = useApi();
   
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        materialType: formState.materialType.toUpperCase(),
+        source: {
+          placeName: formState.loadingPoint,
+          coordinates: {
+            latitude: 19.076090, // Hardcoded Mumbai coordinates
+            longitude: 72.877426
+          }
+        },
+        destination: {
+          placeName: formState.droppingPoint,
+          coordinates: {
+            latitude: 28.7041, // Hardcoded Delhi coordinates
+            longitude: 77.1025
+          }
+        },
+        vehicleType: formState.vehicleType.toUpperCase(),
+        vehicleBodyType: formState.vehicleBodyType === 'open' ? 'OPEN_BODY' : 'CLOSED_BODY',
+        offeredAmount: {
+          total: Number(formState.totalOfferedAmount),
+          advancePercentage: Number(formState.advancePercentage),
+          dieselLiters: Number(formState.advanceDiesel) || 0
+        },
+        whenNeeded: formState.schedule === 'immediately' ? 'IMMEDIATE' : 'SCHEDULED',
+        numberOfWheels: Number(formState.numTires)
+      };
+      console.log("payload", payload);
+
+      const response = await api.request('/load', 'post', payload);
+      console.log("response", response);
+      Alert.alert('Success', 'Load posted successfully!');
+      
+    } catch (error) {
+      console.error('Error posting load:', error);
+      Alert.alert('Error', 'Failed to post load. Please try again.');
+    }
+  };
+
   const handleFormChange = (updatedField) => {
     setFormState((prev) => ({
       ...prev,
@@ -599,13 +576,6 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
     halfWidth: {
       flex: 1,
     },
-    boxSkeletonContainer: {
-      position: 'absolute',
-      right: 10,
-      top: 10,
-      opacity: 0.5,
-      zIndex: 0,
-    },
   });
 
   return (
@@ -629,7 +599,7 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
         </View>
         <View style={stepThreeStyles.detailRow}>
           <LoadingPoint style={stepThreeStyles.detailIcon} />
-          <Text style={stepThreeStyles.detailText}>Iron Sheet    50 Tonnes</Text>
+          <Text style={stepThreeStyles.detailText}>{formState.materialType} • {formState.quantity} {formState.unit}</Text>
         </View>
       </View>
 
@@ -754,8 +724,7 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
               placeholder="Select Date"
               name="scheduleDate"
               type="date"
-              value={formState.scheduleDate}
-              onChange={(value) => handleFormChange({ scheduleDate: value })}
+              onChange={handleFormChange}
             />
           </View>
           <View style={stepThreeStyles.halfWidth}>
@@ -765,8 +734,7 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
               placeholder="Select Time"
               name="scheduleTime"
               type="time"
-              value={formState.scheduleTime}
-              onChange={(value) => handleFormChange({ scheduleTime: value })}
+              onChange={handleFormChange}
             />
           </View>
         </View>
@@ -783,18 +751,8 @@ const StepThree = ({ formState, setFormState, handleStepChange, validateStep }) 
       />
 
       {/* Submit Button */}
-      <FormMainButton
-        text="Swipe to Post Load"
-        onPress={() => {
-          // Handle submission
-          console.log('Form submitted:', formState);
-        }}
-        variant="full"
-      />
-      <StepNavigation
-        currentStep={3}
-        onBack={() => handleStepChange(2)}
-        isValid={validateStep(3)}
+      <SwipeButton 
+        onSwipeComplete={handleSubmit}
       />
     </View>
   );
@@ -822,6 +780,8 @@ const PostLoad = () => {
     scheduleTime: null,
     additionalNotes: "",
   });
+
+  const [direction, setDirection] = useState('forward');
 
   const validateStep = (stepNumber) => {
     switch (stepNumber) {
@@ -855,14 +815,12 @@ const PostLoad = () => {
   };
 
   const handleStepChange = (newStep) => {
-    // Only allow moving forward if current step is valid
     if (newStep > step && !validateStep(step)) {
-      // Show error message or handle invalid step
       Alert.alert('Please fill all required fields before proceeding');
       return;
     }
     
-    // Allow moving backward or to validated steps
+    setDirection(newStep > step ? 'forward' : 'backward');
     if (newStep < step || validateStep(newStep - 1)) {
       setStep(newStep);
     }
@@ -871,6 +829,15 @@ const PostLoad = () => {
   useEffect(() => {
     console.log(formState);
   }, [formState]);
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setDirection('forward');
+      setStep(prev => Math.min(prev + 1, 3));
+    } else {
+      Alert.alert('Please fill all required fields before proceeding');
+    }
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -884,6 +851,23 @@ const PostLoad = () => {
       fontWeight: "bold",
       marginVertical: 10,
       textAlign: "center",
+    },
+    nextButton: {
+      backgroundColor: '#14B8A6',
+      padding: 15,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: 20,
+      marginBottom: 30,
+    },
+    nextButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    formContainer: {
+      position: 'relative',
+      minHeight: 500, // Adjust this value based on your content
     },
   });
 
@@ -900,30 +884,23 @@ const PostLoad = () => {
       />
 
       <View style={styles.formContainer}>
-        {step === 1 && (
-          <StepOne 
-            formState={formState} 
-            setFormState={setFormState}
-            handleStepChange={handleStepChange}
-            validateStep={validateStep}
-          />
-        )}
-        {step === 2 && (
-          <StepTwo 
-            formState={formState} 
-            setFormState={setFormState}
-            handleStepChange={handleStepChange}
-            validateStep={validateStep}
-          />
-        )}
-        {step === 3 && (
-          <StepThree 
-            formState={formState} 
-            setFormState={setFormState}
-            handleStepChange={handleStepChange}
-            validateStep={validateStep}
-          />
-        )}
+        <AnimatedStepView direction={direction} isActive={step === 1}>
+          <StepOne formState={formState} setFormState={setFormState} />
+          <Pressable style={styles.nextButton} onPress={handleNext}>
+            <Text style={styles.nextButtonText}>Next</Text>
+          </Pressable>
+        </AnimatedStepView>
+
+        <AnimatedStepView direction={direction} isActive={step === 2}>
+          <StepTwo formState={formState} setFormState={setFormState} />
+          <Pressable style={styles.nextButton} onPress={handleNext}>
+            <Text style={styles.nextButtonText}>Next</Text>
+          </Pressable>
+        </AnimatedStepView>
+
+        <AnimatedStepView direction={direction} isActive={step === 3}>
+          <StepThree formState={formState} setFormState={setFormState} />
+        </AnimatedStepView>
       </View>
     </ScrollView>
   );
