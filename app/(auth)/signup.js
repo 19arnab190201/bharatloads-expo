@@ -5,31 +5,39 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
+  ScrollView,
 } from "react-native";
-import { Link, router } from "expo-router";
-import { api } from "../../utils/api";
+import { Link } from "expo-router";
+import { useAuth } from "../../context/AuthProvider";
+
+const { width, height } = Dimensions.get("window");
 
 export default function Signup() {
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     name: "",
     phoneNumber: "",
-    email: "",
+    accountType: "transporter",
+    companyName: "",
+    companyLocation: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { signup } = useAuth();
 
   const handleSignup = async () => {
-    if (!formData.name || !formData.phoneNumber || !formData.email) {
-      setError("Please fill in all fields");
+    if (!form.name || !form.phoneNumber || !form.companyName || !form.companyLocation) {
+      setError("Please fill all fields");
       return;
     }
 
     try {
       setLoading(true);
       setError("");
-      await api.post("/auth/signup", formData);
-      router.push("/verify");
+      await signup(form);
     } catch (err) {
       setError(err.message || "Failed to sign up");
     } finally {
@@ -37,110 +45,213 @@ export default function Signup() {
     }
   };
 
+  const handleInputChange = (name, value) => {
+    setForm({ ...form, [name]: value });
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
-      <Text style={styles.subtitle}>Sign up to get started</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        
+        <View style={styles.formContainer}>
+          {/* Name Input */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter Your Name"
+              value={form.name}
+              onChangeText={(value) => handleInputChange("name", value)}
+              editable={!loading}
+            />
+          </View>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder='Full Name'
-          value={formData.name}
-          onChangeText={(text) => setFormData({ ...formData, name: text })}
-          editable={!loading}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder='Phone Number'
-          keyboardType='phone-pad'
-          value={formData.phoneNumber}
-          onChangeText={(text) =>
-            setFormData({ ...formData, phoneNumber: text })
-          }
-          editable={!loading}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder='Email'
-          keyboardType='email-address'
-          value={formData.email}
-          onChangeText={(text) => setFormData({ ...formData, email: text })}
-          editable={!loading}
-        />
-      </View>
+          {/* Phone Number Input */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Phone Number</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter Your Phone Number"
+              keyboardType="phone-pad"
+              value={form.phoneNumber}
+              onChangeText={(value) => handleInputChange("phoneNumber", value)}
+              editable={!loading}
+            />
+          </View>
 
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {/* Account Type Selection */}
+          <View style={styles.accountTypeContainer}>
+            <TouchableOpacity
+              style={[
+                styles.accountTypeButton,
+                form.accountType === "transporter" && styles.accountTypeButtonSelected,
+              ]}
+              onPress={() => handleInputChange("accountType", "transporter")}>
+              <Text
+                style={[
+                  styles.accountTypeText,
+                  form.accountType === "transporter" && styles.accountTypeTextSelected,
+                ]}>
+                Transporter
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.accountTypeButton,
+                form.accountType === "trucker" && styles.accountTypeButtonSelected,
+              ]}
+              onPress={() => handleInputChange("accountType", "trucker")}>
+              <Text
+                style={[
+                  styles.accountTypeText,
+                  form.accountType === "trucker" && styles.accountTypeTextSelected,
+                ]}>
+                Trucker
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSignup}
-        disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color='#fff' />
-        ) : (
-          <Text style={styles.buttonText}>Sign Up</Text>
-        )}
-      </TouchableOpacity>
+          {/* Company Name Input */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Company Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter Your Company Name"
+              value={form.companyName}
+              onChangeText={(value) => handleInputChange("companyName", value)}
+              editable={!loading}
+            />
+          </View>
 
-      <View style={styles.footer}>
-        <Text>Already have an account? </Text>
-        <Link href='/login'>
-          <Text style={styles.link}>Login</Text>
-        </Link>
-      </View>
-    </View>
+          {/* Company Location Input */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Company Location</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter Your Company Location"
+              value={form.companyLocation}
+              onChangeText={(value) => handleInputChange("companyLocation", value)}
+              editable={!loading}
+            />
+          </View>
+
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+          {/* Get Started Button */}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSignup}
+            disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Get Started</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Sign In Link */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Already have an account? </Text>
+            <Link href="/login">
+              <Text style={styles.link}>Sign In</Text>
+            </Link>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: "center",
+    backgroundColor: "#fff",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: width * 0.05,
+    paddingBottom: 20,
   },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 20,
+  formContainer: {
+    flex: 1,
+    paddingTop: height * 0.05,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 8,
+    fontWeight: "500",
   },
   inputContainer: {
     marginBottom: 20,
   },
   input: {
-    height: 50,
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
+    borderColor: "#E8E8E8",
+    borderRadius: 8,
+    padding: Platform.OS === "ios" ? 16 : 12,
+    fontSize: 16,
+    backgroundColor: "#F7F7F7",
+  },
+  accountTypeContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  accountTypeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E8E8E8",
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  accountTypeButtonSelected: {
+    backgroundColor: "#fe7f4a",
+    borderColor: "#fe7f4a",
+  },
+  accountTypeText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  accountTypeTextSelected: {
+    color: "#fff",
   },
   button: {
-    height: 50,
-    backgroundColor: "#333",
-    borderRadius: 5,
-    justifyContent: "center",
+    backgroundColor: "#00BFA6",
+    padding: Platform.OS === "ios" ? 16 : 14,
+    borderRadius: 8,
     alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
   },
   buttonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
   },
   errorText: {
-    color: "red",
-    marginBottom: 10,
+    color: "#FF3B30",
+    marginBottom: 12,
+    fontSize: 14,
   },
   footer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 20,
+    marginTop: 24,
+  },
+  footerText: {
+    color: "#666",
+    fontSize: 14,
   },
   link: {
-    color: "#333",
-    fontWeight: "bold",
+    color: "#fe7f4a",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

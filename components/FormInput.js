@@ -38,28 +38,39 @@ const FormInput = ({
     },
     label: {
       fontSize: 14,
-      fontWeight: 700,
+      fontWeight: "700",
       marginBottom: 8,
       color: "#333",
     },
     inputContainer: {
       position: "relative",
+      minHeight: 48,
     },
     icon: {
       position: "absolute",
       zIndex: 1,
       left: 10,
-      top: 12,
+      top: "50%",
+      transform: [{ translateY: -12 }],
     },
     input: {
       borderRadius: 12,
-      paddingLeft: 40,
+      paddingLeft: 50,
       paddingVertical: 12,
+      fontSize: 16,
+      backgroundColor: colour.inputBackground,
+      height: 60,
+    },
+    pickerInput: {
+      borderRadius: 12,
+      paddingLeft: 60,
+      paddingRight: 10,
       fontSize: 16,
       backgroundColor: colour.inputBackground,
     },
     textarea: {
       height: 80,
+      textAlignVertical: "top",
     },
     errorText: {
       color: "red",
@@ -85,7 +96,7 @@ const FormInput = ({
           />
         ) : type === "select" ? (
           <Picker
-            style={styles.input}
+            style={styles.pickerInput}
             {...rest}
             selectedValue={value}
             onValueChange={(itemValue) =>

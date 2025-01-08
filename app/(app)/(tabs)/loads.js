@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../../utils/api";
 import LoadCard from "../../../components/LoadCard";
 import { useAuth } from "../../../context/AuthProvider";
+import useApi from "../../../hooks/useApi";
 
 export default function Loads() {
   const [loads, setLoads] = useState([]);
