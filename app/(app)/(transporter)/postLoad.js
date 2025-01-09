@@ -20,7 +20,8 @@ import PickAndDrop from "../pickAndDrop";
 import Boxskeleton from "../../../assets/images/icons/Boxskeleton";
 import useApi from "../../../hooks/useApi";
 import SwipeButton from './components/SwipeButton';
-import AnimatedStepView from './components/AnimatedStepView';
+import { KeyboardAvoidingView } from 'react-native';
+
 
 const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
   const { colour } = useAuth();
@@ -781,8 +782,6 @@ const PostLoad = () => {
     additionalNotes: "",
   });
 
-  const [direction, setDirection] = useState('forward');
-
   const validateStep = (stepNumber) => {
     switch (stepNumber) {
       case 1:
@@ -820,7 +819,6 @@ const PostLoad = () => {
       return;
     }
     
-    setDirection(newStep > step ? 'forward' : 'backward');
     if (newStep < step || validateStep(newStep - 1)) {
       setStep(newStep);
     }
@@ -832,7 +830,6 @@ const PostLoad = () => {
 
   const handleNext = () => {
     if (validateStep(step)) {
-      setDirection('forward');
       setStep(prev => Math.min(prev + 1, 3));
     } else {
       Alert.alert('Please fill all required fields before proceeding');
@@ -867,7 +864,7 @@ const PostLoad = () => {
     },
     formContainer: {
       position: 'relative',
-      minHeight: 500, // Adjust this value based on your content
+      minHeight: 500,
     },
   });
 
@@ -884,23 +881,27 @@ const PostLoad = () => {
       />
 
       <View style={styles.formContainer}>
-        <AnimatedStepView direction={direction} isActive={step === 1}>
-          <StepOne formState={formState} setFormState={setFormState} />
-          <Pressable style={styles.nextButton} onPress={handleNext}>
-            <Text style={styles.nextButtonText}>Next</Text>
-          </Pressable>
-        </AnimatedStepView>
+        {step === 1 && (
+          <>
+            <StepOne formState={formState} setFormState={setFormState} />
+            <Pressable style={styles.nextButton} onPress={handleNext}>
+              <Text style={styles.nextButtonText}>Next</Text>
+            </Pressable>
+          </>
+        )}
 
-        <AnimatedStepView direction={direction} isActive={step === 2}>
-          <StepTwo formState={formState} setFormState={setFormState} />
-          <Pressable style={styles.nextButton} onPress={handleNext}>
-            <Text style={styles.nextButtonText}>Next</Text>
-          </Pressable>
-        </AnimatedStepView>
+        {step === 2 && (
+          <>
+            <StepTwo formState={formState} setFormState={setFormState} />
+            <Pressable style={styles.nextButton} onPress={handleNext}>
+              <Text style={styles.nextButtonText}>Next</Text>
+            </Pressable>
+          </>
+        )}
 
-        <AnimatedStepView direction={direction} isActive={step === 3}>
+        {step === 3 && (
           <StepThree formState={formState} setFormState={setFormState} />
-        </AnimatedStepView>
+        )}
       </View>
     </ScrollView>
   );
