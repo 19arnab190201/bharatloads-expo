@@ -20,13 +20,17 @@ import LoadCard from "../../../components/LoadCard";
 import { api } from "../../../utils/api";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
+import TruckCard from "../../../components/TruckCard";
 
 export default function Dashboard() {
   const { user, logout, colour } = useAuth();
   const navigation = useNavigation();
   const router = useRouter();
 
+  const userType = user?.userType;
+
   const [loads, setLoads] = useState([]);
+  const [trucks, setTrucks] = useState([]);
 
   const styles = StyleSheet.create({
     container: {
@@ -66,52 +70,112 @@ export default function Dashboard() {
     }
   };
 
+  const fetchTrucks = async () => {
+    try {
+      const response = await api.get("/dashboard");
+      setTrucks(response.data.data);
+    } catch (error) {
+      console.error("Error fetching loads:", error);
+    }
+  };
+
   useEffect(() => {
-    fetchLoads();
-  }, []);
+    if (userType.toLowerCase() === "transporter") {
+      fetchLoads();
+    } else fetchTrucks();
+  }, [userType]);
 
   // console.log("colour", colour);
-  return (
-    <ScrollView style={styles.container}>
-      <StatusBar barStyle='dark-content' backgroundColor='#fff' />
-      <Header />
-      <Banner
-        description='Driven to deliver excellence, powered by unwavering trust.'
-        image={require("../../../assets/images/truck.png")}
-        cta='Post Load'
-        ctaUrl='(transporter)/postLoad'
-        onPress={() => console.log("Learn more")}
-        backgroundColor='#1E283A'
-        textColor='#fff'
-      />
-      <TouchableOpacity
-        style={{
-          backgroundColor: colour.inputBackground,
-          borderRadius: 10,
-          padding: 10,
-          paddingVertical: 18,
-          marginTop: 20,
-          flexDirection: "row",
-          gap: 10,
-        }}
-        onPress={() => router.push("/(transporter)/searchTrucks")}>
-        <LoadingPoint />
-        <Text>Search Trucks</Text>
-      </TouchableOpacity>
 
-      <View style={{ marginTop: 20 }}>
-        <Text style={styles.title}>Your Loads</Text>
+  if (userType.toLowerCase() === "transporter") {
+    return (
+      <ScrollView style={styles.container}>
+        <StatusBar barStyle='dark-content' backgroundColor='#fff' />
+        <Header />
+        <Banner
+          description='Driven to deliver excellence, powered by unwavering trust.'
+          image={require("../../../assets/images/truck.png")}
+          cta='Post Load'
+          ctaUrl='(transporter)/postLoad'
+          onPress={() => console.log("Learn more")}
+          backgroundColor='#1E283A'
+          textColor='#fff'
+        />
+        <TouchableOpacity
+          style={{
+            backgroundColor: colour.inputBackground,
+            borderRadius: 10,
+            padding: 10,
+            paddingVertical: 18,
+            marginTop: 20,
+            flexDirection: "row",
+            gap: 10,
+          }}
+          onPress={() => router.push("/(transporter)/searchTrucks")}>
+          <LoadingPoint />
+          <Text>Search Trucks</Text>
+        </TouchableOpacity>
 
-        {loads.map((load) => (
-          <LoadCard key={load._id} data={load} />
-        ))}
-      </View>
+        <View style={{ marginTop: 20 }}>
+          <Text style={styles.title}>Your Loads</Text>
 
-      {/* <TouchableOpacity
+          {loads.map((load) => (
+            <LoadCard key={load._id} data={load} />
+          ))}
+        </View>
+
+        {/* <TouchableOpacity
         onPress={() => router.push("/(app)/pickAndDrop")}
         style={styles.statCard}>
         <Text>PICK AND DROP</Text>
       </TouchableOpacity> */}
-    </ScrollView>
-  );
+      </ScrollView>
+    );
+  } else if (userType.toLowerCase()) {
+    return (
+      <ScrollView style={styles.container}>
+        <StatusBar barStyle='dark-content' backgroundColor='#fff' />
+        <Header />
+        <Banner
+          description='Driven to deliver excellence, powered by unwavering trust.'
+          image={require("../../../assets/images/truck.png")}
+          cta='Post Truck'
+          ctaUrl='(transporter)/postLoad'
+          onPress={() => console.log("Learn more")}
+          backgroundColor='#1E283A'
+          textColor='#fff'
+        />
+        <TouchableOpacity
+          style={{
+            backgroundColor: colour.inputBackground,
+            borderRadius: 10,
+            padding: 10,
+            paddingVertical: 18,
+            marginTop: 20,
+            flexDirection: "row",
+            gap: 10,
+          }}
+          onPress={() => router.push("/(transporter)/searchTrucks")}>
+          <LoadingPoint />
+          <Text>Search Loads</Text>
+        </TouchableOpacity>
+
+        <View style={{ marginTop: 20 }}>
+          <Text style={styles.title}>Your Trucks</Text>
+
+          {trucks.map((truck) => (
+            <Text>
+              <TruckCard key={truck._id} data={truck} />
+            </Text>
+          ))}
+        </View>
+
+        {/* <TouchableOpacity
+        onPress={() => router.push("/(app)/pickAndDrop")}
+        style={styles.statCard}>
+        <Text>PICK AND DROP</Text>
+      </TouchableOpacity> */}
+      </ScrollView>
+    );
+  }
 }

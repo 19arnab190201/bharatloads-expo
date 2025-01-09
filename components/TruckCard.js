@@ -190,7 +190,7 @@ export default function TruckCard({ data }) {
                   marginBottom: 4,
                 }}>
                 <FontAwesome6 name='location-dot' size={16} color='#24CAB6' />
-                <Text style={styles.source}>{source.placeName}</Text>
+                <Text style={styles.source}>{source?.placeName}</Text>
               </View>
               <View
                 style={{
@@ -200,7 +200,7 @@ export default function TruckCard({ data }) {
                   justifyContent: "flex-start",
                 }}>
                 <FontAwesome6 name='location-dot' size={16} color='#F43D74' />
-                <Text style={styles.destination}>{destination.placeName}</Text>
+                <Text style={styles.destination}>{destination?.placeName}</Text>
               </View>
             </View>
           </View>
@@ -271,7 +271,7 @@ export default function TruckCard({ data }) {
 
         {/* Price Section */}
         <View style={styles.priceSection}>
-          <Text style={styles.price}>₹{offeredAmount.total}</Text>
+          <Text style={styles.price}>₹{offeredAmount?.total}</Text>
           <Text style={styles.advance}>50% Advance</Text>
         </View>
       </View>
