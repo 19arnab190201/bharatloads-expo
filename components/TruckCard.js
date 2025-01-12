@@ -9,22 +9,33 @@ import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
 import { getTimeLeft } from "../utils/functions";
 
+const CardMenu = () => {
+  return (
+    <View style={styles.cardMenu}>
+      <Text style={styles.cardMenuText}>View Details</Text>
+      <FontAwesome6
+        name='chevron-right'
+        size={16}
+        color={colour.primaryColor}
+      />
+    </View>
+  );
+};
+
 export default function TruckCard({ data }) {
   const { colour } = useAuth();
   const {
-    materialType,
-    source,
-    destination,
-    weight = 0,
-    offeredAmount,
-    numberOfWheels,
-    vehicleType,
+    truckType,
+    isRCVerified,
+    totalBids,
+    truckPermit,
+    truckLocation,
+    truckTyre,
     vehicleBodyType,
     bids,
-    views = 100,
+    truckCapacity,
     expiresAt,
-    tripDistance,
-    advanceAmount,
+    truckNumber,
   } = data;
 
   const styles = StyleSheet.create({
@@ -38,6 +49,7 @@ export default function TruckCard({ data }) {
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 4,
+      width: "100%",
     },
     header: {
       flexDirection: "row",
@@ -54,6 +66,7 @@ export default function TruckCard({ data }) {
     },
     content: {
       marginVertical: 3,
+      marginBottom: 10,
     },
     materialSection: {
       flexDirection: "row",
@@ -64,8 +77,8 @@ export default function TruckCard({ data }) {
       flexDirection: "column",
     },
     materialImage: {
-      width: 60,
-      height: 60,
+      width: 80,
+      height: 80,
       marginRight: 10,
     },
     materialTypeStyles: {
@@ -79,7 +92,7 @@ export default function TruckCard({ data }) {
     },
     source: {
       color: colour.inputLabel,
-      fontSize: 14,
+      fontSize: 16,
     },
     destination: {
       color: colour.inputLabel,
@@ -118,20 +131,20 @@ export default function TruckCard({ data }) {
     },
 
     detailsSection: {
-      width: "65%",
+      width: "100%",
       flexDirection: "row",
       flexWrap: "wrap",
       justifyContent: "space-between",
     },
     detailItem: {
-      width: "48%", // Ensure two items per row
+      width: "33.3333%", // Ensure two items per row
       flexDirection: "row",
       alignItems: "center",
       marginVertical: 2,
     },
     detailIcon: {
       fontSize: 18,
-      marginRight: 10,
+      marginRight: 5,
       width: 25,
     },
     detailText: {
@@ -162,6 +175,8 @@ export default function TruckCard({ data }) {
     },
   });
 
+  console.log("data", data);
+
   return (
     <View style={styles.card}>
       {/* Top Section */}
@@ -173,51 +188,31 @@ export default function TruckCard({ data }) {
       <View style={styles.content}>
         <View style={styles.materialSection}>
           <Image
-            source={require("../assets/images/parcel.png")}
+            source={require("../assets/images/trucktype/hyva.png")}
             style={styles.materialImage}
           />
           <View style={styles.materialSubSection}>
             <Text style={styles.materialTypeStyles}>
-              {materialType ? materialType : "NA"}
+              {truckType ? truckType : "NA"}
             </Text>
             <View style={styles.locations}>
               <View
                 style={{
                   flexDirection: "row",
-                  alignItems: "flex-start",
-                  gap: 4,
-                  justifyContent: "flex-start",
-                  marginBottom: 4,
-                }}>
-                <FontAwesome6 name='location-dot' size={16} color='#24CAB6' />
-                <Text style={styles.source}>{source?.placeName}</Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "flex-start",
+                  alignItems: "center",
                   gap: 4,
                   justifyContent: "flex-start",
                 }}>
-                <FontAwesome6 name='location-dot' size={16} color='#F43D74' />
-                <Text style={styles.destination}>{destination?.placeName}</Text>
+                <FontAwesome6 name='location-dot' size={16} color='#A855F7' />
+                <Text style={styles.source}>{truckLocation?.placeName}</Text>
               </View>
             </View>
+            <Text style={styles.materialTypeStyles}>
+              {truckNumber ? truckNumber : "NA"}
+            </Text>
           </View>
         </View>
-
-        <View style={styles.tripTag}>
-          <Text style={styles.tripDistance}>{tripDistance} kms Trip</Text>
-        </View>
       </View>
-
-      <View
-        style={{
-          height: 1,
-          backgroundColor: "#E5E5E5",
-          marginVertical: 5,
-          width: "100%",
-        }}></View>
 
       {/* Card Content */}
       <View style={styles.row}>
@@ -225,55 +220,63 @@ export default function TruckCard({ data }) {
         <View style={styles.detailsSection}>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name='truck' size={20} color={colour.iconColor} />
+              <FontAwesome6 name='box' size={20} color={colour.iconColor} />
             </Text>
-            <Text style={styles.detailText}>{vehicleType}</Text>
+            <Text style={styles.detailText}>{truckCapacity} Tonnes</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
               <Wheel width={25} height={25} fill={colour.iconColor} />
             </Text>
 
-            <Text style={styles.detailText}>{numberOfWheels} Wheels</Text>
+            <Text style={styles.detailText}>{truckTyre} Wheels</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
               <FontAwesome6 name='box' size={20} color={colour.iconColor} />
             </Text>
-            <Text style={styles.detailText}>{weight} Tonnes</Text>
+            <Text style={styles.detailText}>{truckPermit}</Text>
           </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailIcon}>
-              <Container width={25} height={25} fill={colour.iconColor} />
-            </Text>
-            <Text style={styles.detailText}>{vehicleBodyType}</Text>
-          </View>
-
-          <View style={styles.detailItem}>
-            <Text style={styles.detailIcon}>
-              <AntDesign name='eye' size={24} color={colour.iconColor} />
-            </Text>
-            <Text style={styles.detailText}>{views} Views</Text>
-          </View>
-
-          <View style={styles.detailItem}>
-            <Text style={styles.detailIcon}>
-              <MaterialIcons
-                name='local-offer'
-                size={24}
-                color={colour.iconColor}
-              />
-            </Text>
-            <Text style={styles.detailText}>{bids?.length} Bids</Text>
-          </View>
-          {/* Add more detail items as needed */}
+        </View>
+      </View>
+      <View
+        style={{
+          height: 1,
+          backgroundColor: "#E5E5E5",
+          marginVertical: 5,
+          width: "100%",
+        }}></View>
+      <View style={styles.row}>
+        <View style={styles.detailItem}>
+          <Text style={styles.detailIcon}>
+            <Container width={25} height={25} fill={colour.iconColor} />
+          </Text>
+          <Text style={styles.detailText}>
+            {vehicleBodyType === "OPEN_BODY" ? "Open Body" : "Closed Body"}
+          </Text>
         </View>
 
-        {/* Price Section */}
-        <View style={styles.priceSection}>
-          <Text style={styles.price}>₹{offeredAmount?.total}</Text>
-          <Text style={styles.advance}>50% Advance</Text>
+        <View style={styles.detailItem}>
+          <Text style={styles.detailIcon}>
+            <MaterialIcons
+              name='local-offer'
+              size={24}
+              color={colour.iconColor}
+            />
+          </Text>
+          <Text style={styles.detailText}>{totalBids} Bids</Text>
         </View>
+
+        <View style={styles.detailItem}>
+          <Text style={styles.detailIcon}>
+            <AntDesign name='eye' size={24} color={colour.iconColor} />
+          </Text>
+          <Text style={styles.detailText}>
+            {isRCVerified ? "RC Verified" : "RC Pending"}
+          </Text>
+        </View>
+
+        {/* Add more detail items as needed */}
       </View>
     </View>
   );
