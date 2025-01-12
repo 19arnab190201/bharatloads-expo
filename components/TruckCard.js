@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -24,6 +24,8 @@ const CardMenu = () => {
 
 export default function TruckCard({ data }) {
   const { colour } = useAuth();
+  const [menuVisible, setMenuVisible] = useState(false);
+
   const {
     truckType,
     isRCVerified,
@@ -37,6 +39,10 @@ export default function TruckCard({ data }) {
     expiresAt,
     truckNumber,
   } = data;
+
+  const toggleMenu = () => {
+    setMenuVisible(!menuVisible);
+  };
 
   const styles = StyleSheet.create({
     card: {
@@ -173,6 +179,31 @@ export default function TruckCard({ data }) {
       justifyContent: "space-between",
       alignItems: "flex-start",
     },
+    menuButton: {
+      padding: 10,
+    },
+    menu: {
+      position: "absolute",
+      top: 30,
+      right: 10,
+      backgroundColor: "#fff",
+      borderRadius: 8,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 4,
+      zIndex: 1,
+    },
+    menuItem: {
+      padding: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: "#eee",
+    },
+    menuItemText: {
+      fontSize: 14,
+      color: "#333",
+    },
   });
 
   console.log("data", data);
@@ -182,6 +213,22 @@ export default function TruckCard({ data }) {
       {/* Top Section */}
       <View style={styles.header}>
         <Text style={styles.timeLeft}>{getTimeLeft(expiresAt)} Left</Text>
+        <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
+          <MaterialIcons name="more-vert" size={24} color={colour.iconColor} />
+        </TouchableOpacity>
+        {menuVisible && (
+          <View style={styles.menu}>
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Delete</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Pause</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       {/* Main Content */}
