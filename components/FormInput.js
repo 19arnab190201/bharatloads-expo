@@ -19,10 +19,6 @@ const FormInput = ({
 }) => {
   const { colour } = useAuth();
   const handleInputChange = (inputValue) => {
-    if (type === "number" && (inputValue < min || inputValue > max)) {
-      return;
-    }
-
     const updatedValue =
       type === "number" ? parseFloat(inputValue) : inputValue;
 
@@ -91,27 +87,36 @@ const FormInput = ({
             placeholder={placeholder}
             keyboardType={type === "number" ? "numeric" : "default"}
             value={value}
+            type={type}
             onChangeText={handleInputChange}
             {...rest}
           />
         ) : type === "select" ? (
-          <Picker
-            style={styles.pickerInput}
-            {...rest}
-            selectedValue={value}
-            onValueChange={(itemValue) =>
-              onChange({
-                [name]: itemValue,
-              })
-            }>
-            {options.map((option, index) => (
-              <Picker.Item
-                key={index}
-                label={option.label || option}
-                value={option.value || option}
-              />
-            ))}
-          </Picker>
+          <View
+            style={{
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: "#bdc3c7",
+              overflow: "hidden",
+            }}>
+            <Picker
+              style={styles.pickerInput}
+              {...rest}
+              selectedValue={value}
+              onValueChange={(itemValue) =>
+                onChange({
+                  [name]: itemValue,
+                })
+              }>
+              {options.map((option, index) => (
+                <Picker.Item
+                  key={index}
+                  label={option.label || option}
+                  value={option.value || option}
+                />
+              ))}
+            </Picker>
+          </View>
         ) : type === "textarea" ? (
           <TextInput
             {...rest}

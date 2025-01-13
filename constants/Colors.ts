@@ -63,11 +63,13 @@ export const Colors = {
       secondaryColor: "#1E283A",
       linkColor: "#4994FF",
 
+      greyTag: "#ECECEC",
+
       //Input Field
       inputLabel: "#475569",
       placeHolderText: "rgba(85, 99, 117, 0.41)",
       placeHolderIconColor: "#374151",
-      placeHolderBackground: "#D5E0F6",
+      inputBackground: "#F1F5F9",
       placeHolderBackground2: "#FBFBFB", // for dashboard input field
 
       //ICON
@@ -82,6 +84,9 @@ export const Colors = {
       icon: "#687076",
       tabIconDefault: "#687076",
       tabIconSelected: tintColorLight,
+
+      //Step Indicator
+      stepIndicator: "#FE7F4A",
     },
     dark: {
       text: "#ECEDEE",
@@ -90,6 +95,9 @@ export const Colors = {
       icon: "#9BA1A6",
       tabIconDefault: "#9BA1A6",
       tabIconSelected: tintColorDark,
+
+      //Step Indicator
+      stepIndicator: "#FE7F4A",
     },
   },
 };

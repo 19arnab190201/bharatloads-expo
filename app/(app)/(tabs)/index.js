@@ -74,6 +74,8 @@ export default function Dashboard() {
     try {
       const response = await api.get("/dashboard");
       setTrucks(response.data.data);
+      console.log("============================================");
+      console.log(response.data.data);
     } catch (error) {
       console.error("Error fetching loads:", error);
     }
@@ -140,7 +142,7 @@ export default function Dashboard() {
           description='Driven to deliver excellence, powered by unwavering trust.'
           image={require("../../../assets/images/truck.png")}
           cta='Post Truck'
-          ctaUrl='(transporter)/postLoad'
+          ctaUrl='(trucker)/postTruck'
           onPress={() => console.log("Learn more")}
           backgroundColor='#1E283A'
           textColor='#fff'

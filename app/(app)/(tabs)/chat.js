@@ -1,10 +1,13 @@
-import { View, Text } from "react-native";
+import { View, Text, SafeAreaView } from "react-native";
 import React from "react";
+import PickAndDrop from "../pickAndDrop";
 
 export default function chat() {
   return (
     <View>
-      <Text>chat</Text>
+      <SafeAreaView>
+        <PickAndDrop />
+      </SafeAreaView>
     </View>
   );
 }

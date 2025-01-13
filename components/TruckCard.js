@@ -9,19 +9,6 @@ import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
 import { getTimeLeft } from "../utils/functions";
 
-const CardMenu = () => {
-  return (
-    <View style={styles.cardMenu}>
-      <Text style={styles.cardMenuText}>View Details</Text>
-      <FontAwesome6
-        name='chevron-right'
-        size={16}
-        color={colour.primaryColor}
-      />
-    </View>
-  );
-};
-
 export default function TruckCard({ data }) {
   const { colour } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
@@ -214,7 +201,7 @@ export default function TruckCard({ data }) {
       <View style={styles.header}>
         <Text style={styles.timeLeft}>{getTimeLeft(expiresAt)} Left</Text>
         <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
-          <MaterialIcons name="more-vert" size={24} color={colour.iconColor} />
+          <MaterialIcons name='more-vert' size={24} color={colour.iconColor} />
         </TouchableOpacity>
         {menuVisible && (
           <View style={styles.menu}>

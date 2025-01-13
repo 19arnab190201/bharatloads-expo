@@ -1,33 +1,28 @@
 // src/hooks/useApi.js
 import { useState } from "react";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { token } from "../context/AuthProvider";
 const useApi = () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const request = async (url, method = "get", body = null) => {
+  const request = async (url, method = "get", body = null, ...rest) => {
     setLoading(true);
     console.log("url", url);
+
+    console.log("headers");
     try {
-      let user = await AsyncStorage.getItem("user");
-      user = JSON.parse(user);
-
-      console.log("user444", user);
-
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user?.token}`,
-      };
-
-      const response = await axios({
-        method,
-        url: process.env.EXPO_PUBLIC_API_URL + url,
-        data: body,
-        headers,
-      });
+      const response = await axios(
+        {
+          method,
+          url: process.env.EXPO_PUBLIC_API_URL + url,
+          data: body,
+        },
+        {
+          ...rest,
+        }
+      );
 
       console.log("response", response);
 
@@ -37,6 +32,7 @@ const useApi = () => {
     } catch (err) {
       setError(err);
       setLoading(false);
+      console.log("err", err);
       throw err;
     }
   };
