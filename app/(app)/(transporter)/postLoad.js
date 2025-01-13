@@ -152,9 +152,17 @@ const StepOne = ({ formState, setFormState }) => {
     source: null,
     destination: null,
   });
-  const handleLocationSelect = (data) => {
-    setLocationData(data);
+  const handleLocationSelect = (locationData) => {
+    setLocationData(locationData);
     setPickDropModalVisible(false);
+    
+    // Update form state with selected locations
+    handleFormChange({
+      loadingPoint: locationData.source.name,
+      droppingPoint: locationData.destination.name,
+      sourceCoordinates: locationData.source.coordinates,
+      destinationCoordinates: locationData.destination.coordinates
+    });
   };
   return (
     <View>
@@ -174,11 +182,7 @@ const StepOne = ({ formState, setFormState }) => {
           onChange={handleFormChange}
         />
       </Pressable>
-      <PickAndDrop
-        visible={pickDropModalVisible}
-        onClose={() => setPickDropModalVisible(false)}
-        onLocationSelect={handleLocationSelect}
-      />
+     
       <FormInput
         Icon={LoadingPoint}
         label='Material Type'
