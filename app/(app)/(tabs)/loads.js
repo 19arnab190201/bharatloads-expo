@@ -5,9 +5,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../../utils/api";
 import LoadCard from "../../../components/LoadCard";
 import { useAuth } from "../../../context/AuthProvider";
-import useApi from "../../../hooks/useApi";
-
-export default function Loads() {
+import TruckCard from "../../../components/TruckCard";
+//USED AS LIST TRUCKS IF USER IS TRUCKER
+const Loads = () => {
   const [loads, setLoads] = useState([]);
   const { colour } = useAuth();
 
@@ -70,4 +70,69 @@ export default function Loads() {
         }}></View>
     </ScrollView>
   );
-}
+};
+
+const Trucks = ({ user, colour }) => {
+  const [trucks, setTrucks] = useState([]);
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: colour.background,
+    },
+    fab: {
+      position: "absolute",
+      width: 56,
+      height: 56,
+      alignItems: "center",
+      justifyContent: "center",
+      right: 16,
+      bottom: 16,
+      backgroundColor: "#14B8A6",
+      borderRadius: 14,
+      elevation: 4,
+    },
+  });
+
+  const fetchTrucks = async () => {
+    try {
+      const response = await api.get("/truck");
+      setTrucks(response.data.data);
+    } catch (error) {
+      console.error("Error fetching trucks:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTrucks();
+  }, []);
+
+  return (
+    <ScrollView style={styles.container}>
+      {trucks?.length > 0 &&
+        trucks.map((load, index) => (
+          <View key={index} style={{ marginVertical: 0 }}>
+            <TruckCard key={load._id} data={load} />
+          </View>
+        ))}
+      <View
+        style={{
+          paddingBottom: 40,
+        }}></View>
+    </ScrollView>
+  );
+};
+
+const ListUserAssets = () => {
+  const { user, colour } = useAuth();
+
+  console.log("user", user);
+
+  if (user?.userType == "TRUCKER") {
+    return <Trucks user={user} colour={colour} />;
+  }
+  return <Loads />;
+};
+
+export default ListUserAssets;

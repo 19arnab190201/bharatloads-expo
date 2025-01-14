@@ -98,7 +98,7 @@ const StepOne = ({ formState, setFormState }) => {
         Icon={LoadingPoint}
         label='Vehicle Number'
         placeholder='Enter Vehicle Number'
-        name='vehicleNumber'
+        name='truckNumber'
         onChange={handleFormChange}
       />
 
@@ -106,19 +106,19 @@ const StepOne = ({ formState, setFormState }) => {
         Icon={LoadingPoint}
         label='Vehicle Location'
         placeholder='Enter Vehicle Location'
-        name='vehicleLocation'
+        name='truckLocation'
         onChange={handleFormChange}
       />
 
       <FormInput
         label='Permitted Routes'
         placeholder='Select Permitted Routes'
-        name='permittedRoutes'
+        name='truckPermit'
         type='select'
         onChange={handleFormChange}
         options={[
-          { label: "National", value: "national" },
-          { label: "State", value: "state" },
+          { label: "National", value: "NATIONAL_PERMIT" },
+          { label: "State", value: "STATE_PERMIT" },
         ]}
       />
 
@@ -129,9 +129,8 @@ const StepOne = ({ formState, setFormState }) => {
         type='select'
         onChange={handleFormChange}
         options={[
-          { label: "Open", value: "open" },
-          { label: "Closed", value: "closed" },
-          { label: "Container", value: "container" },
+          { label: "Open", value: "OPEN_BODY" },
+          { label: "Closed", value: "CLOSED_BODY" },
         ]}
       />
     </View>
@@ -239,13 +238,13 @@ const StepTwo = ({ formState, setFormState }) => {
       <View style={stepTwoStyles.vehicleTypeContainer}>
         {vehicleTypes.map((type) => (
           <Pressable
-            key={type.id}
+            key={type.label}
             style={[
               stepTwoStyles.vehicleTypeCard,
-              formState.vehicleType === type.id &&
+              formState.truckType === type.label &&
                 stepTwoStyles.vehicleTypeCardSelected,
             ]}
-            onPress={() => handleFormChange({ vehicleType: type.id })}>
+            onPress={() => handleFormChange({ truckType: type.label })}>
             <Image source={type.icon} style={stepTwoStyles.vehicleTypeImage} />
             <Text style={stepTwoStyles.vehicleTypeLabel}>{type.label}</Text>
           </Pressable>
@@ -259,15 +258,15 @@ const StepTwo = ({ formState, setFormState }) => {
         type='select'
         onChange={handleFormChange}
         options={[
-          { label: "Full Body", value: "full" },
-          { label: "Half Body", value: "half" },
+          { label: "Full Body", value: "OPEN_FULL_BODY" },
+          { label: "Half Body", value: "OPEN_HALF_BODY" },
         ]}
       />
 
       <FormInput
         label='Vehicle Capacity'
         placeholder='Enter Vehicle Capacity (in tonnes)'
-        name='vehicleCapacity'
+        name='truckCapacity'
         type='number'
         onChange={handleFormChange}
       />
@@ -287,13 +286,13 @@ const StepTwo = ({ formState, setFormState }) => {
             key={tyre}
             style={[
               stepTwoStyles.tyreButton,
-              formState.numTires === tyre && stepTwoStyles.tyreButtonSelected,
+              formState.truckTyre === tyre && stepTwoStyles.tyreButtonSelected,
             ]}
-            onPress={() => handleFormChange({ numTires: tyre })}>
+            onPress={() => handleFormChange({ truckTyre: tyre })}>
             <Text
               style={[
                 stepTwoStyles.tyreText,
-                formState.numTires === tyre && stepTwoStyles.tyreTextSelected,
+                formState.truckTyre === tyre && stepTwoStyles.tyreTextSelected,
               ]}>
               {tyre}
             </Text>
@@ -304,7 +303,7 @@ const StepTwo = ({ formState, setFormState }) => {
       <FormInput
         label='RC Document'
         placeholder='Upload RC Document'
-        name='rcDocument'
+        name='RCImage'
         type='file'
         onChange={handleFormChange}
       />
@@ -317,32 +316,32 @@ const PostTruck = () => {
   const api = useApi();
   const [step, setStep] = useState(1);
   const [formState, setFormState] = useState({
-    vehicleNumber: "",
-    vehicleLocation: "",
-    permittedRoutes: "",
+    truckNumber: "",
+    truckLocation: "",
+    truckPermit: "",
     vehicleBodyType: "",
-    vehicleType: "",
+    truckType: "",
     truckBodyType: "",
-    vehicleCapacity: "",
-    numTires: null,
-    rcDocument: null,
+    truckCapacity: "",
+    truckTyre: null,
+    RCImage: null,
   });
 
   const validateStep = (stepNumber) => {
     switch (stepNumber) {
       case 1:
         return !!(
-          formState.vehicleNumber &&
-          formState.vehicleLocation &&
-          formState.permittedRoutes &&
+          formState.truckNumber &&
+          formState.truckLocation &&
+          formState.truckPermit &&
           formState.vehicleBodyType
         );
       case 2:
         return !!(
-          formState.vehicleType &&
+          formState.truckType &&
           formState.truckBodyType &&
-          formState.vehicleCapacity &&
-          formState.numTires
+          formState.truckCapacity &&
+          formState.truckTyre
         );
       default:
         return false;
@@ -371,18 +370,18 @@ const PostTruck = () => {
   const handleSubmit = async () => {
     try {
       const payload = {
-        vehicleNumber: formState.vehicleNumber,
-        vehicleLocation: {
-          placeName: formState.vehicleLocation,
-          coordinates: { latitude: 0, longitude: 0 },
+        truckNumber: formState.truckNumber,
+        truckLocation: {
+          placeName: formState.truckLocation,
+          coordinates: { latitude: 20.5937, longitude: 78.9629 },
         },
-        permittedRoutes: formState.permittedRoutes,
+        truckPermit: formState.truckPermit,
         vehicleBodyType: formState.vehicleBodyType,
-        vehicleType: formState.vehicleType,
+        truckType: formState.truckType,
         truckBodyType: formState.truckBodyType,
-        vehicleCapacity: formState.vehicleCapacity,
-        numTires: formState.numTires,
-        rcDocument: "https://www.example.com/rc-document.pdf",
+        truckCapacity: formState.truckCapacity,
+        truckTyre: formState.truckTyre,
+        RCImage: "https://www.example.com/rc-document.pdf",
       };
 
       console.log("payload", payload);
