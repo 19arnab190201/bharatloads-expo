@@ -20,7 +20,7 @@ export default function Signup() {
   const [form, setForm] = useState({
     name: "",
     phoneNumber: "",
-    accountType: "transporter",
+    userType: "transporter",
     companyName: "",
     companyLocation: "",
   });
@@ -88,13 +88,13 @@ export default function Signup() {
             <TouchableOpacity
               style={[
                 styles.accountTypeButton,
-                form.accountType === "transporter" && styles.accountTypeButtonSelected,
+                form.userType === "transporter" && styles.accountTypeButtonSelected,
               ]}
-              onPress={() => handleInputChange("accountType", "transporter")}>
+              onPress={() => handleInputChange("userType", "transporter")}>
               <Text
                 style={[
                   styles.accountTypeText,
-                  form.accountType === "transporter" && styles.accountTypeTextSelected,
+                  form.userType === "transporter" && styles.accountTypeTextSelected,
                 ]}>
                 Transporter
               </Text>
@@ -102,13 +102,13 @@ export default function Signup() {
             <TouchableOpacity
               style={[
                 styles.accountTypeButton,
-                form.accountType === "trucker" && styles.accountTypeButtonSelected,
+                form.userType === "trucker" && styles.accountTypeButtonSelected,
               ]}
-              onPress={() => handleInputChange("accountType", "trucker")}>
+              onPress={() => handleInputChange("userType", "trucker")}>
               <Text
                 style={[
                   styles.accountTypeText,
-                  form.accountType === "trucker" && styles.accountTypeTextSelected,
+                  form.userType === "trucker" && styles.accountTypeTextSelected,
                 ]}>
                 Trucker
               </Text>
@@ -147,7 +147,7 @@ export default function Signup() {
             onPress={handleSignup}
             disabled={loading}>
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <Text style={styles.buttonText}>Loading...</Text>
             ) : (
               <Text style={styles.buttonText}>Get Started</Text>
             )}

@@ -114,6 +114,29 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const signup = async (form) => {
+    try {
+      await api.post("/signup", {
+        name: form.name,
+        mobile: {
+          countryCode: "91",
+          phone: form.phoneNumber
+        },
+        userType: form.userType.toUpperCase(),
+        companyName: form.companyName,
+        companyLocation: form.companyLocation
+      });
+      
+      router.push({
+        pathname: "/(auth)/verify",
+        params: { phoneNumber: form.phoneNumber },
+      });
+    } catch (error) {
+      console.error("Signup error:", error);
+      throw error;
+    }
+  };
+
   const login = async (phoneNumber) => {
     try {
       await api.post("/login", {
@@ -185,6 +208,7 @@ export function AuthProvider({ children }) {
         verifyOTP,
         logout,
         colour,
+        signup,
       }}>
       {children}
     </AuthContext.Provider>
