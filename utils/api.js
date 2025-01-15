@@ -1,5 +1,11 @@
 import axios from "axios";
 import { useState } from "react";
+import * as SecureStore from "expo-secure-store";
+
+const SECURE_STORE_KEYS = {
+  USER: "auth_user",
+  TOKEN: "auth_token",
+};
 
 export const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
@@ -36,10 +42,14 @@ export const useAPI = (endpoint, options = {}) => {
 };
 
 // Middleware to add auth token to requests
-api.interceptors.request.use((config) => {
-  const token = "";
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(async (config) => {
+  try {
+    const token = await SecureStore.getItemAsync(SECURE_STORE_KEYS.TOKEN);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (error) {
+    console.error("Error getting token:", error);
   }
   return config;
 });
