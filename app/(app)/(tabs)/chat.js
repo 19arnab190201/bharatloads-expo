@@ -6,7 +6,7 @@ export default function chat() {
   return (
     <View>
       <SafeAreaView>
-        <PickAndDrop />
+        <Text>Chat</Text>
       </SafeAreaView>
     </View>
   );
