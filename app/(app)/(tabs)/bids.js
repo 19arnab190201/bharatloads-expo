@@ -13,7 +13,7 @@ import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const BidCard = ({ bid }) => {
-  const { colour } = useAuth();
+  const { colour, user } = useAuth();
 
   const styles = StyleSheet.create({
     card: {
@@ -68,7 +68,7 @@ const BidCard = ({ bid }) => {
       fontSize: 18,
       fontWeight: "600",
       color: "#FFB800",
-      marginRight: 4,
+      marginRight: 14,
     },
     materialImage: {
       width: 56,
@@ -81,6 +81,7 @@ const BidCard = ({ bid }) => {
       flexDirection: "row",
       alignItems: "center",
       marginBottom: 16,
+      position: "relative",
     },
     materialInfo: {
       flex: 1,
@@ -157,8 +158,8 @@ const BidCard = ({ bid }) => {
     }),
     timestamp: {
       position: "absolute",
-      right: 16,
-      top: 16,
+      right: 0,
+      top: 0,
       backgroundColor: "#F8FAFC",
       paddingHorizontal: 8,
       paddingVertical: 4,
@@ -176,8 +177,8 @@ const BidCard = ({ bid }) => {
         <View style={styles.userInfo}>
           <View style={styles.avatar} />
           <View style={styles.nameContainer}>
-            <Text style={styles.name}>{bid.truckId.truckOwner}</Text>
-            <Text style={styles.role}>Truck Owner</Text>
+            <Text style={styles.name}>{bid.bidBy.name}</Text>
+            <Text style={styles.role}>{bid.bidBy.userType}</Text>
           </View>
         </View>
         <View style={styles.rating}>
@@ -210,6 +211,11 @@ const BidCard = ({ bid }) => {
             />
             <Text style={styles.locationText}>{bid.destination.placeName}</Text>
           </View>
+        </View>
+        <View style={styles.timestamp}>
+          <Text style={styles.timestampText}>
+            {new Date(bid.createdAt).toLocaleString()}
+          </Text>
         </View>
       </View>
 
@@ -260,12 +266,6 @@ const BidCard = ({ bid }) => {
         <Pressable style={[styles.button, styles.chatButton]}>
           <Text style={styles.buttonText("chat")}>Chat</Text>
         </Pressable>
-      </View>
-
-      <View style={styles.timestamp}>
-        <Text style={styles.timestampText}>
-          {new Date(bid.createdAt).toLocaleString()}
-        </Text>
       </View>
     </View>
   );
