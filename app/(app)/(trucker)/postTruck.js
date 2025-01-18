@@ -373,7 +373,8 @@ const PostTruck = () => {
         truckNumber: formState.truckNumber,
         truckLocation: {
           placeName: formState.truckLocation,
-          coordinates: { latitude: 20.5937, longitude: 78.9629 },
+          type: "Point",
+          coordinates: [78.9629, 20.5937]
         },
         truckPermit: formState.truckPermit,
         vehicleBodyType: formState.vehicleBodyType,
@@ -393,9 +394,17 @@ const PostTruck = () => {
         },
         body: JSON.stringify(payload),
       });
-      console.log("response", response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create truck');
+      }
+
+      Alert.alert("Success", "Truck posted successfully");
+      
     } catch (error) {
       console.error("Error posting truck:", error);
+      Alert.alert("Error", error.message || "Failed to post truck");
     }
   };
 

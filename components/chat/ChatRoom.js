@@ -67,7 +67,7 @@ export default function ChatRoom({ chatId }) {
     if (!newMessage.trim()) return;
 
     try {
-      socketService.sendMessage(chatId, newMessage.trim(), user._id);
+      await sendMessage(chatId, newMessage.trim());
       setNewMessage('');
     } catch (err) {
       console.error('Failed to send message:', err);
@@ -100,6 +100,18 @@ export default function ChatRoom({ chatId }) {
     }
   };
 
+  // Sort messages by date in ascending order (oldest to newest)
+  const sortedMessages = [...chatMessages].sort((a, b) => 
+    new Date(a.createdAt) - new Date(b.createdAt)
+  );
+
+  // Auto scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (flatListRef.current && sortedMessages.length > 0) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [sortedMessages.length]);
+
   const renderMessage = ({ item }) => (
     <Message
       message={item}
@@ -125,10 +137,9 @@ export default function ChatRoom({ chatId }) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
       <FlatList
         ref={flatListRef}
-        data={chatMessages}
+        data={sortedMessages}
         renderItem={renderMessage}
         keyExtractor={(item) => item._id}
-        inverted
         onEndReached={hasMore ? handleLoadMore : null}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
@@ -138,6 +149,7 @@ export default function ChatRoom({ chatId }) {
             </View>
           ) : null
         }
+        contentContainerStyle={styles.messageList}
       />
       <View style={styles.inputContainer}>
         <TextInput
@@ -242,5 +254,8 @@ const styles = StyleSheet.create({
   loadingMore: {
     padding: 10,
     alignItems: 'center',
+  },
+  messageList: {
+    padding: 10,
   },
 }); 

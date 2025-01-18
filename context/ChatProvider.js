@@ -65,11 +65,34 @@ export function ChatProvider({ children }) {
     const handleNewMessage = (data) => {
       console.log('New message received:', data);
       const message = data.message;
+      
       // Update messages for the relevant chat
-      setMessages(prev => ({
-        ...prev,
-        [message.chat]: [...(prev[message.chat] || []), message]
-      }));
+      setMessages(prev => {
+        const chatMessages = prev[message.chat] || [];
+        
+        // Check if this is a temporary message being replaced
+        const tempMessageIndex = chatMessages.findIndex(
+          msg => msg._id.toString().startsWith('temp_') && 
+                msg.content === message.content && 
+                msg.sender._id === message.sender._id
+        );
+
+        if (tempMessageIndex !== -1) {
+          // Replace temporary message with server message
+          const updatedMessages = [...chatMessages];
+          updatedMessages[tempMessageIndex] = message;
+          return {
+            ...prev,
+            [message.chat]: updatedMessages
+          };
+        }
+
+        // If not a temporary message, append it
+        return {
+          ...prev,
+          [message.chat]: [...chatMessages, message]
+        };
+      });
 
       // Update last message in chats list
       setChats(prev => 
@@ -175,7 +198,7 @@ export function ChatProvider({ children }) {
 
       // Create a temporary message object for immediate UI update
       const tempMessage = {
-        _id: Date.now().toString(), // temporary ID
+        _id: `temp_${Date.now()}`, // prefix to identify temporary messages
         chat: chatId,
         content,
         sender: {
@@ -188,11 +211,20 @@ export function ChatProvider({ children }) {
         createdAt: new Date().toISOString()
       };
 
-      // Update UI immediately
+      // Update UI immediately with temporary message
       setMessages(prev => ({
         ...prev,
         [chatId]: [...(prev[chatId] || []), tempMessage]
       }));
+
+      // Update chats list with temporary message
+      setChats(prev => 
+        prev.map(chat => 
+          chat._id === chatId 
+            ? { ...chat, lastMessage: tempMessage }
+            : chat
+        )
+      );
 
       // Send via socket
       socketService.sendMessage(chatId, content, user._id);
