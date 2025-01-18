@@ -13,10 +13,9 @@ import {
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
-import useApi from "../../../hooks/useApi";
-
+import api from "../../../utils/api";
 const FormStepHeader = ({ totalSteps = 2, currentStep = 1, setSteps }) => {
-  const { colour } = useAuth();
+  const { colour, token } = useAuth();
 
   const styles = StyleSheet.create({
     container: {
@@ -313,7 +312,6 @@ const StepTwo = ({ formState, setFormState }) => {
 
 const PostTruck = () => {
   const { colour, token } = useAuth();
-  const api = useApi();
   const [step, setStep] = useState(1);
   const [formState, setFormState] = useState({
     truckNumber: "",
@@ -385,13 +383,11 @@ const PostTruck = () => {
       };
 
       console.log("payload", payload);
-      const response = await fetch(process.env.EXPO_PUBLIC_API_URL + "/truck", {
-        method: "POST",
+      const response = await api.post("/truck", payload, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
       });
       console.log("response", response);
     } catch (error) {
