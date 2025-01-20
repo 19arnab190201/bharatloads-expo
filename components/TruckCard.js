@@ -5,7 +5,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  Pressable,
+  Dimensions,
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 
@@ -16,13 +16,17 @@ import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
 import { getTimeLeft } from "../utils/functions";
 
-export default function TruckCard({ data }) {
-  const { colour, user } = useAuth();
-  const [menuVisible, setMenuVisible] = useState(false);
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const scale = SCREEN_WIDTH / 500;
 
-  console.log({
-    data,
-  });
+const normalize = (size) => {
+  const newSize = size * scale;
+  return Math.round(Math.min(newSize, size * 1.2));
+};
+
+export default function TruckCard({ data }) {
+  const { colour } = useAuth();
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const {
     truckType,
@@ -32,10 +36,10 @@ export default function TruckCard({ data }) {
     truckLocation,
     truckTyre,
     vehicleBodyType,
+    bids,
     truckCapacity,
     expiresAt,
     truckNumber,
-    truckOwner,
   } = data;
 
   const toggleMenu = () => {
@@ -63,9 +67,10 @@ export default function TruckCard({ data }) {
       backgroundColor: "#E6F7F5",
       color: colour.primaryColor,
       borderRadius: 12,
+      height: normalize(30),
       padding: 5,
       paddingHorizontal: 10,
-      fontSize: 12,
+      fontSize: normalize(12),
       fontWeight: "600",
     },
     content: {
@@ -86,7 +91,7 @@ export default function TruckCard({ data }) {
       marginRight: 10,
     },
     materialTypeStyles: {
-      fontSize: 18,
+      fontSize: normalize(18),
       fontWeight: "700",
       color: colour.inputLabel,
     },
@@ -96,14 +101,14 @@ export default function TruckCard({ data }) {
     },
     source: {
       color: colour.inputLabel,
-      fontSize: 16,
+      fontSize: normalize(16),
     },
     destination: {
       color: colour.inputLabel,
-      fontSize: 14,
+      fontSize: normalize(14),
     },
     tripDistance: {
-      fontSize: 12,
+      fontSize: normalize(12),
       color: "#888",
     },
     details: {
@@ -118,9 +123,9 @@ export default function TruckCard({ data }) {
       fontSize: 18,
     },
     detailText: {
-      fontSize: 12,
+      fontSize: normalize(14),
       marginTop: 4,
-      color: "#555",
+      color: colour.iconText,
     },
 
     tripTag: {
@@ -151,10 +156,6 @@ export default function TruckCard({ data }) {
       marginRight: 5,
       width: 25,
     },
-    detailText: {
-      fontSize: 14,
-      color: colour.iconText,
-    },
     priceSection: {
       width: "35%",
       alignItems: "flex-end",
@@ -164,12 +165,12 @@ export default function TruckCard({ data }) {
       bottom: 0,
     },
     price: {
-      fontSize: 20,
+      fontSize: normalize(20),
       fontWeight: "bold",
       color: colour.text,
     },
     advance: {
-      fontSize: 14,
+      fontSize: normalize(14),
       color: "#555",
     },
     row: {
@@ -199,17 +200,11 @@ export default function TruckCard({ data }) {
       borderBottomColor: "#eee",
     },
     menuItemText: {
-      fontSize: 14,
+      fontSize: normalize(14),
       color: "#333",
     },
-    primaryButton: {
-      backgroundColor: colour.primaryColor,
-      borderRadius: 8,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-    },
   });
-  console.log("user", user);
+
   console.log("data", data);
 
   return (
@@ -217,38 +212,21 @@ export default function TruckCard({ data }) {
       {/* Top Section */}
       <View style={styles.header}>
         <Text style={styles.timeLeft}>{getTimeLeft(expiresAt)} Left</Text>
-        {truckOwner == user._id ? (
-          <>
-            <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
-              <MaterialIcons
-                name='more-vert'
-                size={24}
-                color={colour.iconColor}
-              />
+        <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
+          <MaterialIcons name='more-vert' size={24} color={colour.iconColor} />
+        </TouchableOpacity>
+        {menuVisible && (
+          <View style={styles.menu}>
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Edit</Text>
             </TouchableOpacity>
-            {menuVisible && (
-              <View style={styles.menu}>
-                <TouchableOpacity style={styles.menuItem}>
-                  <Text style={styles.menuItemText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem}>
-                  <Text style={styles.menuItemText}>Delete</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem}>
-                  <Text style={styles.menuItemText}>Pause</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </>
-        ) : (
-          <Pressable style={styles.primaryButton}>
-            <Text
-              style={{
-                color: "#fff",
-              }}>
-              Bid Now
-            </Text>
-          </Pressable>
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Delete</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Pause</Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 
@@ -349,7 +327,3 @@ export default function TruckCard({ data }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  primaryButton: {},
-});

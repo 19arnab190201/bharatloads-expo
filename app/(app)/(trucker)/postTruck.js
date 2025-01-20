@@ -399,7 +399,7 @@ const PostTruck = () => {
         [
           {
             text: "OK",
-            onPress: () => router.push("/dashboard")
+            onPress: () => router.push("/")
           }
         ]
       );
