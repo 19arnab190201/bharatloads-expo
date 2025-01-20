@@ -17,6 +17,7 @@ import FormInput from "../../../components/FormInput";
 import TruckCard from "../../../components/TruckCard";
 import { api } from "../../../utils/api";
 import debounce from "lodash/debounce";
+import { normalize } from "../../../utils/functions";
 
 const FILTER_OPTIONS = {
   vehicleBodyType: {
@@ -384,6 +385,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   resultsContainer: {
+    paddingHorizontal: noramlize(4),
     flex: 1,
   },
   messageText: {

@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   Image,
   TouchableOpacity,
-  Dimensions,
   Pressable,
+  Alert,
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
+import BidSelectionModal from "./BidSelectionModal";
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -16,33 +17,67 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
 import { getTimeLeft } from "../utils/functions";
+import { api } from "../utils/api";
+import { normalize } from "../utils/functions";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const scale = SCREEN_WIDTH / 500;
 
-const normalize = (size) => {
-  const newSize = size * scale;
-  return Math.round(Math.min(newSize, size * 1.2));
-};
 
-export default function TruckCard({ data }) {
-  const { colour, user } = useAuth();
+export default function TruckCard({ data, onBidPlaced }) {
+  const { colour, user, token } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [userLoads, setUserLoads] = useState([]);
+  const [isLoadingLoads, setIsLoadingLoads] = useState(false);
 
   const {
     truckOwner,
     truckType,
     isRCVerified,
-    totalBids,
+    totalBids = 0,
     truckPermit,
     truckLocation,
     truckTyre,
     vehicleBodyType,
-    bids,
+    bids = [],
     truckCapacity,
     expiresAt,
     truckNumber,
+    _id,
+    vehicleNumber,
+    vehicleType,
+    truckBodyType,
+    numberOfWheels,
+    currentLocation,
   } = data;
+
+  const fetchUserLoads = async () => {
+    try {
+      setIsLoadingLoads(true);
+      const response = await api.get("/load", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserLoads(response.data.data);
+    } catch (error) {
+      console.error("Error fetching user loads:", error);
+      Alert.alert("Error", "Failed to fetch your loads. Please try again.");
+    } finally {
+      setIsLoadingLoads(false);
+    }
+  };
+
+  const handleBidButtonPress = async () => {
+    await fetchUserLoads();
+    setShowBidModal(true);
+  };
+
+  const handleBidComplete = () => {
+    setShowBidModal(false);
+    if (onBidPlaced) {
+      onBidPlaced();
+    }
+  };
 
   const toggleMenu = () => {
     setMenuVisible(!menuVisible);
@@ -212,6 +247,50 @@ export default function TruckCard({ data }) {
       alignItems: "center",
       justifyContent: "center",
     },
+    vehicleNumber: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: colour.text,
+    },
+    locationContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 12,
+      gap: 8,
+    },
+    locationText: {
+      fontSize: 14,
+      color: colour.inputLabel,
+    },
+    statsContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 12,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: "#E5E5E5",
+    },
+    statItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    statText: {
+      fontSize: 14,
+      color: colour.iconText,
+    },
+    bidButton: {
+      backgroundColor: colour.primaryColor,
+      padding: 12,
+      borderRadius: 8,
+      alignItems: "center",
+      marginTop: 12,
+    },
+    bidButtonText: {
+      color: "#fff",
+      fontSize: 14,
+      fontWeight: "600",
+    },
   });
 
   console.log("data", data);
@@ -221,7 +300,7 @@ export default function TruckCard({ data }) {
       {/* Top Section */}
       <View style={styles.header}>
         <Text style={styles.timeLeft}>{getTimeLeft(expiresAt)} Left</Text>
-        {truckOwner == user._id ? (
+        {truckOwner === user._id ? (
           <>
             <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
               <MaterialIcons
@@ -245,12 +324,12 @@ export default function TruckCard({ data }) {
             )}
           </>
         ) : (
-          <Pressable style={styles.primaryButton}>
-            <Text
-              style={{
-                color: "#fff",
-              }}>
-              Bid Now
+          <Pressable 
+            style={styles.bidButton}
+            onPress={handleBidButtonPress}
+          >
+            <Text style={styles.bidButtonText}>
+              {isLoadingLoads ? "Loading..." : "Place Bid"}
             </Text>
           </Pressable>
         )}
@@ -300,7 +379,6 @@ export default function TruckCard({ data }) {
             <Text style={styles.detailIcon}>
               <Wheel width={25} height={25} fill={colour.iconColor} />
             </Text>
-
             <Text style={styles.detailText}>{truckTyre} Wheels</Text>
           </View>
           <View style={styles.detailItem}>
@@ -350,6 +428,22 @@ export default function TruckCard({ data }) {
 
         {/* Add more detail items as needed */}
       </View>
+
+      {/* <View style={styles.locationContainer}>
+        <FontAwesome6 name="location-dot" size={16} color="#24CAB6" />
+        <Text style={styles.locationText}>
+          {currentLocation?.placeName || "Location not available"}
+        </Text>
+      </View> */}
+
+
+      <BidSelectionModal
+        visible={showBidModal}
+        onClose={() => setShowBidModal(false)}
+        loads={userLoads}
+        truckId={_id}
+        onBidPlaced={handleBidComplete}
+      />
     </View>
   );
 }

@@ -1,15 +1,13 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { useAuth } from "../context/AuthProvider";
-
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
-import { getTimeLeft } from "../utils/functions";
 
-export default function LoadCard({ data }) {
+export default function BidSelectionCard({ data, onSelect, isSelected }) {
   const { colour } = useAuth();
   const {
     materialType,
@@ -20,84 +18,80 @@ export default function LoadCard({ data }) {
     numberOfWheels,
     vehicleType,
     vehicleBodyType,
-    bids,
-    views = 100,
-    expiresAt,
     tripDistance,
-    advanceAmount,
+    views = 0,
+    bids = [],
   } = data;
 
   const styles = StyleSheet.create({
     card: {
-      backgroundColor: colour.background,
+      backgroundColor: isSelected ? "#E6F7F5" : colour.background,
       borderRadius: 12,
       padding: 16,
-      marginVertical: 10,
+      marginVertical: 8,
+      borderWidth: isSelected ? 2 : 2,
+      borderColor: isSelected ? colour.primaryColor : "#d3d3d3",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 4,
     },
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-    },
-    timeLeft: {
-      backgroundColor: "#E6F7F5",
-      color: colour.primaryColor,
-      borderRadius: 12,
-      padding: 5,
-      paddingHorizontal: 10,
-      fontSize: 12,
-      fontWeight: "600",
-    },
-    content: {
-      marginVertical: 3,
-    },
     materialSection: {
       flexDirection: "row",
       alignItems: "center",
       gap: 20,
-    },
-    materialSubSection: {
-      flexDirection: "column",
+      marginBottom: 12,
     },
     materialImage: {
       width: 60,
       height: 60,
       marginRight: 10,
+      backgroundColor: "#F8FAFC",
+      borderRadius: 8,
     },
-    materialTypeStyles: {
+    materialSubSection: {
+      flexDirection: "column",
+      flex: 1,
+    },
+    materialType: {
       fontSize: 18,
       fontWeight: "700",
       color: colour.inputLabel,
-    },
-    locations: {
-      marginTop: 4,
       marginBottom: 4,
     },
-    source: {
-      color: colour.inputLabel,
-      fontSize: 14,
+    locations: {
+      marginVertical: 4,
     },
-    destination: {
-      color: colour.inputLabel,
-      fontSize: 14,
+    locationRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 4,
     },
-    tripDistance: {
-      fontSize: 12,
-      color: "#888",
+    locationText: {
+      fontSize: 14,
+      color: colour.inputLabel,
     },
     tripTag: {
       position: "absolute",
       right: 0,
-      top: 35,
+      top: 0,
       backgroundColor: colour.greyTag,
       padding: 5,
       borderRadius: 12,
       width: 100,
       alignItems: "center",
+    },
+    tripDistance: {
+      fontSize: 12,
+      color: "#888",
+    },
+    divider: {
+      height: 1,
+      backgroundColor: "#E5E5E5",
+      marginVertical: 8,
+      width: "100%",
     },
     detailsSection: {
       width: "65%",
@@ -120,13 +114,15 @@ export default function LoadCard({ data }) {
       fontSize: 14,
       color: colour.iconText,
     },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
     priceSection: {
       width: "35%",
       alignItems: "flex-end",
       justifyContent: "flex-end",
-      position: "absolute",
-      right: 0,
-      bottom: 0,
     },
     price: {
       fontSize: 20,
@@ -137,77 +133,52 @@ export default function LoadCard({ data }) {
       fontSize: 14,
       color: "#555",
     },
-    row: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-    }
+    selectButton: {
+      backgroundColor: isSelected ? colour.primaryColor : "#F5F5F5",
+      padding: 12,
+      borderRadius: 8,
+      alignItems: "center",
+      marginTop: 12,
+    },
+    selectButtonText: {
+      color: isSelected ? "#fff" : colour.text,
+      fontWeight: "600",
+    },
   });
 
   return (
-    <View style={styles.card}>
-      {/* Top Section */}
-      <View style={styles.header}>
-        <Text style={styles.timeLeft}>{getTimeLeft(expiresAt)} Left</Text>
-      </View>
-
-      {/* Main Content */}
-      <View style={styles.content}>
-        <View style={styles.materialSection}>
-          <Image
-            source={require("../assets/images/parcel.png")}
-            style={styles.materialImage}
-          />
-          <View style={styles.materialSubSection}>
-            <Text style={styles.materialTypeStyles}>
-              {materialType ? materialType : "NA"}
-            </Text>
-            <View style={styles.locations}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "flex-start",
-                  gap: 4,
-                  justifyContent: "flex-start",
-                  marginBottom: 4,
-                }}>
-                <FontAwesome6 name='location-dot' size={16} color='#24CAB6' />
-                <Text style={styles.source}>{source.placeName}</Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "flex-start",
-                  gap: 4,
-                  justifyContent: "flex-start",
-                }}>
-                <FontAwesome6 name='location-dot' size={16} color='#F43D74' />
-                <Text style={styles.destination}>{destination.placeName}</Text>
-              </View>
+    <Pressable style={styles.card} onPress={() => onSelect(data)}>
+      <View style={styles.materialSection}>
+        <Image
+          source={require("../assets/images/parcel.png")}
+          style={styles.materialImage}
+          resizeMode="cover"
+        />
+        <View style={styles.materialSubSection}>
+          <Text style={styles.materialType}>{materialType}</Text>
+          <View style={styles.locations}>
+            <View style={styles.locationRow}>
+              <FontAwesome6 name="location-dot" size={16} color="#24CAB6" />
+              <Text style={styles.locationText}>{source.placeName}</Text>
+            </View>
+            <View style={styles.locationRow}>
+              <FontAwesome6 name="location-dot" size={16} color="#F43D74" />
+              <Text style={styles.locationText}>{destination.placeName}</Text>
             </View>
           </View>
         </View>
-
         <View style={styles.tripTag}>
           <Text style={styles.tripDistance}>{tripDistance} kms Trip</Text>
         </View>
       </View>
 
-      <View
-        style={{
-          height: 1,
-          backgroundColor: "#E5E5E5",
-          marginVertical: 5,
-          width: "100%",
-        }}></View>
+      <View style={styles.divider} />
 
-      {/* Card Content */}
       <View style={styles.row}>
-        {/* Details Section */}
         <View style={styles.detailsSection}>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name='truck' size={20} color={colour.iconColor} />
+              <FontAwesome6 name="truck" size={20} color={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{vehicleType}</Text>
           </View>
@@ -219,7 +190,7 @@ export default function LoadCard({ data }) {
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name='box' size={20} color={colour.iconColor} />
+              <FontAwesome6 name="box" size={20} color={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{weight} Tonnes</Text>
           </View>
@@ -229,32 +200,34 @@ export default function LoadCard({ data }) {
             </Text>
             <Text style={styles.detailText}>{vehicleBodyType}</Text>
           </View>
-
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <AntDesign name='eye' size={24} color={colour.iconColor} />
+              <AntDesign name="eye" size={24} color={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{views} Views</Text>
           </View>
-
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <MaterialIcons
-                name='local-offer'
-                size={24}
-                color={colour.iconColor}
-              />
+              <MaterialIcons name="local-offer" size={24} color={colour.iconColor} />
             </Text>
-            <Text style={styles.detailText}>{bids?.length} Bids</Text>
+            <Text style={styles.detailText}>{bids.length} Bids</Text>
           </View>
         </View>
 
-        {/* Price Section */}
         <View style={styles.priceSection}>
           <Text style={styles.price}>₹{offeredAmount.total}</Text>
           <Text style={styles.advance}>50% Advance</Text>
         </View>
       </View>
-    </View>
+
+      <Pressable 
+        style={styles.selectButton}
+        onPress={() => onSelect(data)}
+      >
+        <Text style={styles.selectButtonText}>
+          {isSelected ? "Selected" : "Select Load"}
+        </Text>
+      </Pressable>
+    </Pressable>
   );
-}
+} 
