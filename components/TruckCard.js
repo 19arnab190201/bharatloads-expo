@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Pressable,
+} from "react-native";
 import { useAuth } from "../context/AuthProvider";
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -10,8 +17,12 @@ import Wheel from "../assets/images/icons/Wheel";
 import { getTimeLeft } from "../utils/functions";
 
 export default function TruckCard({ data }) {
-  const { colour } = useAuth();
+  const { colour, user } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
+
+  console.log({
+    data,
+  });
 
   const {
     truckType,
@@ -21,10 +32,10 @@ export default function TruckCard({ data }) {
     truckLocation,
     truckTyre,
     vehicleBodyType,
-    bids,
     truckCapacity,
     expiresAt,
     truckNumber,
+    truckOwner,
   } = data;
 
   const toggleMenu = () => {
@@ -191,8 +202,14 @@ export default function TruckCard({ data }) {
       fontSize: 14,
       color: "#333",
     },
+    primaryButton: {
+      backgroundColor: colour.primaryColor,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
   });
-
+  console.log("user", user);
   console.log("data", data);
 
   return (
@@ -200,21 +217,38 @@ export default function TruckCard({ data }) {
       {/* Top Section */}
       <View style={styles.header}>
         <Text style={styles.timeLeft}>{getTimeLeft(expiresAt)} Left</Text>
-        <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
-          <MaterialIcons name='more-vert' size={24} color={colour.iconColor} />
-        </TouchableOpacity>
-        {menuVisible && (
-          <View style={styles.menu}>
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Edit</Text>
+        {truckOwner == user._id ? (
+          <>
+            <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
+              <MaterialIcons
+                name='more-vert'
+                size={24}
+                color={colour.iconColor}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Delete</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Pause</Text>
-            </TouchableOpacity>
-          </View>
+            {menuVisible && (
+              <View style={styles.menu}>
+                <TouchableOpacity style={styles.menuItem}>
+                  <Text style={styles.menuItemText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem}>
+                  <Text style={styles.menuItemText}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem}>
+                  <Text style={styles.menuItemText}>Pause</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </>
+        ) : (
+          <Pressable style={styles.primaryButton}>
+            <Text
+              style={{
+                color: "#fff",
+              }}>
+              Bid Now
+            </Text>
+          </Pressable>
         )}
       </View>
 
@@ -315,3 +349,7 @@ export default function TruckCard({ data }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  primaryButton: {},
+});

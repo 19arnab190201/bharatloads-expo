@@ -8,6 +8,7 @@ import {
   Modal,
   Pressable,
   Platform,
+  Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
@@ -98,14 +99,15 @@ const SearchTrucks = () => {
     console.log("============================================");
     console.log(location);
 
-    if (!location?.coordinates) return;
+    // if (!location?.coordinates) return;
 
     try {
       setLoading(true);
-      const { lat, lng } = location.coordinates;
+      // const { lat, lng } = location.coordinates;
       const queryParams = new URLSearchParams({
-        latitude: lat,
-        longitude: lng,
+        latitude: 28.7141,
+        longitude: 77.1125,
+        radius: 1000,
         ...filters,
       }).toString();
 
@@ -114,9 +116,9 @@ const SearchTrucks = () => {
       console.log("URL", url);
 
       const response = await api.get(`/truck/nearby?${queryParams}`);
-      setTrucks(response.data.data);
       console.log("=============+++++++++++++++++++++++++++++++");
       console.log(response.data.data);
+      setTrucks(response.data.data);
     } catch (error) {
       console.error("Fetch trucks error:", error);
       setTrucks([]);
@@ -201,7 +203,11 @@ const SearchTrucks = () => {
           onChangeText={handleSearchChange}
           onFocus={() => setShowLocationDropdown(true)}
         />
-
+        <Button
+          title='Refetch'
+          onPress={() => {
+            fetchTrucks("Jamshedpur");
+          }}></Button>
         {/* Location suggestions dropdown */}
         {showLocationDropdown && locations.length > 0 && (
           <View style={styles.dropdownContainer}>
@@ -262,7 +268,7 @@ const SearchTrucks = () => {
         ) : trucks.length === 0 ? (
           <Text style={styles.messageText}>No trucks found</Text>
         ) : (
-          trucks.map((truck) => <TruckCard key={truck.id} truck={truck} />)
+          trucks.map((truck) => <TruckCard key={truck._id} data={truck} />)
         )}
       </ScrollView>
     </SafeAreaView>
