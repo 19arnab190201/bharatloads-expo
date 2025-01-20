@@ -13,7 +13,9 @@ import {
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
-import api from "../../../utils/api";
+import {api} from "../../../utils/api";
+import { useRouter } from "expo-router";
+
 const FormStepHeader = ({ totalSteps = 2, currentStep = 1, setSteps }) => {
   const { colour, token } = useAuth();
 
@@ -311,6 +313,7 @@ const StepTwo = ({ formState, setFormState }) => {
 };
 
 const PostTruck = () => {
+  const router = useRouter();
   const { colour, token } = useAuth();
   const [step, setStep] = useState(1);
   const [formState, setFormState] = useState({
@@ -390,8 +393,19 @@ const PostTruck = () => {
         },
       });
       console.log("response", response);
+      Alert.alert(
+        "Success",
+        "Truck posted successfully!",
+        [
+          {
+            text: "OK",
+            onPress: () => router.push("/dashboard")
+          }
+        ]
+      );
     } catch (error) {
       console.error("Error posting truck:", error);
+      Alert.alert("Error", "Failed to post truck. Please try again.");
     }
   };
 
