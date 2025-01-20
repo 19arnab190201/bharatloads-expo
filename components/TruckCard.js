@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
+  Pressable,
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 
@@ -25,10 +26,11 @@ const normalize = (size) => {
 };
 
 export default function TruckCard({ data }) {
-  const { colour } = useAuth();
+  const { colour, user } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
 
   const {
+    truckOwner,
     truckType,
     isRCVerified,
     totalBids,
@@ -203,6 +205,13 @@ export default function TruckCard({ data }) {
       fontSize: normalize(14),
       color: "#333",
     },
+    primaryButton: {
+      backgroundColor: colour.primaryColor,
+      padding: 10,
+      borderRadius: 8,
+      alignItems: "center",
+      justifyContent: "center",
+    },
   });
 
   console.log("data", data);
@@ -212,21 +221,38 @@ export default function TruckCard({ data }) {
       {/* Top Section */}
       <View style={styles.header}>
         <Text style={styles.timeLeft}>{getTimeLeft(expiresAt)} Left</Text>
-        <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
-          <MaterialIcons name='more-vert' size={24} color={colour.iconColor} />
-        </TouchableOpacity>
-        {menuVisible && (
-          <View style={styles.menu}>
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Edit</Text>
+        {truckOwner == user._id ? (
+          <>
+            <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
+              <MaterialIcons
+                name='more-vert'
+                size={24}
+                color={colour.iconColor}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Delete</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Pause</Text>
-            </TouchableOpacity>
-          </View>
+            {menuVisible && (
+              <View style={styles.menu}>
+                <TouchableOpacity style={styles.menuItem}>
+                  <Text style={styles.menuItemText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem}>
+                  <Text style={styles.menuItemText}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem}>
+                  <Text style={styles.menuItemText}>Pause</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </>
+        ) : (
+          <Pressable style={styles.primaryButton}>
+            <Text
+              style={{
+                color: "#fff",
+              }}>
+              Bid Now
+            </Text>
+          </Pressable>
         )}
       </View>
 
