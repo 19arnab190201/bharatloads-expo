@@ -11,13 +11,17 @@ const useApi = () => {
     setLoading(true);
     console.log("url", url);
 
-    console.log("headers");
+    console.log("token", token);
     try {
       const response = await axios(
         {
           method,
           url: process.env.EXPO_PUBLIC_API_URL + url,
           data: body,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
         {
           ...rest,
