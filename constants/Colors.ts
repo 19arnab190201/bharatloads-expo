@@ -40,6 +40,9 @@ export const Colors = {
 
       //Step Indicator
       stepIndicator: "#FE7F4A",
+
+      expired: "#F9ECEC",
+      expiredText: "#B81414", // Add this line
     },
     dark: {
       text: "#ECEDEE",
@@ -51,6 +54,9 @@ export const Colors = {
 
       //Step Indicator
       stepIndicator: "#FE7F4A",
+
+      expired: "#F9ECEC",
+      expiredText: "#B81414", // Add this line
     },
   },
 
@@ -87,6 +93,9 @@ export const Colors = {
 
       //Step Indicator
       stepIndicator: "#FE7F4A",
+
+      expired: "#F9ECEC",
+      expiredText: "#B81414", // Add this line
     },
     dark: {
       text: "#ECEDEE",
@@ -98,6 +107,9 @@ export const Colors = {
 
       //Step Indicator
       stepIndicator: "#FE7F4A",
+
+      expired: "#F9ECEC",
+      expiredText: "#B81414", // Add this line
     },
   },
 };

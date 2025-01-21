@@ -7,7 +7,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
-import { getTimeLeft } from "../utils/functions";
+import { formatText, getTimeLeft } from "../utils/functions";
 
 export default function LoadCard({ data }) {
   const { colour } = useAuth();
@@ -24,8 +24,11 @@ export default function LoadCard({ data }) {
     views = 100,
     expiresAt,
     tripDistance,
-    advanceAmount,
   } = data;
+
+  const advanceAmount = offeredAmount.advancePercentage; // value in money not percentage
+  const advancePercentage =
+    100 - ((offeredAmount.total - advanceAmount) / offeredAmount.total) * 100;
 
   const styles = StyleSheet.create({
     card: {
@@ -46,6 +49,15 @@ export default function LoadCard({ data }) {
     timeLeft: {
       backgroundColor: "#E6F7F5",
       color: colour.primaryColor,
+      borderRadius: 12,
+      padding: 5,
+      paddingHorizontal: 10,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    expiredTimeLeft: {
+      backgroundColor: colour.expired,
+      color: colour.expiredText,
       borderRadius: 12,
       padding: 5,
       paddingHorizontal: 10,
@@ -141,14 +153,21 @@ export default function LoadCard({ data }) {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "flex-start",
-    }
+    },
   });
 
   return (
     <View style={styles.card}>
       {/* Top Section */}
       <View style={styles.header}>
-        <Text style={styles.timeLeft}>{getTimeLeft(expiresAt)} Left</Text>
+        <Text
+          style={
+            new Date(expiresAt) < new Date()
+              ? styles.expiredTimeLeft
+              : styles.timeLeft
+          }>
+          {getTimeLeft(expiresAt)}
+        </Text>
       </View>
 
       {/* Main Content */}
@@ -209,7 +228,8 @@ export default function LoadCard({ data }) {
             <Text style={styles.detailIcon}>
               <FontAwesome6 name='truck' size={20} color={colour.iconColor} />
             </Text>
-            <Text style={styles.detailText}>{vehicleType}</Text>
+
+            <Text style={styles.detailText}>{formatText(vehicleType)}</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
@@ -227,7 +247,7 @@ export default function LoadCard({ data }) {
             <Text style={styles.detailIcon}>
               <Container width={25} height={25} fill={colour.iconColor} />
             </Text>
-            <Text style={styles.detailText}>{vehicleBodyType}</Text>
+            <Text style={styles.detailText}>{formatText(vehicleBodyType)}</Text>
           </View>
 
           <View style={styles.detailItem}>
@@ -250,9 +270,13 @@ export default function LoadCard({ data }) {
         </View>
 
         {/* Price Section */}
+        {console.log("Advance Amount: ", offeredAmount)}
         <View style={styles.priceSection}>
           <Text style={styles.price}>₹{offeredAmount.total}</Text>
-          <Text style={styles.advance}>50% Advance</Text>
+          <Text style={styles.advance}>
+            ₹{advanceAmount} ({Math.round(advancePercentage)}%)
+          </Text>
+          <Text style={styles.advance}>Advance</Text>
         </View>
       </View>
     </View>

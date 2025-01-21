@@ -17,7 +17,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 const BidCard = ({ bid, onBidClosed }) => {
   const { colour, user, token } = useAuth();
   const [isClosing, setIsClosing] = useState(false);
-  
+
   const handleCloseBid = async () => {
     Alert.alert(
       "Close Bid",
@@ -25,7 +25,7 @@ const BidCard = ({ bid, onBidClosed }) => {
       [
         {
           text: "Cancel",
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "Close Bid",
@@ -33,25 +33,29 @@ const BidCard = ({ bid, onBidClosed }) => {
           onPress: async () => {
             setIsClosing(true);
             try {
-              console.log("rkjhntrkngitugikutgnvtngviutnviutngviut", token)
-              await api.delete(`/bid/${bid._id}`, 
-                {headers: {
+              console.log("rkjhntrkngitugikutgnvtngviutnviutngviut", token);
+              await api.delete(`/bid/${bid._id}`, {
+                headers: {
                   "Content-Type": "application/json",
                   Authorization: `Bearer ${token}`,
-                }}, );
-                Alert.alert("Success", "Bid closed successfully");
-                // Refresh the bids list after successful deletion
-                if (typeof onBidClosed === 'function') {
-                  onBidClosed(bid._id);
-                }
-              } catch (error) {
+                },
+              });
+              Alert.alert("Success", "Bid closed successfully");
+              // Refresh the bids list after successful deletion
+              if (typeof onBidClosed === "function") {
+                onBidClosed(bid._id);
+              }
+            } catch (error) {
               console.error("Error closing bid:", error);
-              Alert.alert("Error", error.response?.data?.message || "Failed to close bid");
+              Alert.alert(
+                "Error",
+                error.response?.data?.message || "Failed to close bid"
+              );
             } finally {
               setIsClosing(false);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -63,7 +67,10 @@ const BidCard = ({ bid, onBidClosed }) => {
 
   const calculateAverageRating = () => {
     if (!bid.truckId?.rating || bid.truckId.rating.length === 0) return 0;
-    const totalRating = bid.truckId.rating.reduce((acc, curr) => acc + curr.rating, 0);
+    const totalRating = bid.truckId.rating.reduce(
+      (acc, curr) => acc + curr.rating,
+      0
+    );
     return (totalRating / bid.truckId.rating.length).toFixed(1);
   };
 
@@ -92,17 +99,23 @@ const BidCard = ({ bid, onBidClosed }) => {
       flexDirection: "row",
       alignItems: "center",
       gap: 8,
+      width: "60%",
     },
     avatar: {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: "#F8FAFC",
+      backgroundColor: "gold",
+      justifyContent: "center",
+      alignItems: "center",
     },
     avatarText: {
       fontSize: 16,
       fontWeight: "600",
       color: "#1E293B",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
     },
     nameContainer: {
       flex: 1,
@@ -244,10 +257,10 @@ const BidCard = ({ bid, onBidClosed }) => {
       <View style={styles.header}>
         <View style={styles.userInfo}>
           {bid.bidBy?.profileImage ? (
-            <Image 
-              source={{ uri: bid.bidBy.profileImage }} 
-              style={styles.avatar} 
-              resizeMode="cover"
+            <Image
+              source={{ uri: bid.bidBy.profileImage }}
+              style={styles.avatar}
+              resizeMode='cover'
             />
           ) : (
             <View style={styles.avatar}>
@@ -269,33 +282,39 @@ const BidCard = ({ bid, onBidClosed }) => {
 
       <View style={styles.materialContainer}>
         {bid.materialImage ? (
-          <Image 
-            source={{ uri: bid.materialImage }} 
-            style={styles.materialImage} 
-            resizeMode="cover"
+          <Image
+            source={{ uri: bid.materialImage }}
+            style={styles.materialImage}
+            resizeMode='cover'
           />
         ) : (
           <View style={styles.materialImage} />
         )}
         <View style={styles.materialInfo}>
-          <Text style={styles.materialType}>{bid.materialType || "Unknown Material"}</Text>
+          <Text style={styles.materialType}>
+            {bid.materialType || "Unknown Material"}
+          </Text>
           <View style={styles.locationContainer}>
             <MaterialIcons
-              name="circle"
+              name='circle'
               size={8}
-              color="#14B8A6"
+              color='#14B8A6'
               style={styles.locationIcon}
             />
-            <Text style={styles.locationText}>{bid.source?.placeName || "Unknown Location"}</Text>
+            <Text style={styles.locationText}>
+              {bid.source?.placeName || "Unknown Location"}
+            </Text>
           </View>
           <View style={styles.locationContainer}>
             <MaterialIcons
-              name="circle"
+              name='circle'
               size={8}
-              color="#F43F5E"
+              color='#F43F5E'
               style={styles.locationIcon}
             />
-            <Text style={styles.locationText}>{bid.destination?.placeName || "Unknown Location"}</Text>
+            <Text style={styles.locationText}>
+              {bid.destination?.placeName || "Unknown Location"}
+            </Text>
           </View>
         </View>
         <View style={styles.timestamp}>
@@ -308,58 +327,61 @@ const BidCard = ({ bid, onBidClosed }) => {
       <View style={styles.specs}>
         <View style={styles.specItem}>
           <MaterialIcons
-            name="shopping-bag"
+            name='shopping-bag'
             size={18}
-            color="#64748B"
+            color='#64748B'
+            style={styles.specIcon}
+          />
+          <Text style={styles.specText}>{bid.weight || 0} Tonnes</Text>
+        </View>
+        <View style={styles.specItem}>
+          <MaterialIcons
+            name='local-shipping'
+            size={18}
+            color='#64748B'
             style={styles.specIcon}
           />
           <Text style={styles.specText}>
-            {bid.weight || 0} Tonnes
+            {bid.truckId?.truckType || "Unknown"}
           </Text>
         </View>
         <View style={styles.specItem}>
           <MaterialIcons
-            name="local-shipping"
+            name='tire-repair'
             size={18}
-            color="#64748B"
+            color='#64748B'
             style={styles.specIcon}
           />
-          <Text style={styles.specText}>{bid.truckId?.truckType || "Unknown"}</Text>
-        </View>
-        <View style={styles.specItem}>
-          <MaterialIcons
-            name="tire-repair"
-            size={18}
-            color="#64748B"
-            style={styles.specIcon}
-          />
-          <Text style={styles.specText}>{bid.truckId?.truckTyre || 0} Wheels</Text>
+          <Text style={styles.specText}>
+            {bid.truckId?.truckTyre || 0} Wheels
+          </Text>
         </View>
       </View>
 
       <View style={styles.priceContainer}>
         <Text style={styles.price}>₹{bid.offeredAmount?.total || 0}</Text>
         <Text style={styles.pricePerTonne}>
-          ₹{((bid.offeredAmount?.total || 0) / (bid.truckId?.truckCapacity || 1)).toFixed(2)}
+          ₹
+          {(
+            (bid.offeredAmount?.total || 0) / (bid.truckId?.truckCapacity || 1)
+          ).toFixed(2)}
           /Tonne
         </Text>
       </View>
 
       <View style={styles.buttonContainer}>
-        <Pressable 
+        <Pressable
           style={[styles.button, styles.closeButton]}
           onPress={handleCloseBid}
-          disabled={isClosing || bid.status === "ACCEPTED"}
-        >
+          disabled={isClosing || bid.status === "ACCEPTED"}>
           <Text style={styles.buttonText("close")}>
             {isClosing ? "Closing..." : "Close Bid"}
           </Text>
         </Pressable>
-        <Pressable 
+        <Pressable
           style={[styles.button, styles.chatButton]}
           onPress={handleChat}
-          disabled={bid.status === "REJECTED"}
-        >
+          disabled={bid.status === "REJECTED"}>
           <Text style={styles.buttonText("chat")}>Chat</Text>
         </Pressable>
       </View>
@@ -375,7 +397,7 @@ const Bids = () => {
 
   const handleBidClosed = (bidId) => {
     // Remove the closed bid from the state
-    setUserBids(prevBids => prevBids.filter(bid => bid._id !== bidId));
+    setUserBids((prevBids) => prevBids.filter((bid) => bid._id !== bidId));
   };
 
   const fetchBids = async () => {
@@ -399,9 +421,9 @@ const Bids = () => {
   const filteredBids = useMemo(() => {
     switch (activeTab) {
       case "accepted":
-        return userBids.filter(bid => bid.status === "ACCEPTED");
+        return userBids.filter((bid) => bid.status === "ACCEPTED");
       case "awaiting":
-        return userBids.filter(bid => bid.status === "PENDING");
+        return userBids.filter((bid) => bid.status === "PENDING");
       default:
         return userBids;
     }
@@ -483,7 +505,7 @@ const Bids = () => {
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colour.primaryColor} />
+          <ActivityIndicator size='large' color={colour.primaryColor} />
           <Text style={styles.loadingText}>Loading bids...</Text>
         </View>
       );
