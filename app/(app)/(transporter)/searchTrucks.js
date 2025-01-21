@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   resultsContainer: {
-    paddingHorizontal: noramlize(4),
+    paddingHorizontal: normalize(4),
     flex: 1,
   },
   messageText: {

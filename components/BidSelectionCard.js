@@ -31,11 +31,6 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
       marginVertical: 8,
       borderWidth: isSelected ? 2 : 2,
       borderColor: isSelected ? colour.primaryColor : "#d3d3d3",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 4,
     },
     materialSection: {
       flexDirection: "row",
@@ -152,17 +147,17 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
         <Image
           source={require("../assets/images/parcel.png")}
           style={styles.materialImage}
-          resizeMode="cover"
+          resizeMode='cover'
         />
         <View style={styles.materialSubSection}>
           <Text style={styles.materialType}>{materialType}</Text>
           <View style={styles.locations}>
             <View style={styles.locationRow}>
-              <FontAwesome6 name="location-dot" size={16} color="#24CAB6" />
+              <FontAwesome6 name='location-dot' size={16} color='#24CAB6' />
               <Text style={styles.locationText}>{source.placeName}</Text>
             </View>
             <View style={styles.locationRow}>
-              <FontAwesome6 name="location-dot" size={16} color="#F43D74" />
+              <FontAwesome6 name='location-dot' size={16} color='#F43D74' />
               <Text style={styles.locationText}>{destination.placeName}</Text>
             </View>
           </View>
@@ -178,7 +173,7 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
         <View style={styles.detailsSection}>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name="truck" size={20} color={colour.iconColor} />
+              <FontAwesome6 name='truck' size={20} color={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{vehicleType}</Text>
           </View>
@@ -190,7 +185,7 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name="box" size={20} color={colour.iconColor} />
+              <FontAwesome6 name='box' size={20} color={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{weight} Tonnes</Text>
           </View>
@@ -202,13 +197,17 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <AntDesign name="eye" size={24} color={colour.iconColor} />
+              <AntDesign name='eye' size={24} color={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{views} Views</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <MaterialIcons name="local-offer" size={24} color={colour.iconColor} />
+              <MaterialIcons
+                name='local-offer'
+                size={24}
+                color={colour.iconColor}
+              />
             </Text>
             <Text style={styles.detailText}>{bids.length} Bids</Text>
           </View>
@@ -220,14 +219,11 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
         </View>
       </View>
 
-      <Pressable 
-        style={styles.selectButton}
-        onPress={() => onSelect(data)}
-      >
+      <Pressable style={styles.selectButton} onPress={() => onSelect(data)}>
         <Text style={styles.selectButtonText}>
           {isSelected ? "Selected" : "Select Load"}
         </Text>
       </Pressable>
     </Pressable>
   );
-} 
+}
