@@ -18,6 +18,7 @@ import TruckCard from "../../../components/TruckCard";
 import { api } from "../../../utils/api";
 import debounce from "lodash/debounce";
 import { normalize } from "../../../utils/functions";
+import * as Location from 'expo-location';
 
 const FILTER_OPTIONS = {
   vehicleBodyType: {
@@ -56,10 +57,11 @@ const SearchTrucks = () => {
     vehicleBodyType: "",
     truckType: "",
     truckBodyType: "",
-    radius: "1000",
+    radius: "100",
   });
   const [activeFilter, setActiveFilter] = useState(null);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
 
   // Debounced function for location search
   const debouncedLocationSearch = useCallback(
@@ -72,6 +74,7 @@ const SearchTrucks = () => {
       try {
         setLoading(true);
         const response = await api.get(`/locationsearch?query=${query}`);
+        console.log(response.data)
         setLocations(response.data.data);
         setShowLocationDropdown(true);
       } catch (error) {
@@ -89,6 +92,35 @@ const SearchTrucks = () => {
     console.log("locations", locations);
   }, [locations]);
 
+  // Get user's current location when component mounts
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          console.error('Permission to access location was denied');
+          return;
+        }
+
+        const location = await Location.getCurrentPositionAsync({});
+        setUserLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude
+        });
+        
+        // Fetch trucks near user's location
+        fetchTrucks({
+          coordinates: {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude
+          }
+        });
+      } catch (error) {
+        console.error('Error getting location:', error);
+      }
+    })();
+  }, []);
+
   // Handle search input changes
   const handleSearchChange = (text) => {
     setSearch(text);
@@ -97,28 +129,19 @@ const SearchTrucks = () => {
 
   // Fetch trucks based on selected location and filters
   const fetchTrucks = async (location) => {
-    console.log("============================================");
-    console.log(location);
-
-    // if (!location?.coordinates) return;
+    if (!location?.coordinates) return;
 
     try {
       setLoading(true);
-      // const { lat, lng } = location.coordinates;
+      const { latitude, longitude } = location.coordinates;
       const queryParams = new URLSearchParams({
-        latitude: 28.7141,
-        longitude: 77.1125,
-        radius: 1000,
+        latitude,
+        longitude,
+        radius: 100, // 100km radius
         ...filters,
       }).toString();
 
-      const url = `/truck/nearby?${queryParams}`;
-
-      console.log("URL", url);
-
       const response = await api.get(`/truck/nearby?${queryParams}`);
-      console.log("=============+++++++++++++++++++++++++++++++");
-      console.log(response.data.data);
       setTrucks(response.data.data);
     } catch (error) {
       console.error("Fetch trucks error:", error);
@@ -133,7 +156,12 @@ const SearchTrucks = () => {
     setSelectedLocation(location);
     setSearch(location.name);
     setShowLocationDropdown(false);
-    fetchTrucks(location);
+    fetchTrucks({
+      coordinates: {
+        latitude: location.coordinates.lat,
+        longitude: location.coordinates.lng
+      }
+    });
   };
 
   const FilterPicker = ({ isVisible, onClose, filterKey }) => {
@@ -198,17 +226,13 @@ const SearchTrucks = () => {
       <View style={styles.searchContainer}>
         <FormInput
           Icon={LoadingPoint}
-          placeholder='Enter origin'
+          placeholder='Search location'
           name='origin'
           value={search}
           onChangeText={handleSearchChange}
           onFocus={() => setShowLocationDropdown(true)}
         />
-        <Button
-          title='Refetch'
-          onPress={() => {
-            fetchTrucks("Jamshedpur");
-          }}></Button>
+
         {/* Location suggestions dropdown */}
         {showLocationDropdown && locations.length > 0 && (
           <View style={styles.dropdownContainer}>
@@ -221,7 +245,7 @@ const SearchTrucks = () => {
                   {location.name}
                 </Text>
                 <Text numberOfLines={2} style={styles.dropdownSubText}>
-                  {location.description?.split(",").slice(1).join(",").trim()}
+                  {location.description}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -267,7 +291,7 @@ const SearchTrucks = () => {
         {loading ? (
           <Text style={styles.messageText}>Loading...</Text>
         ) : trucks.length === 0 ? (
-          <Text style={styles.messageText}>No trucks found</Text>
+          <Text style={styles.messageText}>No nearby trucks found</Text>
         ) : (
           trucks.map((truck) => <TruckCard key={truck._id} data={truck} />)
         )}

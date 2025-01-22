@@ -13,7 +13,7 @@ export const getTimeLeft = (timeToExpiry) => {
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const scale = SCREEN_WIDTH / 500;
+const scale = SCREEN_WIDTH / 425;
 
 export const normalize = (size) => {
   const newSize = size * scale;

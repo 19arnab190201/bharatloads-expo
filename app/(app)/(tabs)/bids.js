@@ -13,6 +13,7 @@ import { api } from "../../../utils/api";
 import { useAuth } from "../../../context/AuthProvider";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import { MaterialIcons } from "@expo/vector-icons";
+import { normalize } from "../../../utils/functions";
 
 const BidCard = ({ bid, onBidClosed }) => {
   const { colour, user, token } = useAuth();
@@ -77,40 +78,40 @@ const BidCard = ({ bid, onBidClosed }) => {
   const styles = StyleSheet.create({
     card: {
       backgroundColor: "#fff",
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 16,
+      borderRadius: normalize(12),
+      padding: normalize(16),
+      marginBottom: normalize(16),
       shadowColor: "#000",
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: normalize(2),
       },
       shadowOpacity: 0.05,
-      shadowRadius: 4,
+      shadowRadius: normalize(4),
       elevation: 2,
     },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 12,
+      marginBottom: normalize(12),
     },
     userInfo: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 8,
+      gap: normalize(8),
       width: "60%",
     },
     avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: normalize(40),
+      height: normalize(40),
+      borderRadius: normalize(20),
       backgroundColor: "gold",
       justifyContent: "center",
       alignItems: "center",
     },
     avatarText: {
-      fontSize: 16,
+      fontSize: normalize(16),
       fontWeight: "600",
       color: "#1E293B",
       display: "flex",
@@ -121,13 +122,13 @@ const BidCard = ({ bid, onBidClosed }) => {
       flex: 1,
     },
     name: {
-      fontSize: 16,
+      fontSize: normalize(16),
       fontWeight: "600",
       color: "#1E293B",
-      marginBottom: 2,
+      marginBottom: normalize(2),
     },
     role: {
-      fontSize: 14,
+      fontSize: normalize(14),
       color: "#64748B",
     },
     rating: {
@@ -135,84 +136,84 @@ const BidCard = ({ bid, onBidClosed }) => {
       alignItems: "center",
     },
     ratingText: {
-      fontSize: 18,
+      fontSize: normalize(18),
       fontWeight: "600",
       color: "#FFB800",
-      marginRight: 14,
+      marginRight: normalize(14),
     },
     materialImage: {
-      width: 56,
-      height: 56,
-      marginRight: 12,
+      width: normalize(56),
+      height: normalize(56),
+      marginRight: normalize(12),
       backgroundColor: "#F8FAFC",
-      borderRadius: 8,
+      borderRadius: normalize(8),
     },
     materialContainer: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 16,
+      marginBottom: normalize(16),
       position: "relative",
     },
     materialInfo: {
       flex: 1,
     },
     materialType: {
-      fontSize: 16,
+      fontSize: normalize(16),
       fontWeight: "600",
       color: "#1E293B",
-      marginBottom: 4,
+      marginBottom: normalize(4),
     },
     locationContainer: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 4,
+      marginBottom: normalize(4),
     },
     locationIcon: {
-      marginRight: 8,
+      marginRight: normalize(8),
     },
     locationText: {
-      fontSize: 14,
+      fontSize: normalize(14),
       color: "#64748B",
     },
     specs: {
       flexDirection: "row",
       justifyContent: "space-between",
-      gap: 24,
-      marginTop: 16,
-      marginBottom: 20,
+      gap: normalize(24),
+      marginTop: normalize(16),
+      marginBottom: normalize(20),
     },
     specItem: {
       flexDirection: "row",
       alignItems: "center",
     },
     specIcon: {
-      marginRight: 6,
+      marginRight: normalize(6),
     },
     specText: {
-      fontSize: 14,
+      fontSize: normalize(14),
       color: "#64748B",
     },
     priceContainer: {
-      marginBottom: 16,
+      marginBottom: normalize(16),
     },
     price: {
-      fontSize: 20,
+      fontSize: normalize(20),
       fontWeight: "700",
       color: "#1E293B",
-      marginBottom: 2,
+      marginBottom: normalize(2),
     },
     pricePerTonne: {
-      fontSize: 14,
+      fontSize: normalize(14),
       color: "#64748B",
     },
     buttonContainer: {
       flexDirection: "row",
-      gap: 12,
+      gap: normalize(12),
     },
     button: {
       flex: 1,
-      paddingVertical: 12,
-      borderRadius: 8,
+      paddingVertical: normalize(12),
+      borderRadius: normalize(8),
       alignItems: "center",
     },
     closeButton: {
@@ -222,7 +223,7 @@ const BidCard = ({ bid, onBidClosed }) => {
       backgroundColor: colour.primaryColor,
     },
     buttonText: (variant) => ({
-      fontSize: 15,
+      fontSize: normalize(15),
       fontWeight: "600",
       color: variant === "close" ? "#DC2626" : "#fff",
     }),
@@ -231,12 +232,12 @@ const BidCard = ({ bid, onBidClosed }) => {
       right: 0,
       top: 0,
       backgroundColor: "#F8FAFC",
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 6,
+      paddingHorizontal: normalize(8),
+      paddingVertical: normalize(4),
+      borderRadius: normalize(6),
     },
     timestampText: {
-      fontSize: 12,
+      fontSize: normalize(12),
       color: "#64748B",
     },
   });
@@ -270,8 +271,12 @@ const BidCard = ({ bid, onBidClosed }) => {
             </View>
           )}
           <View style={styles.nameContainer}>
-            <Text style={styles.name}>{bid.bidBy?.name || "Unknown User"}</Text>
-            <Text style={styles.role}>{bid.bidBy?.userType || "User"}</Text>
+            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+              {bid.bidBy?.name || "Unknown User"}
+            </Text>
+            <Text style={styles.role} numberOfLines={1} ellipsizeMode="tail">
+              {bid.bidBy?.userType || "User"}
+            </Text>
           </View>
         </View>
         <View style={styles.rating}>
@@ -291,28 +296,28 @@ const BidCard = ({ bid, onBidClosed }) => {
           <View style={styles.materialImage} />
         )}
         <View style={styles.materialInfo}>
-          <Text style={styles.materialType}>
+          <Text style={styles.materialType} numberOfLines={1} ellipsizeMode="tail">
             {bid.materialType || "Unknown Material"}
           </Text>
           <View style={styles.locationContainer}>
             <MaterialIcons
               name='circle'
-              size={8}
+              size={normalize(8)}
               color='#14B8A6'
               style={styles.locationIcon}
             />
-            <Text style={styles.locationText}>
+            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
               {bid.source?.placeName || "Unknown Location"}
             </Text>
           </View>
           <View style={styles.locationContainer}>
             <MaterialIcons
               name='circle'
-              size={8}
+              size={normalize(8)}
               color='#F43F5E'
               style={styles.locationIcon}
             />
-            <Text style={styles.locationText}>
+            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
               {bid.destination?.placeName || "Unknown Location"}
             </Text>
           </View>
@@ -328,7 +333,7 @@ const BidCard = ({ bid, onBidClosed }) => {
         <View style={styles.specItem}>
           <MaterialIcons
             name='shopping-bag'
-            size={18}
+            size={normalize(18)}
             color='#64748B'
             style={styles.specIcon}
           />
@@ -337,18 +342,18 @@ const BidCard = ({ bid, onBidClosed }) => {
         <View style={styles.specItem}>
           <MaterialIcons
             name='local-shipping'
-            size={18}
+            size={normalize(18)}
             color='#64748B'
             style={styles.specIcon}
           />
-          <Text style={styles.specText}>
+          <Text style={styles.specText} numberOfLines={1} ellipsizeMode="tail">
             {bid.truckId?.truckType || "Unknown"}
           </Text>
         </View>
         <View style={styles.specItem}>
           <MaterialIcons
             name='tire-repair'
-            size={18}
+            size={normalize(18)}
             color='#64748B'
             style={styles.specIcon}
           />
@@ -433,18 +438,18 @@ const Bids = () => {
     container: {
       flex: 1,
       backgroundColor: "#F8FAFC",
-      paddingTop: 16,
+      paddingTop: normalize(16),
     },
     tabContainer: {
       flexDirection: "row",
-      paddingHorizontal: 16,
-      marginBottom: 16,
-      gap: 12,
+      paddingHorizontal: normalize(16),
+      marginBottom: normalize(16),
+      gap: normalize(12),
     },
     tab: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 24,
+      paddingHorizontal: normalize(16),
+      paddingVertical: normalize(8),
+      borderRadius: normalize(24),
       borderWidth: 1,
       borderColor: "#E2E8F0",
       backgroundColor: "#fff",
@@ -454,7 +459,7 @@ const Bids = () => {
       borderColor: colour.primaryColor,
     },
     tabText: {
-      fontSize: 14,
+      fontSize: normalize(14),
       color: "#64748B",
       fontWeight: "500",
     },
@@ -463,7 +468,7 @@ const Bids = () => {
     },
     content: {
       flex: 1,
-      paddingHorizontal: 16,
+      paddingHorizontal: normalize(16),
     },
     loadingContainer: {
       flex: 1,
@@ -471,32 +476,32 @@ const Bids = () => {
       alignItems: "center",
     },
     loadingText: {
-      fontSize: 16,
+      fontSize: normalize(16),
       color: "#64748B",
-      marginTop: 12,
+      marginTop: normalize(12),
     },
     emptyContainer: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      paddingHorizontal: 24,
+      paddingHorizontal: normalize(24),
     },
     emptyText: {
-      fontSize: 16,
+      fontSize: normalize(16),
       color: "#64748B",
       textAlign: "center",
-      marginTop: 12,
+      marginTop: normalize(12),
     },
     refreshButton: {
-      marginTop: 16,
-      paddingHorizontal: 24,
-      paddingVertical: 12,
+      marginTop: normalize(16),
+      paddingHorizontal: normalize(24),
+      paddingVertical: normalize(12),
       backgroundColor: colour.primaryColor,
-      borderRadius: 8,
+      borderRadius: normalize(8),
     },
     refreshButtonText: {
       color: "#fff",
-      fontSize: 14,
+      fontSize: normalize(14),
       fontWeight: "600",
     },
   });

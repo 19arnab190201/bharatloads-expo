@@ -18,7 +18,7 @@ import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
 import { getTimeLeft } from "../utils/functions";
 import { api } from "../utils/api";
-import { normalize } from "../utils/functions";
+import { normalize, formatText } from "../utils/functions";
 
 
 
@@ -104,10 +104,10 @@ export default function TruckCard({ data, onBidPlaced }) {
       backgroundColor: "#E6F7F5",
       color: colour.primaryColor,
       borderRadius: 12,
-      height: normalize(30),
+      height: normalize(28),
       padding: 5,
       paddingHorizontal: 10,
-      fontSize: normalize(12),
+      fontSize: normalize(11),
       fontWeight: "600",
     },
     content: {
@@ -123,12 +123,12 @@ export default function TruckCard({ data, onBidPlaced }) {
       flexDirection: "column",
     },
     materialImage: {
-      width: 80,
-      height: 80,
+      width: 75,
+      height: 75,
       marginRight: 10,
     },
     materialTypeStyles: {
-      fontSize: normalize(18),
+      fontSize: normalize(16),
       fontWeight: "700",
       color: colour.inputLabel,
     },
@@ -138,14 +138,14 @@ export default function TruckCard({ data, onBidPlaced }) {
     },
     source: {
       color: colour.inputLabel,
-      fontSize: normalize(16),
+      fontSize: normalize(14),
     },
     destination: {
       color: colour.inputLabel,
-      fontSize: normalize(14),
+      fontSize: normalize(13),
     },
     tripDistance: {
-      fontSize: normalize(12),
+      fontSize: normalize(11),
       color: "#888",
     },
     details: {
@@ -157,10 +157,10 @@ export default function TruckCard({ data, onBidPlaced }) {
       alignItems: "center",
     },
     icon: {
-      fontSize: 18,
+      fontSize: 16,
     },
     detailText: {
-      fontSize: normalize(14),
+      fontSize: normalize(12),
       marginTop: 4,
       color: colour.iconText,
     },
@@ -183,13 +183,13 @@ export default function TruckCard({ data, onBidPlaced }) {
       justifyContent: "space-between",
     },
     detailItem: {
-      width: "33.3333%", // Ensure two items per row
+      width: "33.3333%",
       flexDirection: "row",
       alignItems: "center",
       marginVertical: 2,
     },
     detailIcon: {
-      fontSize: 18,
+      fontSize: 16,
       marginRight: 5,
       width: 25,
     },
@@ -202,12 +202,12 @@ export default function TruckCard({ data, onBidPlaced }) {
       bottom: 0,
     },
     price: {
-      fontSize: normalize(20),
+      fontSize: normalize(18),
       fontWeight: "bold",
       color: colour.text,
     },
     advance: {
-      fontSize: normalize(14),
+      fontSize: normalize(13),
       color: "#555",
     },
     row: {
@@ -237,7 +237,7 @@ export default function TruckCard({ data, onBidPlaced }) {
       borderBottomColor: "#eee",
     },
     menuItemText: {
-      fontSize: normalize(14),
+      fontSize: normalize(13),
       color: "#333",
     },
     primaryButton: {
@@ -248,7 +248,7 @@ export default function TruckCard({ data, onBidPlaced }) {
       justifyContent: "center",
     },
     vehicleNumber: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: "700",
       color: colour.text,
     },
@@ -259,7 +259,7 @@ export default function TruckCard({ data, onBidPlaced }) {
       gap: 8,
     },
     locationText: {
-      fontSize: 14,
+      fontSize: 13,
       color: colour.inputLabel,
     },
     statsContainer: {
@@ -276,7 +276,7 @@ export default function TruckCard({ data, onBidPlaced }) {
       gap: 4,
     },
     statText: {
-      fontSize: 14,
+      fontSize: 13,
       color: colour.iconText,
     },
     bidButton: {
@@ -288,7 +288,7 @@ export default function TruckCard({ data, onBidPlaced }) {
     },
     bidButtonText: {
       color: "#fff",
-      fontSize: 14,
+      fontSize: 13,
       fontWeight: "600",
     },
   });
@@ -371,21 +371,21 @@ export default function TruckCard({ data, onBidPlaced }) {
         <View style={styles.detailsSection}>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name='box' size={20} color={colour.iconColor} />
+              <FontAwesome6 name='box' size={18} color={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{truckCapacity} Tonnes</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <Wheel width={25} height={25} fill={colour.iconColor} />
+              <Wheel width={22} height={22} fill={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{truckTyre} Wheels</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name='box' size={20} color={colour.iconColor} />
+              <FontAwesome6 name='box' size={18} color={colour.iconColor} />
             </Text>
-            <Text style={styles.detailText}>{truckPermit}</Text>
+            <Text style={styles.detailText}>{formatText(truckPermit)}</Text>
           </View>
         </View>
       </View>
@@ -399,7 +399,7 @@ export default function TruckCard({ data, onBidPlaced }) {
       <View style={styles.row}>
         <View style={styles.detailItem}>
           <Text style={styles.detailIcon}>
-            <Container width={25} height={25} fill={colour.iconColor} />
+            <Container width={22} height={22} fill={colour.iconColor} />
           </Text>
           <Text style={styles.detailText}>
             {vehicleBodyType === "OPEN_BODY" ? "Open Body" : "Closed Body"}
@@ -410,7 +410,7 @@ export default function TruckCard({ data, onBidPlaced }) {
           <Text style={styles.detailIcon}>
             <MaterialIcons
               name='local-offer'
-              size={24}
+              size={22}
               color={colour.iconColor}
             />
           </Text>
@@ -419,7 +419,7 @@ export default function TruckCard({ data, onBidPlaced }) {
 
         <View style={styles.detailItem}>
           <Text style={styles.detailIcon}>
-            <AntDesign name='eye' size={24} color={colour.iconColor} />
+            <AntDesign name='eye' size={22} color={colour.iconColor} />
           </Text>
           <Text style={styles.detailText}>
             {isRCVerified ? "RC Verified" : "RC Pending"}

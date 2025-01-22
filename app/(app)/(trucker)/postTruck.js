@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -9,12 +9,14 @@ import {
   Pressable,
   Image,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import {api} from "../../../utils/api";
 import { useRouter } from "expo-router";
+import debounce from "lodash/debounce";
 
 const FormStepHeader = ({ totalSteps = 2, currentStep = 1, setSteps }) => {
   const { colour, token } = useAuth();
@@ -86,11 +88,95 @@ const FormStepHeader = ({ totalSteps = 2, currentStep = 1, setSteps }) => {
 };
 
 const StepOne = ({ formState, setFormState }) => {
+  const [locations, setLocations] = useState([]);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const styles = StyleSheet.create({
+    dropdownContainer: {
+      position: "absolute",
+      top: "100%",
+      left: 0,
+      right: 0,
+      backgroundColor: "#fff",
+      borderRadius: 8,
+      elevation: 2,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      zIndex: 1000,
+    },
+    dropdownItem: {
+      padding: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: "#eee",
+    },
+    dropdownText: {
+      fontSize: 16,
+      color: "#333",
+      fontWeight: "400",
+    },
+    dropdownSubText: {
+      fontSize: 14,
+      color: "#999",
+    },
+  });
+
   const handleFormChange = (updatedField) => {
     setFormState((prev) => ({
       ...prev,
       ...updatedField,
     }));
+  };
+
+  // Debounced function for location search
+  const debouncedLocationSearch = useCallback(
+    debounce(async (query) => {
+      if (query.length < 3) {
+        setLocations([]);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await api.get(`/locationsearch?query=${query}`);
+        setLocations(response.data.data);
+        setShowLocationDropdown(true);
+      } catch (error) {
+        console.error("Location search error:", error);
+        setLocations([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 500),
+    []
+  );
+
+  // Handle location selection
+  const handleLocationSelect = (location) => {
+    setFormState(prev => ({
+      ...prev,
+      truckLocation: {
+        placeName: location.name,
+        coordinates: {
+          latitude: location.coordinates.lat,
+          longitude: location.coordinates.lng
+        }
+      }
+    }));
+    setShowLocationDropdown(false);
+  };
+
+  const handleLocationChange = (text) => {
+    setFormState(prev => ({
+      ...prev,
+      truckLocation: {
+        placeName: text,
+        coordinates: null
+      }
+    }));
+    debouncedLocationSearch(text);
   };
 
   return (
@@ -100,16 +186,40 @@ const StepOne = ({ formState, setFormState }) => {
         label='Vehicle Number'
         placeholder='Enter Vehicle Number'
         name='truckNumber'
-        onChange={handleFormChange}
+        value={formState.truckNumber}
+        onChangeText={(text) => handleFormChange({ truckNumber: text })}
       />
 
-      <FormInput
-        Icon={LoadingPoint}
-        label='Vehicle Location'
-        placeholder='Enter Vehicle Location'
-        name='truckLocation'
-        onChange={handleFormChange}
-      />
+      <View style={{ position: 'relative', zIndex: 1000 }}>
+        <FormInput
+          Icon={LoadingPoint}
+          label='Vehicle Location'
+          placeholder='Enter Vehicle Location'
+          name='truckLocation'
+          value={formState.truckLocation?.placeName || ''}
+          onChangeText={handleLocationChange}
+          onFocus={() => setShowLocationDropdown(true)}
+        />
+        
+        {/* Location suggestions dropdown */}
+        {showLocationDropdown && locations.length > 0 && (
+          <View style={styles.dropdownContainer}>
+            {locations.map((location, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.dropdownItem}
+                onPress={() => handleLocationSelect(location)}>
+                <Text numberOfLines={1} style={styles.dropdownText}>
+                  {location.name}
+                </Text>
+                <Text numberOfLines={2} style={styles.dropdownSubText}>
+                  {location.description}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
 
       <FormInput
         label='Permitted Routes'
@@ -318,7 +428,10 @@ const PostTruck = () => {
   const [step, setStep] = useState(1);
   const [formState, setFormState] = useState({
     truckNumber: "",
-    truckLocation: "",
+    truckLocation: {
+      placeName: "",
+      coordinates: null
+    },
     truckPermit: "",
     vehicleBodyType: "",
     truckType: "",
@@ -333,7 +446,7 @@ const PostTruck = () => {
       case 1:
         return !!(
           formState.truckNumber &&
-          formState.truckLocation &&
+          formState.truckLocation.placeName &&
           formState.truckPermit &&
           formState.vehicleBodyType
         );
@@ -370,12 +483,14 @@ const PostTruck = () => {
 
   const handleSubmit = async () => {
     try {
+      if (!formState.truckLocation.coordinates) {
+        Alert.alert("Error", "Please select a valid location from the dropdown");
+        return;
+      }
+
       const payload = {
         truckNumber: formState.truckNumber,
-        truckLocation: {
-          placeName: formState.truckLocation,
-          coordinates: { latitude: 20.5937, longitude: 78.9629 },
-        },
+        truckLocation: formState.truckLocation,
         truckPermit: formState.truckPermit,
         vehicleBodyType: formState.vehicleBodyType,
         truckType: formState.truckType,
@@ -385,24 +500,19 @@ const PostTruck = () => {
         RCImage: "https://www.example.com/rc-document.pdf",
       };
 
-      console.log("payload", payload);
       const response = await api.post("/truck", payload, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("response", response);
-      Alert.alert(
-        "Success",
-        "Truck posted successfully!",
-        [
-          {
-            text: "OK",
-            onPress: () => router.push("/")
-          }
-        ]
-      );
+      
+      Alert.alert("Success", "Truck posted successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.push("/")
+        }
+      ]);
     } catch (error) {
       console.error("Error posting truck:", error);
       Alert.alert("Error", "Failed to post truck. Please try again.");

@@ -8,6 +8,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
 import { formatText, getTimeLeft } from "../utils/functions";
+import { normalize } from "../utils/functions";
 
 export default function LoadCard({ data }) {
   const { colour } = useAuth();
@@ -33,14 +34,14 @@ export default function LoadCard({ data }) {
   const styles = StyleSheet.create({
     card: {
       backgroundColor: colour.background,
-      borderRadius: 12,
-      padding: 16,
-      marginVertical: 10,
+      borderRadius: normalize(12),
+      padding: normalize(16),
+      marginVertical: normalize(10),
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
+      shadowOffset: { width: 0, height: normalize(2) },
       shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 4,
+      shadowRadius: normalize(4),
+      elevation: normalize(4),
     },
     header: {
       flexDirection: "row",
@@ -49,66 +50,66 @@ export default function LoadCard({ data }) {
     timeLeft: {
       backgroundColor: "#E6F7F5",
       color: colour.primaryColor,
-      borderRadius: 12,
-      padding: 5,
-      paddingHorizontal: 10,
-      fontSize: 12,
+      borderRadius: normalize(12),
+      padding: normalize(5),
+      paddingHorizontal: normalize(10),
+      fontSize: normalize(12),
       fontWeight: "600",
     },
     expiredTimeLeft: {
       backgroundColor: colour.expired,
       color: colour.expiredText,
-      borderRadius: 12,
-      padding: 5,
-      paddingHorizontal: 10,
-      fontSize: 12,
+      borderRadius: normalize(12),
+      padding: normalize(5),
+      paddingHorizontal: normalize(10),
+      fontSize: normalize(12),
       fontWeight: "600",
     },
     content: {
-      marginVertical: 3,
+      marginVertical: normalize(3),
     },
     materialSection: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 20,
+      gap: normalize(20),
     },
     materialSubSection: {
       flexDirection: "column",
     },
     materialImage: {
-      width: 60,
-      height: 60,
-      marginRight: 10,
+      width: normalize(60),
+      height: normalize(60),
+      marginRight: normalize(10),
     },
     materialTypeStyles: {
-      fontSize: 18,
+      fontSize: normalize(18),
       fontWeight: "700",
       color: colour.inputLabel,
     },
     locations: {
-      marginTop: 4,
-      marginBottom: 4,
+      marginTop: normalize(4),
+      marginBottom: normalize(4),
     },
     source: {
       color: colour.inputLabel,
-      fontSize: 14,
+      fontSize: normalize(14),
     },
     destination: {
       color: colour.inputLabel,
-      fontSize: 14,
+      fontSize: normalize(14),
     },
     tripDistance: {
-      fontSize: 12,
+      fontSize: normalize(12),
       color: "#888",
     },
     tripTag: {
       position: "absolute",
       right: 0,
-      top: 35,
+      top: normalize(35),
       backgroundColor: colour.greyTag,
-      padding: 5,
-      borderRadius: 12,
-      width: 100,
+      padding: normalize(5),
+      borderRadius: normalize(12),
+      width: normalize(100),
       alignItems: "center",
     },
     detailsSection: {
@@ -121,15 +122,15 @@ export default function LoadCard({ data }) {
       width: "48%",
       flexDirection: "row",
       alignItems: "center",
-      marginVertical: 2,
+      marginVertical: normalize(2),
     },
     detailIcon: {
-      fontSize: 18,
-      marginRight: 10,
-      width: 25,
+      fontSize: normalize(18),
+      marginRight: normalize(10),
+      width: normalize(25),
     },
     detailText: {
-      fontSize: 14,
+      fontSize: normalize(14),
       color: colour.iconText,
     },
     priceSection: {
@@ -141,12 +142,12 @@ export default function LoadCard({ data }) {
       bottom: 0,
     },
     price: {
-      fontSize: 20,
+      fontSize: normalize(20),
       fontWeight: "bold",
       color: colour.text,
     },
     advance: {
-      fontSize: 14,
+      fontSize: normalize(14),
       color: "#555",
     },
     row: {
@@ -186,21 +187,21 @@ export default function LoadCard({ data }) {
                 style={{
                   flexDirection: "row",
                   alignItems: "flex-start",
-                  gap: 4,
+                  gap: normalize(4),
                   justifyContent: "flex-start",
-                  marginBottom: 4,
+                  marginBottom: normalize(4),
                 }}>
-                <FontAwesome6 name='location-dot' size={16} color='#24CAB6' />
+                <FontAwesome6 name='location-dot' size={normalize(16)} color='#24CAB6' />
                 <Text style={styles.source}>{source.placeName}</Text>
               </View>
               <View
                 style={{
                   flexDirection: "row",
                   alignItems: "flex-start",
-                  gap: 4,
+                  gap: normalize(4),
                   justifyContent: "flex-start",
                 }}>
-                <FontAwesome6 name='location-dot' size={16} color='#F43D74' />
+                <FontAwesome6 name='location-dot' size={normalize(16)} color='#F43D74' />
                 <Text style={styles.destination}>{destination.placeName}</Text>
               </View>
             </View>
@@ -214,9 +215,9 @@ export default function LoadCard({ data }) {
 
       <View
         style={{
-          height: 1,
+          height: normalize(1),
           backgroundColor: "#E5E5E5",
-          marginVertical: 5,
+          marginVertical: normalize(5),
           width: "100%",
         }}></View>
 
@@ -226,33 +227,33 @@ export default function LoadCard({ data }) {
         <View style={styles.detailsSection}>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name='truck' size={20} color={colour.iconColor} />
+              <FontAwesome6 name='truck' size={normalize(20)} color={colour.iconColor} />
             </Text>
 
             <Text style={styles.detailText}>{formatText(vehicleType)}</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <Wheel width={25} height={25} fill={colour.iconColor} />
+              <Wheel width={normalize(25)} height={normalize(25)} fill={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{numberOfWheels} Wheels</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name='box' size={20} color={colour.iconColor} />
+              <FontAwesome6 name='box' size={normalize(20)} color={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{weight} Tonnes</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <Container width={25} height={25} fill={colour.iconColor} />
+              <Container width={normalize(25)} height={normalize(25)} fill={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{formatText(vehicleBodyType)}</Text>
           </View>
 
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <AntDesign name='eye' size={24} color={colour.iconColor} />
+              <AntDesign name='eye' size={normalize(24)} color={colour.iconColor} />
             </Text>
             <Text style={styles.detailText}>{views} Views</Text>
           </View>
@@ -261,7 +262,7 @@ export default function LoadCard({ data }) {
             <Text style={styles.detailIcon}>
               <MaterialIcons
                 name='local-offer'
-                size={24}
+                size={normalize(24)}
                 color={colour.iconColor}
               />
             </Text>
