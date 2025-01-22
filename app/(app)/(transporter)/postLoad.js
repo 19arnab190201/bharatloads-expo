@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { materialTypes } from "../../../constants/data";
 import {
   SafeAreaView,
@@ -11,6 +11,7 @@ import {
   Pressable,
   Image,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
@@ -21,6 +22,7 @@ import Boxskeleton from "../../../assets/images/icons/Boxskeleton";
 import { api } from "../../../utils/api";
 import SwipeButton from "./components/SwipeButton";
 import { KeyboardAvoidingView } from "react-native";
+import { debounce } from "lodash";
 
 const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
   const { colour } = useAuth();
@@ -132,55 +134,157 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000",
   },
+  dropdownContainer: {
+    position: "absolute",
+    top: "100%",
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 1000,
+  },
+  dropdownItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "400",
+  },
+  dropdownSubText: {
+    fontSize: 14,
+    color: "#999",
+  },
 });
 
 const StepOne = ({ formState, setFormState }) => {
+  const [locations, setLocations] = useState([]);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [activeInput, setActiveInput] = useState(null); // 'loading' or 'dropping'
+
+  // Debounced function for location search
+  const debouncedLocationSearch = useCallback(
+    debounce(async (query) => {
+      if (query.length < 3) {
+        setLocations([]);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await api.get(`/locationsearch?query=${query}`);
+        setLocations(response.data.data);
+        setShowLocationDropdown(true);
+      } catch (error) {
+        console.error("Location search error:", error);
+        setLocations([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 500),
+    []
+  );
+
+  // Handle location selection
+  const handleLocationSelect = (location) => {
+    setFormState(prev => ({
+      ...prev,
+      ...(activeInput === 'loading' ? {
+        loadingPoint: location.name,
+        sourceCoordinates: {
+          latitude: location.coordinates.lat,
+          longitude: location.coordinates.lng
+        }
+      } : {
+        droppingPoint: location.name,
+        destinationCoordinates: {
+          latitude: location.coordinates.lat,
+          longitude: location.coordinates.lng
+        }
+      })
+    }));
+    setShowLocationDropdown(false);
+    setActiveInput(null);
+  };
+
+  const handleLocationChange = (text, type) => {
+    setActiveInput(type);
+    setFormState(prev => ({
+      ...prev,
+      ...(type === 'loading' ? {
+        loadingPoint: text,
+        sourceCoordinates: null
+      } : {
+        droppingPoint: text,
+        destinationCoordinates: null
+      })
+    }));
+    debouncedLocationSearch(text);
+  };
+
   const handleUnitChange = (unit) => {
     setFormState((prev) => ({ ...prev, unit }));
   };
 
-  const handleFormChange = (updatedField) => {
-    setFormState((prev) => ({
-      ...prev,
-      ...updatedField,
-    }));
-  };
-
-  const [pickDropModalVisible, setPickDropModalVisible] = useState(false);
-  const [locationData, setLocationData] = useState({
-    source: null,
-    destination: null,
-  });
-  const handleLocationSelect = (locationData) => {
-    setLocationData(locationData);
-    setPickDropModalVisible(false);
-
-    // Update form state with selected locations
-    handleFormChange({
-      loadingPoint: locationData.source.name,
-      droppingPoint: locationData.destination.name,
-      sourceCoordinates: locationData.source.coordinates,
-      destinationCoordinates: locationData.destination.coordinates,
-    });
-  };
   return (
     <View>
-      <Pressable onPress={() => setPickDropModalVisible(true)}>
+      <View style={{ position: 'relative', zIndex: 1000 }}>
         <FormInput
           Icon={LoadingPoint}
           label='Loading Point'
           placeholder='Search Loading Point'
           name='loadingPoint'
-          onChange={handleFormChange}
+          value={formState.loadingPoint}
+          onChangeText={(text) => handleLocationChange(text, 'loading')}
+          onFocus={() => {
+            setActiveInput('loading');
+            setShowLocationDropdown(true);
+          }}
         />
+        
         <FormInput
           Icon={LoadingPoint}
-          label='Droping Point'
-          placeholder='Search Droping Point'
+          label='Dropping Point'
+          placeholder='Search Dropping Point'
           name='droppingPoint'
-          onChange={handleFormChange}
+          value={formState.droppingPoint}
+          onChangeText={(text) => handleLocationChange(text, 'dropping')}
+          onFocus={() => {
+            setActiveInput('dropping');
+            setShowLocationDropdown(true);
+          }}
         />
-      </Pressable>
+
+        {/* Location suggestions dropdown */}
+        {showLocationDropdown && locations.length > 0 && (
+          <View style={styles.dropdownContainer}>
+            {locations.map((location, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.dropdownItem}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleLocationSelect(location);
+                }}>
+                <Text numberOfLines={1} style={styles.dropdownText}>
+                  {location.name}
+                </Text>
+                <Text numberOfLines={2} style={styles.dropdownSubText}>
+                  {location.description}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
 
       <FormInput
         Icon={LoadingPoint}
@@ -188,7 +292,7 @@ const StepOne = ({ formState, setFormState }) => {
         placeholder='Enter Material Type'
         name='materialType'
         type='select'
-        onChange={handleFormChange}
+        onChange={(field) => setFormState(prev => ({ ...prev, ...field }))}
         options={materialTypes.map((material) => ({
           label: material,
           value: material,
@@ -206,7 +310,7 @@ const StepOne = ({ formState, setFormState }) => {
             label='Quantity'
             placeholder='Enter Quantity'
             name='quantity'
-            onChange={handleFormChange}
+            onChange={(field) => setFormState(prev => ({ ...prev, ...field }))}
             type='number'
             min={1}
             max={1000}
@@ -468,22 +572,21 @@ const StepThree = ({ formState, setFormState }) => {
 
   const handleSubmit = async () => {
     try {
+      if (!formState.sourceCoordinates || !formState.destinationCoordinates) {
+        Alert.alert("Error", "Please select valid locations from the dropdown");
+        return;
+      }
+
       const payload = {
         materialType: formState.materialType.toUpperCase(),
         weight: Number(formState.quantity),
         source: {
           placeName: formState.loadingPoint,
-          coordinates: {
-            latitude: 19.07609, // Hardcoded Mumbai coordinates
-            longitude: 72.877426,
-          },
+          coordinates: formState.sourceCoordinates
         },
         destination: {
           placeName: formState.droppingPoint,
-          coordinates: {
-            latitude: 28.7041, // Hardcoded Delhi coordinates
-            longitude: 77.1025,
-          },
+          coordinates: formState.destinationCoordinates
         },
         vehicleType: formState.vehicleType.toUpperCase(),
         vehicleBodyType:
@@ -827,6 +930,8 @@ const PostLoad = () => {
   const [formState, setFormState] = useState({
     loadingPoint: "",
     droppingPoint: "",
+    sourceCoordinates: null,
+    destinationCoordinates: null,
     materialType: "",
     quantity: 0,
     unit: "tonnes",

@@ -157,7 +157,7 @@ export default function Dashboard() {
             flexDirection: "row",
             gap: 10,
           }}
-          onPress={() => router.push("/(transporter)/searchTrucks")}>
+          onPress={() => router.push("/(trucker)/searchLoad")}>
           <LoadingPoint />
           <Text>Search Loads</Text>
         </TouchableOpacity>
