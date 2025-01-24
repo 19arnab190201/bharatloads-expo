@@ -14,6 +14,7 @@ import { useAuth } from "../../../context/AuthProvider";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import { MaterialIcons } from "@expo/vector-icons";
 import { normalize } from "../../../utils/functions";
+import { useFocusEffect } from "@react-navigation/native";
 
 const BidCard = ({ bid, onBidClosed }) => {
   const { colour, user, token } = useAuth();
@@ -131,16 +132,18 @@ const BidCard = ({ bid, onBidClosed }) => {
       fontSize: normalize(14),
       color: "#64748B",
     },
-    rating: {
-      flexDirection: "row",
-      alignItems: "center",
+    statusBadge: {
+      paddingHorizontal: normalize(12),
+      paddingVertical: normalize(4),
+      borderRadius: normalize(12),
+      backgroundColor: "#F8FAFC",
     },
-    ratingText: {
-      fontSize: normalize(18),
+    statusText: (status) => ({
+      fontSize: normalize(14),
       fontWeight: "600",
-      color: "#FFB800",
-      marginRight: normalize(14),
-    },
+      color: status === "ACCEPTED" ? "#10B981" : 
+             status === "REJECTED" ? "#EF4444" : "#F59E0B",
+    }),
     materialImage: {
       width: normalize(56),
       height: normalize(56),
@@ -266,22 +269,24 @@ const BidCard = ({ bid, onBidClosed }) => {
           ) : (
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
-                {bid.bidBy?.name?.charAt(0)?.toUpperCase()}
+                {bid.offeredTo?.name?.charAt(0)?.toUpperCase()}
               </Text>
             </View>
           )}
           <View style={styles.nameContainer}>
             <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
-              {bid.bidBy?.name || "Unknown User"}
+              {bid.offeredTo?.name || "Unknown User"}
             </Text>
             <Text style={styles.role} numberOfLines={1} ellipsizeMode="tail">
-              {bid.bidBy?.userType || "User"}
+              {bid.offeredTo
+              ?.userType || "User"}
             </Text>
           </View>
         </View>
-        <View style={styles.rating}>
-          <Text style={styles.ratingText}>{calculateAverageRating()}</Text>
-          <Text style={styles.ratingText}>★</Text>
+        <View style={styles.statusBadge}>
+          <Text style={styles.statusText(bid.status)}>
+            {bid.status}
+          </Text>
         </View>
       </View>
 
@@ -401,7 +406,6 @@ const Bids = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleBidClosed = (bidId) => {
-    // Remove the closed bid from the state
     setUserBids((prevBids) => prevBids.filter((bid) => bid._id !== bidId));
   };
 
@@ -419,9 +423,11 @@ const Bids = () => {
     }
   };
 
-  useEffect(() => {
-    fetchBids();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchBids();
+    }, [])
+  );
 
   const filteredBids = useMemo(() => {
     switch (activeTab) {

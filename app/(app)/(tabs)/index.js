@@ -8,6 +8,7 @@ import {
   StatusBar,
   Pressable,
 } from "react-native";
+import { useCallback } from "react";
 import { useAPI } from "../../../utils/api";
 import { useAuth } from "../../../context/AuthProvider";
 import { useNavigation } from "expo-router";
@@ -21,6 +22,8 @@ import { api } from "../../../utils/api";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import TruckCard from "../../../components/TruckCard";
+import { normalize } from "../../../utils/functions";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Dashboard() {
   const { user, logout, colour } = useAuth();
@@ -40,7 +43,7 @@ export default function Dashboard() {
       marginTop: 30,
     },
     title: {
-      fontSize: 24,
+      fontSize: normalize(22),
       fontWeight: "bold",
       marginBottom: 10,
     },
@@ -81,11 +84,15 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    if (userType.toLowerCase() === "transporter") {
-      fetchLoads();
-    } else fetchTrucks();
-  }, [userType]);
+  useFocusEffect(
+    useCallback(() => {
+      if (userType.toLowerCase() === "transporter") {
+        fetchLoads();
+      } else {
+        fetchTrucks();
+      }
+    }, [userType])
+  );
 
   // console.log("colour", colour);
 
@@ -166,9 +173,9 @@ export default function Dashboard() {
           <Text style={styles.title}>Your Trucks</Text>
 
           {trucks.map((truck) => (
-            <Text>
+            
               <TruckCard key={truck._id} data={truck} />
-            </Text>
+            
           ))}
         </View>
 

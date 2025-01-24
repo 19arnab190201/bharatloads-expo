@@ -6,6 +6,8 @@ import { api } from "../../../utils/api";
 import LoadCard from "../../../components/LoadCard";
 import { useAuth } from "../../../context/AuthProvider";
 import TruckCard from "../../../components/TruckCard";
+import { useFocusEffect } from "@react-navigation/native";
+
 //USED AS LIST TRUCKS IF USER IS TRUCKER
 const Loads = () => {
   const [loads, setLoads] = useState([]);
@@ -40,9 +42,11 @@ const Loads = () => {
     }
   };
 
-  useEffect(() => {
-    fetchLoads();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchLoads();
+    }, [])
+  );
 
   useEffect(() => {
     console.log("loads", loads);
@@ -104,9 +108,11 @@ const Trucks = ({ user, colour }) => {
     }
   };
 
-  useEffect(() => {
-    fetchTrucks();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchTrucks();
+    }, [])
+  );
 
   return (
     <ScrollView style={styles.container}>
