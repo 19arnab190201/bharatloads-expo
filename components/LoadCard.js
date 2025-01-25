@@ -1,14 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { useAuth } from "../context/AuthProvider";
-
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
-import { formatText, getTimeLeft } from "../utils/functions";
-import { normalize } from "../utils/functions";
+import { formatText, getTimeLeft, calculateDistance, normalize } from "../utils/functions";
+
 
 export default function LoadCard({ data }) {
   const { colour } = useAuth();
@@ -209,7 +208,9 @@ export default function LoadCard({ data }) {
         </View>
 
         <View style={styles.tripTag}>
-          <Text style={styles.tripDistance}>{tripDistance} kms Trip</Text>
+          <Text style={styles.tripDistance}>
+            {calculateDistance(source.coordinates[1], source.coordinates[0], destination.coordinates[1], destination.coordinates[0]) + " KMs"}
+          </Text>
         </View>
       </View>
 

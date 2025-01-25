@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 import BidSelectionModal from "./BidSelectionModal";
+import { limitText } from "../utils/functions";
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -293,7 +294,6 @@ export default function TruckCard({ data, onBidPlaced }) {
     },
   });
 
-  console.log("data", data);
 
   return (
     <View style={styles.card}>
@@ -355,7 +355,7 @@ export default function TruckCard({ data, onBidPlaced }) {
                   justifyContent: "flex-start",
                 }}>
                 <FontAwesome6 name='location-dot' size={16} color='#A855F7' />
-                <Text style={styles.source}>{truckLocation?.placeName}</Text>
+                <Text style={styles.source}>{limitText(truckLocation?.placeName, 25)}</Text>
               </View>
             </View>
             <Text style={styles.materialTypeStyles}>

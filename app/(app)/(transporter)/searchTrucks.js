@@ -74,7 +74,6 @@ const SearchTrucks = () => {
       try {
         setLoading(true);
         const response = await api.get(`/locationsearch?query=${query}`);
-        console.log(response.data)
         setLocations(response.data.data);
         setShowLocationDropdown(true);
       } catch (error) {
@@ -87,10 +86,6 @@ const SearchTrucks = () => {
     []
   );
 
-  useEffect(() => {
-    //Console log data
-    console.log("locations", locations);
-  }, [locations]);
 
   // Get user's current location when component mounts
   useEffect(() => {

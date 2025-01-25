@@ -7,13 +7,13 @@ import {
   ScrollView,
   Image,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import { api } from "../../../utils/api";
 import { useAuth } from "../../../context/AuthProvider";
 import { MaterialIcons } from "@expo/vector-icons";
 import { normalize } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
+import Loader from "../../../components/Loader";
 
 const OfferCard = ({ offer, onOfferStatusChange }) => {
   const { colour, token } = useAuth();
@@ -550,9 +550,8 @@ const Offers = () => {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colour.primaryColor} />
-          <Text style={styles.loadingText}>Loading offers...</Text>
+        <View style={[styles.loadingContainer, { backgroundColor: '#fff' }]}>
+          <Loader />
         </View>
       );
     }

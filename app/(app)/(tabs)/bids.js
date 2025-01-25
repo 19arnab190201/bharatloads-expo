@@ -7,7 +7,6 @@ import {
   ScrollView,
   Image,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import { api } from "../../../utils/api";
 import { useAuth } from "../../../context/AuthProvider";
@@ -15,6 +14,7 @@ import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import { MaterialIcons } from "@expo/vector-icons";
 import { normalize } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
+import Loader from "../../../components/Loader";
 
 const BidCard = ({ bid, onBidClosed }) => {
   const { colour, user, token } = useAuth();
@@ -35,7 +35,6 @@ const BidCard = ({ bid, onBidClosed }) => {
           onPress: async () => {
             setIsClosing(true);
             try {
-              console.log("rkjhntrkngitugikutgnvtngviutnviutngviut", token);
               await api.delete(`/bid/${bid._id}`, {
                 headers: {
                   "Content-Type": "application/json",
@@ -414,7 +413,6 @@ const Bids = () => {
     try {
       const response = await api.get("/bid");
       setUserBids(response.data.data);
-      console.log(response.data.data);
     } catch (error) {
       console.error("Error fetching bids:", error);
       Alert.alert("Error", "Failed to fetch bids");
@@ -515,9 +513,8 @@ const Bids = () => {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size='large' color={colour.primaryColor} />
-          <Text style={styles.loadingText}>Loading bids...</Text>
+        <View style={[styles.loadingContainer, { backgroundColor: '#fff' }]}>
+          <Loader />
         </View>
       );
     }

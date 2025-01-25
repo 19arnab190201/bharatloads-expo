@@ -74,7 +74,6 @@ const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
             <Pressable
               onPress={() => {
                 setSteps(stepIndex);
-                console.log("Step", stepIndex);
               }}>
               <View style={styles.stepContainer}>
                 <View style={styles.circle(isActive)}>

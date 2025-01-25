@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState, useCallback } from "react";
+import { formatVehicle } from "../../../utils/functions";
 import {
   SafeAreaView,
   StyleSheet,
@@ -8,6 +9,7 @@ import {
   View,
   Pressable,
   Image,
+  ActivityIndicator,
   Alert,
   TouchableOpacity,
 } from "react-native";
@@ -17,6 +19,7 @@ import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import {api} from "../../../utils/api";
 import { useRouter } from "expo-router";
 import debounce from "lodash/debounce";
+import Loader from "../../../components/Loader";
 
 const FormStepHeader = ({ totalSteps = 2, currentStep = 1, setSteps }) => {
   const { colour, token } = useAuth();
@@ -426,6 +429,7 @@ const PostTruck = () => {
   const router = useRouter();
   const { colour, token } = useAuth();
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formState, setFormState] = useState({
     truckNumber: "",
     truckLocation: {
@@ -488,8 +492,9 @@ const PostTruck = () => {
         return;
       }
 
+      setIsSubmitting(true);
       const payload = {
-        truckNumber: formState.truckNumber,
+        truckNumber: formatVehicle(formState.truckNumber),
         truckLocation: formState.truckLocation,
         truckPermit: formState.truckPermit,
         vehicleBodyType: formState.vehicleBodyType,
@@ -497,7 +502,7 @@ const PostTruck = () => {
         truckBodyType: formState.truckBodyType,
         truckCapacity: formState.truckCapacity,
         truckTyre: formState.truckTyre,
-        RCImage: "https://www.example.com/rc-document.pdf",
+        RCImage: formState.RCImage,
       };
 
       const response = await api.post("/truck", payload, {
@@ -516,6 +521,8 @@ const PostTruck = () => {
     } catch (error) {
       console.error("Error posting truck:", error);
       Alert.alert("Error", "Failed to post truck. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -539,6 +546,10 @@ const PostTruck = () => {
       alignItems: "center",
       marginTop: 20,
       marginBottom: 30,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 10,
+      opacity: isSubmitting ? 0.7 : 1,
     },
     nextButtonText: {
       color: "#fff",
@@ -576,8 +587,17 @@ const PostTruck = () => {
         {step === 2 && (
           <>
             <StepTwo formState={formState} setFormState={setFormState} />
-            <Pressable style={styles.nextButton} onPress={handleSubmit}>
-              <Text style={styles.nextButtonText}>Submit</Text>
+            <Pressable 
+              style={styles.nextButton} 
+              onPress={handleSubmit}
+              disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                <ActivityIndicator size='small' color='#fff' />
+                </>
+              ) : (
+                <Text style={styles.nextButtonText}>Submit</Text>
+              )}
             </Pressable>
           </>
         )}

@@ -24,6 +24,7 @@ import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import TruckCard from "../../../components/TruckCard";
 import { normalize } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
+import Loader from "../../../components/Loader";
 
 export default function Dashboard() {
   const { user, logout, colour } = useAuth();
@@ -34,6 +35,7 @@ export default function Dashboard() {
 
   const [loads, setLoads] = useState([]);
   const [trucks, setTrucks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const styles = StyleSheet.create({
     container: {
@@ -66,21 +68,25 @@ export default function Dashboard() {
 
   const fetchLoads = async () => {
     try {
+      setIsLoading(true);
       const response = await api.get("/dashboard");
       setLoads(response.data.data);
     } catch (error) {
       console.error("Error fetching loads:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const fetchTrucks = async () => {
     try {
+      setIsLoading(true);
       const response = await api.get("/dashboard");
       setTrucks(response.data.data);
-      console.log("============================================");
-      console.log(response.data.data);
     } catch (error) {
       console.error("Error fetching loads:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -95,6 +101,10 @@ export default function Dashboard() {
   );
 
   // console.log("colour", colour);
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   if (userType.toLowerCase() === "transporter") {
     return (

@@ -7,10 +7,12 @@ import LoadCard from "../../../components/LoadCard";
 import { useAuth } from "../../../context/AuthProvider";
 import TruckCard from "../../../components/TruckCard";
 import { useFocusEffect } from "@react-navigation/native";
+import Loader from "../../../components/Loader";
 
 //USED AS LIST TRUCKS IF USER IS TRUCKER
 const Loads = () => {
   const [loads, setLoads] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { colour } = useAuth();
 
   const styles = StyleSheet.create({
@@ -31,14 +33,24 @@ const Loads = () => {
       borderRadius: 14,
       elevation: 4,
     },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: '#fff',
+      minHeight: 400,
+    }
   });
 
   const fetchLoads = async () => {
     try {
+      setIsLoading(true);
       const response = await api.get("/load");
       setLoads(response.data.data);
     } catch (error) {
       console.error("Error fetching loads:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,13 +61,12 @@ const Loads = () => {
   );
 
   useEffect(() => {
-    console.log("loads", loads);
   }, [loads]);
 
-  if (loads.length === 0) {
+  if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Loading...</Text>
+      <View style={styles.loadingContainer}>
+        <Loader />
       </View>
     );
   }
@@ -78,6 +89,7 @@ const Loads = () => {
 
 const Trucks = ({ user, colour }) => {
   const [trucks, setTrucks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const styles = StyleSheet.create({
     container: {
@@ -97,14 +109,24 @@ const Trucks = ({ user, colour }) => {
       borderRadius: 14,
       elevation: 4,
     },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: '#fff',
+      minHeight: 400,
+    }
   });
 
   const fetchTrucks = async () => {
     try {
+      setIsLoading(true);
       const response = await api.get("/truck");
       setTrucks(response.data.data);
     } catch (error) {
       console.error("Error fetching trucks:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -113,6 +135,14 @@ const Trucks = ({ user, colour }) => {
       fetchTrucks();
     }, [])
   );
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Loader />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -133,7 +163,6 @@ const Trucks = ({ user, colour }) => {
 const ListUserAssets = () => {
   const { user, colour } = useAuth();
 
-  console.log("user", user);
 
   if (user?.userType == "TRUCKER") {
     return <Trucks user={user} colour={colour} />;
