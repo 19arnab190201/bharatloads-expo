@@ -15,8 +15,9 @@
       }
     },
     "android": {
-      "permissions": ["ACCESS_FINE_LOCATION"],
-
+      "permissions": [
+        "ACCESS_FINE_LOCATION"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -42,6 +43,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "90f4dae2-82cd-4ac8-8131-580504b2ce8f"
+      }
+    },
+    "owner": "arnab.d.kumar"
   }
 }
