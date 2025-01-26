@@ -11,15 +11,16 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../../context/AuthProvider";
 
 const { width, height } = Dimensions.get("window");
 
 export default function Signup() {
+  const { phoneNumber: prefillPhone } = useLocalSearchParams();
   const [form, setForm] = useState({
     name: "",
-    phoneNumber: "",
+    phoneNumber: prefillPhone || "",
     userType: "transporter",
     companyName: "",
     companyLocation: "",

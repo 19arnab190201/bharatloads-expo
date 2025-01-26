@@ -229,6 +229,7 @@ const StepOne = ({ formState, setFormState }) => {
         placeholder='Select Permitted Routes'
         name='truckPermit'
         type='select'
+        disabled={showLocationDropdown}
         onChange={handleFormChange}
         options={[
           { label: "National", value: "NATIONAL_PERMIT" },
@@ -241,6 +242,7 @@ const StepOne = ({ formState, setFormState }) => {
         placeholder='Select Vehicle Body Type'
         name='vehicleBodyType'
         type='select'
+        disabled={showLocationDropdown}
         onChange={handleFormChange}
         options={[
           { label: "Open", value: "OPEN_BODY" },

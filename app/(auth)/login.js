@@ -12,7 +12,7 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useAuth } from "../../context/AuthProvider";
 
 const { width, height } = Dimensions.get("window");
@@ -35,7 +35,16 @@ export default function Login() {
       setError("");
       await login(phoneNumber);
     } catch (err) {
-      setError(err.message || "Failed to send OTP");
+      //status code 404 
+      if (err.response.status === 404) {
+        // Navigate to signup with phone number
+        router.replace({
+          pathname: "/signup",
+          params: { phoneNumber }
+        });
+      } else {
+        setError(err.message || "Failed to send OTP");
+      }
     } finally {
       setLoading(false);
     }

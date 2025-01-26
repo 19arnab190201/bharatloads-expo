@@ -48,7 +48,7 @@ export default function Verify() {
       setLoading(true);
       setError("");
       await verifyOTP(otpString, phoneNumber);
-      router.push("/(app)");
+      router.replace("/(app)");
     } catch (err) {
       setError(err.message || "Invalid OTP");
     } finally {

@@ -486,7 +486,7 @@ const StepTwo = ({ formState, setFormState }) => {
         <Text style={{ fontSize: 22, marginBottom: 10 }}>Load Details</Text>
         <Text>{formState.loadingPoint}</Text>
         <Text>{formState.droppingPoint}</Text>
-        <Text>Iron Sheet • 50 Tonnes</Text>
+        <Text>{formState.materialType} • {formState.quantity} • {formState.unit}</Text>
       </View>
 
       <FormInput
@@ -861,7 +861,7 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
         <Text style={{ fontSize: 22, marginBottom: 10 }}>Load Details</Text>
         <Text>{formState.loadingPoint}</Text>
         <Text>{formState.droppingPoint}</Text>
-        <Text>{formState.materialType} • {formState.quantity} {formState.unit}</Text>
+        <Text>{formState.materialType} • {formState.quantity} • {formState.unit}</Text>
       </View>
 
      
