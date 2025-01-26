@@ -12,7 +12,9 @@ import {
   Image,
   Alert,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
+import Edit from "../../../assets/images/icons/Edit"
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
@@ -23,6 +25,10 @@ import { api } from "../../../utils/api";
 import SwipeButton from "./components/SwipeButton";
 import { KeyboardAvoidingView } from "react-native";
 import { debounce } from "lodash";
+import { normalize } from "../../../utils/functions";
+import { useRouter } from "expo-router";
+import Popup from "../../../components/Popup";
+
 
 const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
   const { colour } = useAuth();
@@ -124,12 +130,12 @@ const styles = StyleSheet.create({
     borderColor: "#24cab6",
   },
   tagButtonText: {
-    fontSize: 16,
+    fontSize: normalize(14),
     fontWeight: "bold",
     color: "#000",
   },
   tagButtonTextUnselected: {
-    fontSize: 16,
+    fontSize: normalize(14),
     fontWeight: "bold",
     color: "#000",
   },
@@ -286,11 +292,12 @@ const StepOne = ({ formState, setFormState }) => {
       </View>
 
       <FormInput
-        Icon={LoadingPoint}
+        // Icon={LoadingPoint}
         label='Material Type'
         placeholder='Enter Material Type'
         name='materialType'
         type='select'
+        disabled={showLocationDropdown}
         onChange={(field) => setFormState(prev => ({ ...prev, ...field }))}
         options={materialTypes.map((material) => ({
           label: material,
@@ -307,7 +314,7 @@ const StepOne = ({ formState, setFormState }) => {
           <FormInput
             Icon={LoadingPoint}
             label='Quantity'
-            placeholder='Enter Quantity'
+            placeholder='Qty'
             name='quantity'
             onChange={(field) => setFormState(prev => ({ ...prev, ...field }))}
             type='number'
@@ -380,7 +387,7 @@ const StepTwo = ({ formState, setFormState }) => {
     },
   ];
 
-  const truckTyres = [10, 12, 14, 16, "Other"];
+  const truckTyres = [10, 12, 14, 16, 18];
 
   const stepTwoStyles = StyleSheet.create({
     detailsCard: {
@@ -471,7 +478,7 @@ const StepTwo = ({ formState, setFormState }) => {
             borderRadius: 25,
             backgroundColor: "#f1f1f1",
           }}>
-          <Text>E</Text>
+            <Edit/>
         </Pressable>
         <View style={stepTwoStyles.boxSkeletonContainer}>
           <Boxskeleton />
@@ -483,7 +490,7 @@ const StepTwo = ({ formState, setFormState }) => {
       </View>
 
       <FormInput
-        Icon={LoadingPoint}
+        // Icon={LoadingPoint}
         label='Vehicle Body Type'
         placeholder='Select Vehicle Body Type'
         name='vehicleBodyType'
@@ -522,7 +529,7 @@ const StepTwo = ({ formState, setFormState }) => {
       </View>
 
       <FormInput
-        Icon={LoadingPoint}
+        // Icon={LoadingPoint}
         label='Truck Body Type'
         placeholder='Select Truck Body Type'
         name='truckBodyType'
@@ -566,19 +573,34 @@ const StepTwo = ({ formState, setFormState }) => {
   );
 };
 
-const StepThree = ({ formState, setFormState }) => {
+const StepThree = ({ formState, setFormState, validateStep }) => {
   const { colour, token } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [popup, setPopup] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info',
+  });
+  const router = useRouter();
 
   const handleSubmit = async () => {
     try {
+      setIsLoading(true);
+      
       if (!formState.sourceCoordinates || !formState.destinationCoordinates) {
-        Alert.alert("Error", "Please select valid locations from the dropdown");
+        setPopup({
+          visible: true,
+          title: 'Invalid Locations',
+          message: 'Please select valid locations from the dropdown',
+          type: 'error'
+        });
         return;
       }
 
       const payload = {
         materialType: formState.materialType.toUpperCase(),
-        weight: Number(formState.quantity),
+        weight: formState.unit === "tonnes" ? Number(formState.quantity ) : Number(Math.round(formState.quantity /1000 )),
         source: {
           placeName: formState.loadingPoint,
           coordinates: formState.sourceCoordinates
@@ -599,7 +621,6 @@ const StepThree = ({ formState, setFormState }) => {
           formState.schedule === "immediately" ? "IMMEDIATE" : "SCHEDULED",
         numberOfWheels: Number(formState.numTires),
       };
-      console.log("payload", payload);
 
       const response = await api.post("/load", payload, {
         headers: {
@@ -607,11 +628,36 @@ const StepThree = ({ formState, setFormState }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("response", response);
-      Alert.alert("Success", "Load posted successfully!");
+      
+      // Show success popup
+      setPopup({
+        visible: true,
+        title: 'Success',
+        message: 'Load posted successfully!',
+        type: 'success',
+        primaryAction: {
+          label: 'View Loads',
+          onPress: () => {
+            setPopup(prev => ({ ...prev, visible: false }));
+            router.push("/loads");
+          }
+        }
+      });
+      
     } catch (error) {
       console.error("Error posting load:", error);
-      Alert.alert("Error", "Failed to post load. Please try again.");
+      setPopup({
+        visible: true,
+        title: 'Error',
+        message: 'Failed to post load. Please try again.',
+        type: 'error',
+        primaryAction: {
+          label: 'Try Again',
+          onPress: () => setPopup(prev => ({ ...prev, visible: false }))
+        }
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -638,10 +684,11 @@ const StepThree = ({ formState, setFormState }) => {
       right: -10,
       width: 35,
       height: 35,
+      borderRadius: 25,
+      backgroundColor: "#14B8A6",
+      display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      borderRadius: 25,
-      backgroundColor: "#f1f1f1",
       zIndex: 1,
     },
     cardTitle: {
@@ -668,7 +715,8 @@ const StepThree = ({ formState, setFormState }) => {
       marginTop: 8,
     },
     infoColumn: {
-      flex: 1,
+      alignItems: "center",
+      width: "33%",
     },
     infoLabel: {
       color: "#999",
@@ -714,66 +762,138 @@ const StepThree = ({ formState, setFormState }) => {
       flex: 1,
     },
   });
+  const stepTwoStyles = StyleSheet.create({
+    detailsCard: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "flex-start",
+      borderWidth: 1,
+      padding: 14,
+      borderRadius: 12,
+      borderColor: "#14B8A6",
+      marginBottom: 20,
+    },
+    vehicleTypeContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginVertical: 15,
+      gap: 10,
+    },
+    vehicleTypeCard: {
+      flex: 1,
+      aspectRatio: 1,
+      backgroundColor: colour.inputBackground,
+      borderRadius: 12,
+      padding: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2,
+      borderColor: "transparent",
+    },
+    vehicleTypeCardSelected: {
+      borderColor: "#14B8A6",
+    },
+    vehicleTypeImage: {
+      width: 50,
+      height: 50,
+      marginBottom: 8,
+      resizeMode: "contain",
+    },
+    vehicleTypeLabel: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: "#333",
+      textAlign: "center",
+    },
+    tyreContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 10,
+      marginTop: 10,
+    },
+    tyreButton: {
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 25,
+      backgroundColor: colour.inputBackground,
+    },
+    tyreButtonSelected: {
+      backgroundColor: "#14B8A6",
+    },
+    tyreText: {
+      fontSize: 16,
+      color: "#333",
+    },
+    tyreTextSelected: {
+      color: "#fff",
+    },
+    boxSkeletonContainer: {
+      position: "absolute",
+      right: 10,
+      top: 10,
+      opacity: 0.5,
+    },
+  });
 
   return (
     <View>
       {/* Load Details Summary Card */}
-      <View style={stepThreeStyles.summaryCard}>
+      <View style={stepTwoStyles.detailsCard}>
         <Pressable
-          style={stepThreeStyles.editButton}
-          onPress={() => setStep(1)}>
-          <Text>E</Text>
-        </Pressable>
-        <View style={stepThreeStyles.boxSkeletonContainer}>
+          onPress={() => setStep(1)}
+          style={{
+            position: "absolute",
+            top: -10,
+            right: -10,
+            width: 35,
+            height: 35,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 25,
+            backgroundColor: "#14B8A6",
+          }}>
+            <Edit/>
+            </Pressable>
+        <View style={stepTwoStyles.boxSkeletonContainer}>
           <Boxskeleton />
         </View>
-        <Text style={stepThreeStyles.cardTitle}>Load Details</Text>
-        <View style={stepThreeStyles.detailRow}>
-          <LoadingPoint style={stepThreeStyles.detailIcon} />
-          <Text style={stepThreeStyles.detailText}>
-            {formState.loadingPoint}
-          </Text>
-        </View>
-        <View style={stepThreeStyles.detailRow}>
-          <LoadingPoint style={stepThreeStyles.detailIcon} />
-          <Text style={stepThreeStyles.detailText}>
-            {formState.droppingPoint}
-          </Text>
-        </View>
-        <View style={stepThreeStyles.detailRow}>
-          <LoadingPoint style={stepThreeStyles.detailIcon} />
-          <Text style={stepThreeStyles.detailText}>
-            {formState.materialType} • {formState.quantity} {formState.unit}
-          </Text>
-        </View>
+        <Text style={{ fontSize: 22, marginBottom: 10 }}>Load Details</Text>
+        <Text>{formState.loadingPoint}</Text>
+        <Text>{formState.droppingPoint}</Text>
+        <Text>{formState.materialType} • {formState.quantity} {formState.unit}</Text>
       </View>
+
+     
 
       {/* Vehicle Requirements Summary Card */}
       <View style={stepThreeStyles.summaryCard}>
         <Pressable
           style={stepThreeStyles.editButton}
           onPress={() => setStep(2)}>
-          <Text>E</Text>
-        </Pressable>
+            <Edit/>
+            </Pressable>
         <Text style={stepThreeStyles.cardTitle}>Vehicle Requirement</Text>
         <View style={stepThreeStyles.detailRow}>
           <Image
             source={require("../../../assets/images/trucktype/truck.png")}
             style={{ width: 40, height: 40, marginRight: 10 }}
           />
-          <Text style={stepThreeStyles.detailText}>TRUCK</Text>
+          <Text style={stepThreeStyles.detailText}>
+            {formState.vehicleType.toUpperCase()}
+          </Text>
         </View>
         <View style={stepThreeStyles.vehicleInfo}>
           <View style={stepThreeStyles.infoColumn}>
             <Text style={stepThreeStyles.infoLabel}>Body Type</Text>
             <Text style={stepThreeStyles.infoValue}>
-              {formState.vehicleBodyType}
+              {formState.vehicleBodyType === "open" ? "OPEN" : "CLOSED"}
             </Text>
           </View>
           <View style={stepThreeStyles.infoColumn}>
             <Text style={stepThreeStyles.infoLabel}>Truck Body</Text>
             <Text style={stepThreeStyles.infoValue}>
-              {formState.truckBodyType}
+              {formState.truckBodyType === "open" ? "OPEN BODY" : "CLOSED BODY"}
             </Text>
           </View>
           <View style={stepThreeStyles.infoColumn}>
@@ -790,20 +910,57 @@ const StepThree = ({ formState, setFormState }) => {
         placeholder='Enter Offered Amount'
         name='totalOfferedAmount'
         type='number'
-        onChange={handleFormChange}
+        onChange={(field) => {
+          if (Number(field.totalOfferedAmount) <= 0) {
+            Alert.alert("Error", "Total amount must be greater than 0");
+            return;
+          }
+          handleFormChange(field);
+          // Reset advance fields when total amount changes
+          handleFormChange({ 
+            advancePercentage: null,
+            advanceCash: '',
+            advanceDiesel: ''
+          });
+        }}
+        value={formState.totalOfferedAmount}
       />
 
       {/* Advance Amount Selection */}
       <FormInput
         Icon={LoadingPoint}
         label='How much advance would you like to pay ?'
-        placeholder='Select Advance Amount Percentage'
+        placeholder='Enter Advance Amount'
         name='advancePercentage'
         type='number'
-        onChange={handleFormChange}
-        min={10}
-        max={100}
-        step={1}
+        min={0}
+        max={formState.totalOfferedAmount ? Number(formState.totalOfferedAmount) : 0}
+        onChange={(field) => {
+          const totalAmount = Number(formState.totalOfferedAmount);
+          const advanceAmount = Number(field.advancePercentage);
+          
+          if (!totalAmount) {
+            Alert.alert("Error", "Please enter total amount first");
+            return;
+          }
+          
+          if (advanceAmount > totalAmount) {
+            Alert.alert("Error", "Advance amount cannot exceed total amount");
+            return;
+          }
+
+          if (advanceAmount < 0) {
+            Alert.alert("Error", "Advance amount cannot be negative");
+            return;
+          }
+          
+          handleFormChange({
+            ...field,
+            advanceCash: advanceAmount.toString(),
+            advanceDiesel: '0'
+          });
+        }}
+        value={formState.advancePercentage}
       />
 
       {/* Advance Amount Details */}
@@ -823,16 +980,71 @@ const StepThree = ({ formState, setFormState }) => {
             placeholder='Cash'
             name='advanceCash'
             type='number'
-            onChange={handleFormChange}
+            onChange={(field) => {
+              const advanceAmount = Number(formState.advancePercentage);
+              const cashAmount = Number(field.advanceCash);
+              
+              if (!advanceAmount) {
+                Alert.alert("Error", "Please enter advance amount first");
+                return;
+              }
+
+              if (cashAmount < 0) {
+                Alert.alert("Error", "Cash amount cannot be negative");
+                return;
+              }
+              
+              if (cashAmount > advanceAmount) {
+                Alert.alert("Error", "Cash amount cannot exceed advance amount");
+                return;
+              }
+              
+              // Calculate remaining amount for diesel
+              const remainingForDiesel = advanceAmount - cashAmount;
+              handleFormChange({
+                ...field,
+                advanceDiesel: remainingForDiesel.toString()
+              });
+            }}
+            value={formState.advanceCash}
+            max={formState.advancePercentage ? Number(formState.advancePercentage) : 0}
           />
         </View>
         <View style={stepThreeStyles.halfWidth}>
           <FormInput
             Icon={LoadingPoint}
-            placeholder='Diesel'
+            placeholder='Diesel Amount'
             name='advanceDiesel'
             type='number'
-            onChange={handleFormChange}
+            onChange={(field) => {
+              const advanceAmount = Number(formState.advancePercentage);
+              const cashAmount = Number(formState.advanceCash);
+              const dieselAmount = Number(field.advanceDiesel);
+              
+              if (!advanceAmount) {
+                Alert.alert("Error", "Please enter advance amount first");
+                return;
+              }
+
+              if (dieselAmount < 0) {
+                Alert.alert("Error", "Diesel amount cannot be negative");
+                return;
+              }
+              
+              if (dieselAmount > advanceAmount) {
+                Alert.alert("Error", "Diesel amount cannot exceed advance amount");
+                return;
+              }
+              
+              // Calculate remaining amount for cash
+              const remainingForCash = advanceAmount - dieselAmount;
+              handleFormChange({
+                ...field,
+                advanceCash: remainingForCash.toString()
+              });
+            }}
+            value={formState.advanceDiesel}
+            max={formState.advancePercentage ? Number(formState.advancePercentage) : 0}
           />
         </View>
       </View>
@@ -908,6 +1120,9 @@ const StepThree = ({ formState, setFormState }) => {
       )}
 
       {/* Additional Notes */}
+      <View style={{
+        marginTop: 20,
+      }}>
       <FormInput
         Icon={LoadingPoint}
         label='Additional Notes'
@@ -915,10 +1130,51 @@ const StepThree = ({ formState, setFormState }) => {
         name='additionalNotes'
         type='textarea'
         onChange={handleFormChange}
+        style={{
+          marginTop: 10,
+        }}
       />
+      </View>
 
       {/* Submit Button */}
-      <SwipeButton onSwipeComplete={handleSubmit} />
+      <View style={{
+        marginBottom: 40,
+        marginTop: 20,
+      }}>
+   
+       <Pressable style={{
+ backgroundColor: "#14B8A6",
+ padding: 15,
+ borderRadius: 8,
+ alignItems: "center",
+ marginTop: 20,
+ marginBottom: 30,
+       }}
+       disabled={isLoading}
+       onPress={
+        handleSubmit
+       }>
+        {isLoading ? <ActivityIndicator size="small" color="#fff" /> :
+              <Text style={{
+                color: "#fff",
+                fontSize: 16,
+                fontWeight: "bold",
+              }}>Submit</Text>
+              }
+            </Pressable>
+      </View>
+
+      {/* Popup Component */}
+      <Popup
+        visible={popup.visible}
+        onClose={() => setPopup(prev => ({ ...prev, visible: false }))}
+        title={popup.title}
+        message={popup.message}
+        type={popup.type}
+        primaryAction={popup.primaryAction}
+        secondaryAction={popup.secondaryAction}
+        loading={isLoading}
+      />
     </View>
   );
 };
@@ -926,6 +1182,12 @@ const StepThree = ({ formState, setFormState }) => {
 const PostLoad = () => {
   const { user, colour } = useAuth();
   const [step, setStep] = useState(1);
+  const [popup, setPopup] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info'
+  });
   const [formState, setFormState] = useState({
     loadingPoint: "",
     droppingPoint: "",
@@ -935,7 +1197,7 @@ const PostLoad = () => {
     quantity: 0,
     unit: "tonnes",
     vehicleBodyType: "",
-    vehicleType: "",
+    vehicleType: "trailer",
     truckBodyType: "",
     numTires: null,
     totalOfferedAmount: "",
@@ -981,7 +1243,16 @@ const PostLoad = () => {
 
   const handleStepChange = (newStep) => {
     if (newStep > step && !validateStep(step)) {
-      Alert.alert("Please fill all required fields before proceeding");
+      setPopup({
+        visible: true,
+        title: 'Required Fields',
+        message: 'Please fill all required fields before proceeding',
+        type: 'warning',
+        primaryAction: {
+          label: 'OK',
+          onPress: () => setPopup(prev => ({ ...prev, visible: false }))
+        }
+      });
       return;
     }
 
@@ -990,17 +1261,24 @@ const PostLoad = () => {
     }
   };
 
-  useEffect(() => {
-    console.log(formState);
-  }, [formState]);
-
   const handleNext = () => {
     if (validateStep(step)) {
       setStep((prev) => Math.min(prev + 1, 3));
     } else {
-      Alert.alert("Please fill all required fields before proceeding");
+      setPopup({
+        visible: true,
+        title: 'Required Fields',
+        message: 'Please fill all required fields before proceeding',
+        type: 'warning',
+        primaryAction: {
+          label: 'OK',
+          onPress: () => setPopup(prev => ({ ...prev, visible: false }))
+        }
+      });
     }
   };
+
+
 
   const styles = StyleSheet.create({
     container: {
@@ -1066,9 +1344,24 @@ const PostLoad = () => {
         )}
 
         {step === 3 && (
-          <StepThree formState={formState} setFormState={setFormState} />
+          <StepThree 
+            formState={formState} 
+            setFormState={setFormState} 
+            validateStep={validateStep}
+          />
         )}
       </View>
+
+      {/* Popup Component */}
+      <Popup
+        visible={popup.visible}
+        onClose={() => setPopup(prev => ({ ...prev, visible: false }))}
+        title={popup.title}
+        message={popup.message}
+        type={popup.type}
+        primaryAction={popup.primaryAction}
+        secondaryAction={popup.secondaryAction}
+      />
     </ScrollView>
   );
 };

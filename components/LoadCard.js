@@ -1,16 +1,16 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
-import { formatText, getTimeLeft, calculateDistance, normalize } from "../utils/functions";
+import { formatText, getTimeLeft, calculateDistance, normalize, limitText } from "../utils/functions";
+import TruckInfoDrawer from "./TruckInfoDrawer";
 
-
-export default function LoadCard({ data }) {
-  const { colour } = useAuth();
+export default function LoadCard({ data, onLoadUpdated }) {
+  const { colour, user } = useAuth();
   const {
     materialType,
     source,
@@ -29,6 +29,20 @@ export default function LoadCard({ data }) {
   const advanceAmount = offeredAmount.advancePercentage; // value in money not percentage
   const advancePercentage =
     100 - ((offeredAmount.total - advanceAmount) / offeredAmount.total) * 100;
+
+  const [showInfoDrawer, setShowInfoDrawer] = useState(false);
+
+  const handleRepost = () => {
+    if (onLoadUpdated) {
+      onLoadUpdated();
+    }
+  };
+
+  const handlePause = () => {
+    if (onLoadUpdated) {
+      onLoadUpdated();
+    }
+  };
 
   const styles = StyleSheet.create({
     card: {
@@ -78,7 +92,7 @@ export default function LoadCard({ data }) {
     materialImage: {
       width: normalize(60),
       height: normalize(60),
-      marginRight: normalize(10),
+    marginRight: normalize(10),
     },
     materialTypeStyles: {
       fontSize: normalize(18),
@@ -107,9 +121,11 @@ export default function LoadCard({ data }) {
       top: normalize(35),
       backgroundColor: colour.greyTag,
       padding: normalize(5),
+      paddingHorizontal: normalize(10),
       borderRadius: normalize(12),
       width: normalize(100),
       alignItems: "center",
+      width: "fit-content",
     },
     detailsSection: {
       width: "65%",
@@ -154,6 +170,12 @@ export default function LoadCard({ data }) {
       justifyContent: "space-between",
       alignItems: "flex-start",
     },
+    menuButton: {
+      padding: normalize(5),
+      position: "absolute",
+      right: 0,
+      top: 0,
+    },
   });
 
   return (
@@ -168,6 +190,18 @@ export default function LoadCard({ data }) {
           }>
           {getTimeLeft(expiresAt)}
         </Text>
+        {user._id === data.transporterId && (
+          <TouchableOpacity 
+            style={styles.menuButton} 
+            onPress={() => setShowInfoDrawer(true)}
+          >
+            <MaterialIcons
+              name='more-vert'
+              size={24}
+              color={colour.iconColor}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Main Content */}
@@ -176,6 +210,7 @@ export default function LoadCard({ data }) {
           <Image
             source={require("../assets/images/parcel.png")}
             style={styles.materialImage}
+            resizeMode='contain'
           />
           <View style={styles.materialSubSection}>
             <Text style={styles.materialTypeStyles}>
@@ -191,7 +226,7 @@ export default function LoadCard({ data }) {
                   marginBottom: normalize(4),
                 }}>
                 <FontAwesome6 name='location-dot' size={normalize(16)} color='#24CAB6' />
-                <Text style={styles.source}>{source.placeName}</Text>
+                <Text style={styles.source}>{limitText(source.placeName, 20)}</Text>
               </View>
               <View
                 style={{
@@ -201,7 +236,7 @@ export default function LoadCard({ data }) {
                   justifyContent: "flex-start",
                 }}>
                 <FontAwesome6 name='location-dot' size={normalize(16)} color='#F43D74' />
-                <Text style={styles.destination}>{destination.placeName}</Text>
+                <Text style={styles.destination}> {limitText(destination.placeName, 20)}</Text>
               </View>
             </View>
           </View>
@@ -281,6 +316,15 @@ export default function LoadCard({ data }) {
           <Text style={styles.advance}>Advance</Text>
         </View>
       </View>
+
+      <TruckInfoDrawer
+        visible={showInfoDrawer}
+        onClose={() => setShowInfoDrawer(false)}
+        data={data}
+        onRepost={handleRepost}
+        onPause={handlePause}
+        type="load"
+      />
     </View>
   );
 }

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 import BidSelectionModal from "./BidSelectionModal";
+import TruckInfoDrawer from "./TruckInfoDrawer";
 import { limitText } from "../utils/functions";
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -23,9 +24,9 @@ import { normalize, formatText } from "../utils/functions";
 
 
 
-export default function TruckCard({ data, onBidPlaced }) {
+export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
   const { colour, user, token } = useAuth();
-  const [menuVisible, setMenuVisible] = useState(false);
+  const [showInfoDrawer, setShowInfoDrawer] = useState(false);
   const [showBidModal, setShowBidModal] = useState(false);
   const [userLoads, setUserLoads] = useState([]);
   const [isLoadingLoads, setIsLoadingLoads] = useState(false);
@@ -80,8 +81,16 @@ export default function TruckCard({ data, onBidPlaced }) {
     }
   };
 
-  const toggleMenu = () => {
-    setMenuVisible(!menuVisible);
+  const handleRepost = () => {
+    if (onTruckUpdated) {
+      onTruckUpdated();
+    }
+  };
+
+  const handlePause = () => {
+    if (onTruckUpdated) {
+      onTruckUpdated();
+    }
   };
 
   const styles = StyleSheet.create({
@@ -218,6 +227,9 @@ export default function TruckCard({ data, onBidPlaced }) {
     },
     menuButton: {
       padding: 10,
+      position: "absolute",
+      top: normalize(-10),
+      right: normalize(-10),
     },
     menu: {
       position: "absolute",
@@ -231,6 +243,24 @@ export default function TruckCard({ data, onBidPlaced }) {
       shadowRadius: 4,
       elevation: 4,
       zIndex: 1,
+    },
+    timeLeft: {
+      backgroundColor: "#E6F7F5",
+      color: colour.primaryColor,
+      borderRadius: normalize(12),
+      padding: normalize(5),
+      paddingHorizontal: normalize(10),
+      fontSize: normalize(12),
+      fontWeight: "600",
+    },
+    expiredTimeLeft: {
+      backgroundColor: colour.expired,
+      color: colour.expiredText,
+      borderRadius: normalize(12),
+      padding: normalize(5),
+      paddingHorizontal: normalize(10),
+      fontSize: normalize(12),
+      fontWeight: "600",
     },
     menuItem: {
       padding: 10,
@@ -285,7 +315,9 @@ export default function TruckCard({ data, onBidPlaced }) {
       padding: 12,
       borderRadius: 8,
       alignItems: "center",
-      marginTop: 12,
+      position: "absolute",
+      top: 0,
+      right: 0,
     },
     bidButtonText: {
       color: "#fff",
@@ -299,30 +331,25 @@ export default function TruckCard({ data, onBidPlaced }) {
     <View style={styles.card}>
       {/* Top Section */}
       <View style={styles.header}>
-        <Text style={styles.timeLeft}>{getTimeLeft(expiresAt)} Left</Text>
+        <Text
+          style={
+            new Date(expiresAt) < new Date()
+              ? styles.expiredTimeLeft
+              : styles.timeLeft
+          }>
+          {getTimeLeft(expiresAt)}
+        </Text>
         {truckOwner === user._id ? (
-          <>
-            <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
-              <MaterialIcons
-                name='more-vert'
-                size={24}
-                color={colour.iconColor}
-              />
-            </TouchableOpacity>
-            {menuVisible && (
-              <View style={styles.menu}>
-                <TouchableOpacity style={styles.menuItem}>
-                  <Text style={styles.menuItemText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem}>
-                  <Text style={styles.menuItemText}>Delete</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem}>
-                  <Text style={styles.menuItemText}>Pause</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </>
+          <TouchableOpacity 
+            style={styles.menuButton} 
+            onPress={() => setShowInfoDrawer(true)}
+          >
+            <MaterialIcons
+              name='more-vert'
+              size={24}
+              color={colour.iconColor}
+            />
+          </TouchableOpacity>
         ) : (
           <Pressable 
             style={styles.bidButton}
@@ -443,6 +470,14 @@ export default function TruckCard({ data, onBidPlaced }) {
         loads={userLoads}
         truckId={_id}
         onBidPlaced={handleBidComplete}
+      />
+
+      <TruckInfoDrawer
+        visible={showInfoDrawer}
+        onClose={() => setShowInfoDrawer(false)}
+        data={data}
+        onRepost={handleRepost}
+        onPause={handlePause}
       />
     </View>
   );

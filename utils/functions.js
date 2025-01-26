@@ -21,6 +21,7 @@ export const normalize = (size) => {
 };
 
 export const formatText = (string) => {
+  if (!string) return "";
   // replace all the special characters with space
   string = string.replace(/[^a-zA-Z0-9]/g, " ");
   // replace multiple spaces with a single space

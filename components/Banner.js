@@ -42,6 +42,8 @@ const Banner = ({
       textAlign: "center",
       width: 100,
       borderColor: textColor,
+      alignItems: "center",
+      justifyContent: "center",
     },
   });
 

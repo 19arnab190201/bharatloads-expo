@@ -147,7 +147,7 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
         <Image
           source={require("../assets/images/parcel.png")}
           style={styles.materialImage}
-          resizeMode='cover'
+          resizeMode='contain'
         />
         <View style={styles.materialSubSection}>
           <Text style={styles.materialType}>{materialType}</Text>

@@ -16,6 +16,7 @@ const FormInput = ({
   error = "",
   value,
   onChange,
+  disabled = false,
   name,
   ...rest
 }) => {
@@ -95,6 +96,7 @@ const FormInput = ({
     inputContainer: {
       position: "relative",
       minHeight: 48,
+      display: "flex",
     },
     icon: {
       position: "absolute",
@@ -153,7 +155,13 @@ const FormInput = ({
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
       <View style={styles.inputContainer}>
-        {Icon && <Icon style={styles.icon} />}
+        {
+          type === "select" ? (
+              Icon && <Icon style={styles.icon} />
+          ) : (
+            Icon && <Icon style={styles.icon} />
+          )
+        }
 
         {type === "text" || type === "number" ? (
           <TextInput
@@ -162,6 +170,8 @@ const FormInput = ({
             keyboardType={type === "number" ? "numeric" : "default"}
             value={value}
             type={type}
+            maxLength={max}
+            minLength={min} 
             onChangeText={handleInputChange}
             {...rest}
           />
@@ -172,16 +182,28 @@ const FormInput = ({
               borderWidth: 1,
               borderColor: "#bdc3c7",
               overflow: "hidden",
+              paddingLeft: 0,  
             }}>
             <Picker
-              style={styles.pickerInput}
+              style={
+                {
+                  ...styles.pickerInput,
+                  ...(Icon && {
+                    paddingLeft: 160,
+                  })
+                }
+              }
               {...rest}
+              
+              enabled={!disabled}
               selectedValue={value}
               onValueChange={(itemValue) =>
                 onChange({
                   [name]: itemValue,
                 })
               }>
+                   <Picker.Item label='Select Option' value='0'/>
+
               {options.map((option, index) => (
                 <Picker.Item
                   key={index}

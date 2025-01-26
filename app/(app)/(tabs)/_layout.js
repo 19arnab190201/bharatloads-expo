@@ -30,7 +30,11 @@ export default function TabLayout() {
         tabBarButton: (props) => (
           <Pressable {...props} android_ripple={{ color: "transparent" }} />
         ),
-
+        headerTitleAlign: "center",
+        headerTitleStyle: {
+          fontWeight: "600",
+          fontSize: 18,
+        },
         tabBarPressColor: "transparent",
         tabBarShowLabel: false,
         tabBarStyle: {
@@ -43,7 +47,6 @@ export default function TabLayout() {
           marginHorizontal: 10,
           borderRadius: 20,
         },
-
         headerShown: true,
       }}>
       <Tabs.Screen
@@ -68,8 +71,6 @@ export default function TabLayout() {
         name='loads'
         options={{
           title: "Your Loads",
-          headerTitleAlign: "center",
-
           tabBarIcon: ({ focused }) => (
             <View style={{ alignItems: "center" }}>
               {focused ? (
@@ -82,7 +83,6 @@ export default function TabLayout() {
               )}
             </View>
           ),
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         }}
       />
       <Tabs.Screen

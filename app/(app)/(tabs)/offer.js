@@ -310,7 +310,13 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
       </View>
 
       <View style={styles.materialContainer}>
-        <View style={styles.materialImage} />
+        <View style={styles.materialImage} >
+          <Image
+            source={require("../../../assets/images/parcel.png")}
+            style={styles.materialImage}
+            resizeMode='contain'
+          />
+        </View>
         <View style={styles.materialInfo}>
           <Text style={styles.materialType} numberOfLines={1} ellipsizeMode="tail">
             {offer.materialType || "Unknown Material"}

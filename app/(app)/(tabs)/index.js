@@ -139,7 +139,7 @@ export default function Dashboard() {
           <Text style={styles.title}>Your Loads</Text>
 
           {loads.map((load) => (
-            <LoadCard key={load._id} data={load} />
+            <LoadCard key={load._id} data={load} onLoadUpdated={fetchLoads}/>
           ))}
         </View>
 
@@ -184,7 +184,7 @@ export default function Dashboard() {
 
           {trucks.map((truck) => (
             
-              <TruckCard key={truck._id} data={truck} />
+              <TruckCard key={truck._id} data={truck} onTruckUpdated={fetchTrucks} />
             
           ))}
         </View>

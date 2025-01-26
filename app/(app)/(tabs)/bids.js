@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { api } from "../../../utils/api";
 import { useAuth } from "../../../context/AuthProvider";
-import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import { MaterialIcons } from "@expo/vector-icons";
 import { normalize } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
@@ -290,15 +289,13 @@ const BidCard = ({ bid, onBidClosed }) => {
       </View>
 
       <View style={styles.materialContainer}>
-        {bid.materialImage ? (
+       
           <Image
-            source={{ uri: bid.materialImage }}
+            source={require("../../../assets/images/parcel.png")}
             style={styles.materialImage}
-            resizeMode='cover'
+            resizeMode='contain'
           />
-        ) : (
-          <View style={styles.materialImage} />
-        )}
+        
         <View style={styles.materialInfo}>
           <Text style={styles.materialType} numberOfLines={1} ellipsizeMode="tail">
             {bid.materialType || "Unknown Material"}
@@ -377,8 +374,9 @@ const BidCard = ({ bid, onBidClosed }) => {
           /Tonne
         </Text>
       </View>
-
+        
       <View style={styles.buttonContainer}>
+        {bid.status === "PENDING" && (
         <Pressable
           style={[styles.button, styles.closeButton]}
           onPress={handleCloseBid}
@@ -386,13 +384,14 @@ const BidCard = ({ bid, onBidClosed }) => {
           <Text style={styles.buttonText("close")}>
             {isClosing ? "Closing..." : "Close Bid"}
           </Text>
-        </Pressable>
+        </Pressable>)}
+        {bid.status === "ACCEPTED" && (
         <Pressable
           style={[styles.button, styles.chatButton]}
           onPress={handleChat}
           disabled={bid.status === "REJECTED"}>
           <Text style={styles.buttonText("chat")}>Chat</Text>
-        </Pressable>
+        </Pressable>)}
       </View>
     </View>
   );

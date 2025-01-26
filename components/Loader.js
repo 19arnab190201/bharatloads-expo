@@ -1,4 +1,4 @@
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions,Text } from 'react-native';
 import { useEffect } from 'react';
 import Animated, {
   useSharedValue,
@@ -8,7 +8,7 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import BLLogo from '../assets/images/icons/BLLogo';
-
+import { normalize } from '../utils/functions';
 const { width } = Dimensions.get('window');
 
 const Loader = () => {
@@ -35,6 +35,7 @@ const Loader = () => {
     <View style={styles.container}>
       <Animated.View style={[styles.logoContainer, animatedStyle]}>
         <BLLogo width={width * 0.6} height={width * 0.25} />
+        <Text style={styles.text}>BHARATLOADS</Text>
       </Animated.View>
     </View>
   );
@@ -50,6 +51,12 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  text: {
+    fontSize: normalize(24),
+    fontWeight: 'bold',
+    color: '#000',
+    marginTop: "10"
   },
 });
 
