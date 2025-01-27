@@ -6,7 +6,13 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
-import { formatText, getTimeLeft, calculateDistance, normalize, limitText } from "../utils/functions";
+import {
+  formatText,
+  getTimeLeft,
+  calculateDistance,
+  normalize,
+  limitText,
+} from "../utils/functions";
 import TruckInfoDrawer from "./TruckInfoDrawer";
 
 export default function LoadCard({ data, onLoadUpdated }) {
@@ -39,6 +45,12 @@ export default function LoadCard({ data, onLoadUpdated }) {
   };
 
   const handlePause = () => {
+    if (onLoadUpdated) {
+      onLoadUpdated();
+    }
+  };
+
+  const handleDelete = () => {
     if (onLoadUpdated) {
       onLoadUpdated();
     }
@@ -92,7 +104,7 @@ export default function LoadCard({ data, onLoadUpdated }) {
     materialImage: {
       width: normalize(60),
       height: normalize(60),
-    marginRight: normalize(10),
+      marginRight: normalize(10),
     },
     materialTypeStyles: {
       fontSize: normalize(18),
@@ -191,10 +203,9 @@ export default function LoadCard({ data, onLoadUpdated }) {
           {getTimeLeft(expiresAt)}
         </Text>
         {user._id === data.transporterId && (
-          <TouchableOpacity 
-            style={styles.menuButton} 
-            onPress={() => setShowInfoDrawer(true)}
-          >
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={() => setShowInfoDrawer(true)}>
             <MaterialIcons
               name='more-vert'
               size={24}
@@ -225,8 +236,14 @@ export default function LoadCard({ data, onLoadUpdated }) {
                   justifyContent: "flex-start",
                   marginBottom: normalize(4),
                 }}>
-                <FontAwesome6 name='location-dot' size={normalize(16)} color='#24CAB6' />
-                <Text style={styles.source}>{limitText(source.placeName, 20)}</Text>
+                <FontAwesome6
+                  name='location-dot'
+                  size={normalize(16)}
+                  color='#24CAB6'
+                />
+                <Text style={styles.source}>
+                  {limitText(source.placeName, 20)}
+                </Text>
               </View>
               <View
                 style={{
@@ -235,8 +252,15 @@ export default function LoadCard({ data, onLoadUpdated }) {
                   gap: normalize(4),
                   justifyContent: "flex-start",
                 }}>
-                <FontAwesome6 name='location-dot' size={normalize(16)} color='#F43D74' />
-                <Text style={styles.destination}> {limitText(destination.placeName, 20)}</Text>
+                <FontAwesome6
+                  name='location-dot'
+                  size={normalize(16)}
+                  color='#F43D74'
+                />
+                <Text style={styles.destination}>
+                  {" "}
+                  {limitText(destination.placeName, 20)}
+                </Text>
               </View>
             </View>
           </View>
@@ -244,7 +268,12 @@ export default function LoadCard({ data, onLoadUpdated }) {
 
         <View style={styles.tripTag}>
           <Text style={styles.tripDistance}>
-            {calculateDistance(source.coordinates[1], source.coordinates[0], destination.coordinates[1], destination.coordinates[0]) + " KMs"}
+            {calculateDistance(
+              source.coordinates[1],
+              source.coordinates[0],
+              destination.coordinates[1],
+              destination.coordinates[0]
+            ) + " KMs"}
           </Text>
         </View>
       </View>
@@ -263,33 +292,53 @@ export default function LoadCard({ data, onLoadUpdated }) {
         <View style={styles.detailsSection}>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name='truck' size={normalize(20)} color={colour.iconColor} />
+              <FontAwesome6
+                name='truck'
+                size={normalize(20)}
+                color={colour.iconColor}
+              />
             </Text>
 
             <Text style={styles.detailText}>{formatText(vehicleType)}</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <Wheel width={normalize(25)} height={normalize(25)} fill={colour.iconColor} />
+              <Wheel
+                width={normalize(25)}
+                height={normalize(25)}
+                fill={colour.iconColor}
+              />
             </Text>
             <Text style={styles.detailText}>{numberOfWheels} Wheels</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <FontAwesome6 name='box' size={normalize(20)} color={colour.iconColor} />
+              <FontAwesome6
+                name='box'
+                size={normalize(20)}
+                color={colour.iconColor}
+              />
             </Text>
             <Text style={styles.detailText}>{weight} Tonnes</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <Container width={normalize(25)} height={normalize(25)} fill={colour.iconColor} />
+              <Container
+                width={normalize(25)}
+                height={normalize(25)}
+                fill={colour.iconColor}
+              />
             </Text>
             <Text style={styles.detailText}>{formatText(vehicleBodyType)}</Text>
           </View>
 
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>
-              <AntDesign name='eye' size={normalize(24)} color={colour.iconColor} />
+              <AntDesign
+                name='eye'
+                size={normalize(24)}
+                color={colour.iconColor}
+              />
             </Text>
             <Text style={styles.detailText}>{views} Views</Text>
           </View>
@@ -323,7 +372,8 @@ export default function LoadCard({ data, onLoadUpdated }) {
         data={data}
         onRepost={handleRepost}
         onPause={handlePause}
-        type="load"
+        onDelete={handleDelete}
+        type='load'
       />
     </View>
   );

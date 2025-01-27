@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { materialTypes } from "../../../constants/data";
+import { Buffer } from "buffer";
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,7 +15,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import Edit from "../../../assets/images/icons/Edit"
+import Edit from "../../../assets/images/icons/Edit";
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
@@ -26,9 +27,8 @@ import SwipeButton from "./components/SwipeButton";
 import { KeyboardAvoidingView } from "react-native";
 import { debounce } from "lodash";
 import { normalize } from "../../../utils/functions";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import Popup from "../../../components/Popup";
-
 
 const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
   const { colour } = useAuth();
@@ -200,21 +200,15 @@ const StepOne = ({ formState, setFormState }) => {
 
   // Handle location selection
   const handleLocationSelect = (location) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
-      ...(activeInput === 'loading' ? {
-        loadingPoint: location.name,
-        sourceCoordinates: {
+      [activeInput === "loading" ? "source" : "destination"]: {
+        placeName: location.name,
+        coordinates: {
           latitude: location.coordinates.lat,
-          longitude: location.coordinates.lng
-        }
-      } : {
-        droppingPoint: location.name,
-        destinationCoordinates: {
-          latitude: location.coordinates.lat,
-          longitude: location.coordinates.lng
-        }
-      })
+          longitude: location.coordinates.lng,
+        },
+      },
     }));
     setShowLocationDropdown(false);
     setActiveInput(null);
@@ -222,15 +216,13 @@ const StepOne = ({ formState, setFormState }) => {
 
   const handleLocationChange = (text, type) => {
     setActiveInput(type);
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
-      ...(type === 'loading' ? {
-        loadingPoint: text,
-        sourceCoordinates: null
-      } : {
-        droppingPoint: text,
-        destinationCoordinates: null
-      })
+      [type === "loading" ? "source" : "destination"]: {
+        ...prev[type === "loading" ? "source" : "destination"],
+        placeName: text,
+        coordinates: null,
+      },
     }));
     debouncedLocationSearch(text);
   };
@@ -241,29 +233,29 @@ const StepOne = ({ formState, setFormState }) => {
 
   return (
     <View>
-      <View style={{ position: 'relative', zIndex: 1000 }}>
+      <View style={{ position: "relative", zIndex: 1000 }}>
         <FormInput
           Icon={LoadingPoint}
           label='Loading Point'
           placeholder='Search Loading Point'
           name='loadingPoint'
-          value={formState.loadingPoint}
-          onChangeText={(text) => handleLocationChange(text, 'loading')}
+          value={formState.source.placeName}
+          onChangeText={(text) => handleLocationChange(text, "loading")}
           onFocus={() => {
-            setActiveInput('loading');
+            setActiveInput("loading");
             setShowLocationDropdown(true);
           }}
         />
-        
+
         <FormInput
           Icon={LoadingPoint}
           label='Dropping Point'
           placeholder='Search Dropping Point'
           name='droppingPoint'
-          value={formState.droppingPoint}
-          onChangeText={(text) => handleLocationChange(text, 'dropping')}
+          value={formState.destination.placeName}
+          onChangeText={(text) => handleLocationChange(text, "dropping")}
           onFocus={() => {
-            setActiveInput('dropping');
+            setActiveInput("dropping");
             setShowLocationDropdown(true);
           }}
         />
@@ -292,18 +284,19 @@ const StepOne = ({ formState, setFormState }) => {
       </View>
 
       <FormInput
-        // Icon={LoadingPoint}
         label='Material Type'
         placeholder='Enter Material Type'
         name='materialType'
+        value={formState.materialType}
         type='select'
         disabled={showLocationDropdown}
-        onChange={(field) => setFormState(prev => ({ ...prev, ...field }))}
+        onChange={(field) => setFormState((prev) => ({ ...prev, ...field }))}
         options={materialTypes.map((material) => ({
           label: material,
           value: material,
         }))}
       />
+
       <View
         style={{
           flexDirection: "row",
@@ -316,7 +309,10 @@ const StepOne = ({ formState, setFormState }) => {
             label='Quantity'
             placeholder='Qty'
             name='quantity'
-            onChange={(field) => setFormState(prev => ({ ...prev, ...field }))}
+            value={formState.quantity}
+            onChange={(field) =>
+              setFormState((prev) => ({ ...prev, ...field }))
+            }
             type='number'
             min={1}
             max={1000}
@@ -478,22 +474,24 @@ const StepTwo = ({ formState, setFormState }) => {
             borderRadius: 25,
             backgroundColor: "#f1f1f1",
           }}>
-            <Edit/>
+          <Edit />
         </Pressable>
         <View style={stepTwoStyles.boxSkeletonContainer}>
           <Boxskeleton />
         </View>
         <Text style={{ fontSize: 22, marginBottom: 10 }}>Load Details</Text>
-        <Text>{formState.loadingPoint}</Text>
-        <Text>{formState.droppingPoint}</Text>
-        <Text>{formState.materialType} • {formState.quantity} • {formState.unit}</Text>
+        <Text>{formState.source.placeName}</Text>
+        <Text>{formState.destination.placeName}</Text>
+        <Text>
+          {formState.materialType} • {formState.quantity} • {formState.unit}
+        </Text>
       </View>
 
       <FormInput
-        // Icon={LoadingPoint}
         label='Vehicle Body Type'
         placeholder='Select Vehicle Body Type'
         name='vehicleBodyType'
+        value={formState.vehicleBodyType}
         type='select'
         onChange={handleFormChange}
         options={[
@@ -529,10 +527,10 @@ const StepTwo = ({ formState, setFormState }) => {
       </View>
 
       <FormInput
-        // Icon={LoadingPoint}
         label='Truck Body Type'
         placeholder='Select Truck Body Type'
         name='truckBodyType'
+        value={formState.truckBodyType}
         type='select'
         onChange={handleFormChange}
         options={[
@@ -573,88 +571,120 @@ const StepTwo = ({ formState, setFormState }) => {
   );
 };
 
-const StepThree = ({ formState, setFormState, validateStep }) => {
+const StepThree = ({ 
+  formState, 
+  setFormState, 
+  validateStep,
+  isEditMode,
+  loadData 
+}) => {
   const { colour, token } = useAuth();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [popup, setPopup] = useState({
     visible: false,
-    title: '',
-    message: '',
-    type: 'info',
+    title: "",
+    message: "",
+    type: "info",
   });
-  const router = useRouter();
 
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
-      
-      if (!formState.sourceCoordinates || !formState.destinationCoordinates) {
+
+      if (!formState.source.coordinates || !formState.destination.coordinates) {
         setPopup({
           visible: true,
-          title: 'Invalid Locations',
-          message: 'Please select valid locations from the dropdown',
-          type: 'error'
+          title: "Invalid Locations",
+          message: "Please select valid locations from the dropdown",
+          type: "error",
         });
         return;
       }
 
       const payload = {
         materialType: formState.materialType.toUpperCase(),
-        weight: formState.unit === "tonnes" ? Number(formState.quantity ) : Number(Math.round(formState.quantity /1000 )),
+        weight:
+          formState.unit === "tonnes"
+            ? Number(formState.quantity)
+            : Number(Math.round(formState.quantity / 1000)),
         source: {
-          placeName: formState.loadingPoint,
-          coordinates: formState.sourceCoordinates
+          placeName: formState.source.placeName,
+          coordinates: [
+            formState.source.coordinates.longitude,
+            formState.source.coordinates.latitude,
+          ],
         },
         destination: {
-          placeName: formState.droppingPoint,
-          coordinates: formState.destinationCoordinates
+          placeName: formState.destination.placeName,
+          coordinates: [
+            formState.destination.coordinates.longitude,
+            formState.destination.coordinates.latitude,
+          ],
         },
         vehicleType: formState.vehicleType.toUpperCase(),
         vehicleBodyType:
           formState.vehicleBodyType === "open" ? "OPEN_BODY" : "CLOSED_BODY",
+        numberOfWheels: Number(formState.numTires),
         offeredAmount: {
           total: Number(formState.totalOfferedAmount),
           advancePercentage: Number(formState.advancePercentage),
           dieselAmount: Number(formState.advanceDiesel) || 0,
+          cashAmount: Number(formState.advanceCash) || 0,
         },
         whenNeeded:
           formState.schedule === "immediately" ? "IMMEDIATE" : "SCHEDULED",
-        numberOfWheels: Number(formState.numTires),
+        scheduleDate: formState.scheduleDate,
+        scheduleTime: formState.scheduleTime,
+        additionalNotes: formState.additionalNotes,
       };
 
-      const response = await api.post("/load", payload, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      let response;
+
+      if (isEditMode && loadData?._id) {
+        // Update existing load
+        response = await api.put(`/load/${loadData._id}`, payload, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } else {
+        // Create new load
+        response = await api.post("/load", payload, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+
+      setPopup({
+        visible: true,
+        title: "Success",
+        message: `Load ${isEditMode ? "updated" : "posted"} successfully!`,
+        type: "success",
+        primaryAction: {
+          label: "View Loads",
+          onPress: () => {
+            setPopup((prev) => ({ ...prev, visible: false }));
+            router.push("/loads");
+          },
         },
       });
-      
-      // Show success popup
-      setPopup({
-        visible: true,
-        title: 'Success',
-        message: 'Load posted successfully!',
-        type: 'success',
-        primaryAction: {
-          label: 'View Loads',
-          onPress: () => {
-            setPopup(prev => ({ ...prev, visible: false }));
-            router.push("/loads");
-          }
-        }
-      });
-      
     } catch (error) {
-      console.error("Error posting load:", error);
+      console.error("Error handling load:", error);
       setPopup({
         visible: true,
-        title: 'Error',
-        message: 'Failed to post load. Please try again.',
-        type: 'error',
+        title: "Error",
+        message: `Failed to ${
+          isEditMode ? "update" : "post"
+        } load. Please try again.`,
+        type: "error",
         primaryAction: {
-          label: 'Try Again',
-          onPress: () => setPopup(prev => ({ ...prev, visible: false }))
-        }
+          label: "Try Again",
+          onPress: () => setPopup((prev) => ({ ...prev, visible: false })),
+        },
       });
     } finally {
       setIsLoading(false);
@@ -853,26 +883,26 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
             borderRadius: 25,
             backgroundColor: "#14B8A6",
           }}>
-            <Edit/>
-            </Pressable>
+          <Edit />
+        </Pressable>
         <View style={stepTwoStyles.boxSkeletonContainer}>
           <Boxskeleton />
         </View>
         <Text style={{ fontSize: 22, marginBottom: 10 }}>Load Details</Text>
-        <Text>{formState.loadingPoint}</Text>
-        <Text>{formState.droppingPoint}</Text>
-        <Text>{formState.materialType} • {formState.quantity} • {formState.unit}</Text>
+        <Text>{formState.source.placeName}</Text>
+        <Text>{formState.destination.placeName}</Text>
+        <Text>
+          {formState.materialType} • {formState.quantity} • {formState.unit}
+        </Text>
       </View>
-
-     
 
       {/* Vehicle Requirements Summary Card */}
       <View style={stepThreeStyles.summaryCard}>
         <Pressable
           style={stepThreeStyles.editButton}
           onPress={() => setStep(2)}>
-            <Edit/>
-            </Pressable>
+          <Edit />
+        </Pressable>
         <Text style={stepThreeStyles.cardTitle}>Vehicle Requirement</Text>
         <View style={stepThreeStyles.detailRow}>
           <Image
@@ -917,10 +947,10 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
           }
           handleFormChange(field);
           // Reset advance fields when total amount changes
-          handleFormChange({ 
+          handleFormChange({
             advancePercentage: null,
-            advanceCash: '',
-            advanceDiesel: ''
+            advanceCash: "",
+            advanceDiesel: "",
           });
         }}
         value={formState.totalOfferedAmount}
@@ -934,16 +964,20 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
         name='advancePercentage'
         type='number'
         min={0}
-        max={formState.totalOfferedAmount ? Number(formState.totalOfferedAmount) : 0}
+        max={
+          formState.totalOfferedAmount
+            ? Number(formState.totalOfferedAmount)
+            : 0
+        }
         onChange={(field) => {
           const totalAmount = Number(formState.totalOfferedAmount);
           const advanceAmount = Number(field.advancePercentage);
-          
+
           if (!totalAmount) {
             Alert.alert("Error", "Please enter total amount first");
             return;
           }
-          
+
           if (advanceAmount > totalAmount) {
             Alert.alert("Error", "Advance amount cannot exceed total amount");
             return;
@@ -953,11 +987,11 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
             Alert.alert("Error", "Advance amount cannot be negative");
             return;
           }
-          
+
           handleFormChange({
             ...field,
             advanceCash: advanceAmount.toString(),
-            advanceDiesel: '0'
+            advanceDiesel: "0",
           });
         }}
         value={formState.advancePercentage}
@@ -983,7 +1017,7 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
             onChange={(field) => {
               const advanceAmount = Number(formState.advancePercentage);
               const cashAmount = Number(field.advanceCash);
-              
+
               if (!advanceAmount) {
                 Alert.alert("Error", "Please enter advance amount first");
                 return;
@@ -993,21 +1027,28 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
                 Alert.alert("Error", "Cash amount cannot be negative");
                 return;
               }
-              
+
               if (cashAmount > advanceAmount) {
-                Alert.alert("Error", "Cash amount cannot exceed advance amount");
+                Alert.alert(
+                  "Error",
+                  "Cash amount cannot exceed advance amount"
+                );
                 return;
               }
-              
+
               // Calculate remaining amount for diesel
               const remainingForDiesel = advanceAmount - cashAmount;
               handleFormChange({
                 ...field,
-                advanceDiesel: remainingForDiesel.toString()
+                advanceDiesel: remainingForDiesel.toString(),
               });
             }}
             value={formState.advanceCash}
-            max={formState.advancePercentage ? Number(formState.advancePercentage) : 0}
+            max={
+              formState.advancePercentage
+                ? Number(formState.advancePercentage)
+                : 0
+            }
           />
         </View>
         <View style={stepThreeStyles.halfWidth}>
@@ -1020,7 +1061,7 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
               const advanceAmount = Number(formState.advancePercentage);
               const cashAmount = Number(formState.advanceCash);
               const dieselAmount = Number(field.advanceDiesel);
-              
+
               if (!advanceAmount) {
                 Alert.alert("Error", "Please enter advance amount first");
                 return;
@@ -1030,21 +1071,28 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
                 Alert.alert("Error", "Diesel amount cannot be negative");
                 return;
               }
-              
+
               if (dieselAmount > advanceAmount) {
-                Alert.alert("Error", "Diesel amount cannot exceed advance amount");
+                Alert.alert(
+                  "Error",
+                  "Diesel amount cannot exceed advance amount"
+                );
                 return;
               }
-              
+
               // Calculate remaining amount for cash
               const remainingForCash = advanceAmount - dieselAmount;
               handleFormChange({
                 ...field,
-                advanceCash: remainingForCash.toString()
+                advanceCash: remainingForCash.toString(),
               });
             }}
             value={formState.advanceDiesel}
-            max={formState.advancePercentage ? Number(formState.advancePercentage) : 0}
+            max={
+              formState.advancePercentage
+                ? Number(formState.advancePercentage)
+                : 0
+            }
           />
         </View>
       </View>
@@ -1120,54 +1168,59 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
       )}
 
       {/* Additional Notes */}
-      <View style={{
-        marginTop: 20,
-      }}>
-      <FormInput
-        Icon={LoadingPoint}
-        label='Additional Notes'
-        placeholder='Type Here...'
-        name='additionalNotes'
-        type='textarea'
-        onChange={handleFormChange}
+      <View
         style={{
-          marginTop: 10,
-        }}
-      />
+          marginTop: 20,
+        }}>
+        <FormInput
+          Icon={LoadingPoint}
+          label='Additional Notes'
+          placeholder='Type Here...'
+          name='additionalNotes'
+          type='textarea'
+          onChange={handleFormChange}
+          style={{
+            marginTop: 10,
+          }}
+        />
       </View>
 
       {/* Submit Button */}
-      <View style={{
-        marginBottom: 40,
-        marginTop: 20,
-      }}>
-   
-       <Pressable style={{
- backgroundColor: "#14B8A6",
- padding: 15,
- borderRadius: 8,
- alignItems: "center",
- marginTop: 20,
- marginBottom: 30,
-       }}
-       disabled={isLoading}
-       onPress={
-        handleSubmit
-       }>
-        {isLoading ? <ActivityIndicator size="small" color="#fff" /> :
-              <Text style={{
+      <View
+        style={{
+          marginBottom: 40,
+          marginTop: 20,
+        }}>
+        <Pressable
+          style={{
+            backgroundColor: "#14B8A6",
+            padding: 15,
+            borderRadius: 8,
+            alignItems: "center",
+            marginTop: 20,
+            marginBottom: 30,
+          }}
+          disabled={isLoading}
+          onPress={handleSubmit}>
+          {isLoading ? (
+            <ActivityIndicator size='small' color='#fff' />
+          ) : (
+            <Text
+              style={{
                 color: "#fff",
                 fontSize: 16,
                 fontWeight: "bold",
-              }}>Submit</Text>
-              }
-            </Pressable>
+              }}>
+              {isEditMode ? "Update Load" : "Post Load"}
+            </Text>
+          )}
+        </Pressable>
       </View>
 
       {/* Popup Component */}
       <Popup
         visible={popup.visible}
-        onClose={() => setPopup(prev => ({ ...prev, visible: false }))}
+        onClose={() => setPopup((prev) => ({ ...prev, visible: false }))}
         title={popup.title}
         message={popup.message}
         type={popup.type}
@@ -1181,27 +1234,20 @@ const StepThree = ({ formState, setFormState, validateStep }) => {
 
 const PostLoad = () => {
   const { user, colour } = useAuth();
+  const router = useRouter();
   const [step, setStep] = useState(1);
-  const [popup, setPopup] = useState({
-    visible: false,
-    title: '',
-    message: '',
-    type: 'info'
-  });
   const [formState, setFormState] = useState({
-    loadingPoint: "",
-    droppingPoint: "",
-    sourceCoordinates: null,
-    destinationCoordinates: null,
+    source: { placeName: "", coordinates: null },
+    destination: { placeName: "", coordinates: null },
     materialType: "",
-    quantity: 0,
+    quantity: "",
     unit: "tonnes",
-    vehicleBodyType: "",
+    vehicleBodyType: "open",
     vehicleType: "trailer",
-    truckBodyType: "",
+    truckBodyType: "open",
     numTires: null,
     totalOfferedAmount: "",
-    advancePercentage: null,
+    advancePercentage: "",
     advanceCash: "",
     advanceDiesel: "",
     schedule: "immediately",
@@ -1210,12 +1256,70 @@ const PostLoad = () => {
     additionalNotes: "",
   });
 
+  const paramsData = useLocalSearchParams();
+  const isEditMode = paramsData?.editMode === "true";
+
+  // Parse loadData only once when component mounts
+  const loadData = useMemo(() => {
+    if (paramsData?.loadData) {
+      try {
+        return JSON.parse(paramsData.loadData);
+      } catch (error) {
+        console.error("Error parsing loadData:", error);
+        return null;
+      }
+    }
+    return null;
+  }, [paramsData?.loadData]);
+
+  // Log edit mode info only once when component mounts
+  useEffect(() => {
+    if (isEditMode) {
+      console.log("Edit mode:", isEditMode);
+      console.log("Initial loadData:", loadData);
+    }
+  }, [isEditMode, loadData]);
+
+  // Update form state only once when loadData changes
+  useEffect(() => {
+    if (loadData) {
+      console.log("Updating form state with loadData:", loadData);
+      setFormState((prev) => ({
+        ...prev,
+        source: loadData.source || prev.source,
+        destination: loadData.destination || prev.destination,
+        materialType: loadData.materialType || prev.materialType,
+        quantity: loadData.quantity || prev.quantity,
+        vehicleBodyType: loadData.vehicleBodyType || prev.vehicleBodyType,
+        vehicleType: loadData.vehicleType || prev.vehicleType,
+        truckBodyType: loadData.truckBodyType || prev.truckBodyType,
+        numTires: loadData.numTires || prev.numTires,
+        totalOfferedAmount:
+          loadData.totalOfferedAmount || prev.totalOfferedAmount,
+        advancePercentage: loadData.advancePercentage || prev.advancePercentage,
+        advanceCash: loadData.advanceCash || prev.advanceCash,
+        advanceDiesel: loadData.advanceDiesel || prev.advanceDiesel,
+        schedule: loadData.schedule || prev.schedule,
+        scheduleDate: loadData.scheduleDate || prev.scheduleDate,
+        scheduleTime: loadData.scheduleTime || prev.scheduleTime,
+        additionalNotes: loadData.additionalNotes || prev.additionalNotes,
+      }));
+    }
+  }, [loadData]);
+
+  const [popup, setPopup] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+
   const validateStep = (stepNumber) => {
     switch (stepNumber) {
       case 1:
         return !!(
-          formState.loadingPoint &&
-          formState.droppingPoint &&
+          formState.source.placeName &&
+          formState.destination.placeName &&
           formState.materialType &&
           formState.quantity &&
           formState.unit
@@ -1245,13 +1349,13 @@ const PostLoad = () => {
     if (newStep > step && !validateStep(step)) {
       setPopup({
         visible: true,
-        title: 'Required Fields',
-        message: 'Please fill all required fields before proceeding',
-        type: 'warning',
+        title: "Required Fields",
+        message: "Please fill all required fields before proceeding",
+        type: "warning",
         primaryAction: {
-          label: 'OK',
-          onPress: () => setPopup(prev => ({ ...prev, visible: false }))
-        }
+          label: "OK",
+          onPress: () => setPopup((prev) => ({ ...prev, visible: false })),
+        },
       });
       return;
     }
@@ -1267,18 +1371,16 @@ const PostLoad = () => {
     } else {
       setPopup({
         visible: true,
-        title: 'Required Fields',
-        message: 'Please fill all required fields before proceeding',
-        type: 'warning',
+        title: "Required Fields",
+        message: "Please fill all required fields before proceeding",
+        type: "warning",
         primaryAction: {
-          label: 'OK',
-          onPress: () => setPopup(prev => ({ ...prev, visible: false }))
-        }
+          label: "OK",
+          onPress: () => setPopup((prev) => ({ ...prev, visible: false })),
+        },
       });
     }
   };
-
-
 
   const styles = StyleSheet.create({
     container: {
@@ -1344,10 +1446,12 @@ const PostLoad = () => {
         )}
 
         {step === 3 && (
-          <StepThree 
-            formState={formState} 
-            setFormState={setFormState} 
+          <StepThree
+            formState={formState}
+            setFormState={setFormState}
             validateStep={validateStep}
+            isEditMode={isEditMode}
+            loadData={loadData}
           />
         )}
       </View>
@@ -1355,7 +1459,7 @@ const PostLoad = () => {
       {/* Popup Component */}
       <Popup
         visible={popup.visible}
-        onClose={() => setPopup(prev => ({ ...prev, visible: false }))}
+        onClose={() => setPopup((prev) => ({ ...prev, visible: false }))}
         title={popup.title}
         message={popup.message}
         type={popup.type}
