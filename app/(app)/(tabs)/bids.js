@@ -152,7 +152,7 @@ const BidCard = ({ bid, onBidClosed }) => {
     materialContainer: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: normalize(16),
+      marginBottom: normalize(12),
       position: "relative",
     },
     materialInfo: {
@@ -180,8 +180,8 @@ const BidCard = ({ bid, onBidClosed }) => {
       flexDirection: "row",
       justifyContent: "space-between",
       gap: normalize(24),
-      marginTop: normalize(16),
-      marginBottom: normalize(20),
+      marginTop: normalize(12),
+      marginBottom: normalize(12),
     },
     specItem: {
       flexDirection: "row",
@@ -196,6 +196,7 @@ const BidCard = ({ bid, onBidClosed }) => {
     },
     priceContainer: {
       marginBottom: normalize(16),
+      marginTop: normalize(12),
     },
     price: {
       fontSize: normalize(20),
@@ -203,9 +204,23 @@ const BidCard = ({ bid, onBidClosed }) => {
       color: "#1E293B",
       marginBottom: normalize(2),
     },
-    pricePerTonne: {
+    priceDetails: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    priceInfo: {
+      flex: 1,
+    },
+    priceLabel: {
       fontSize: normalize(14),
       color: "#64748B",
+      marginBottom: normalize(2),
+    },
+    priceValue: {
+      fontSize: normalize(16),
+      fontWeight: "600",
+      color: "#1E293B",
     },
     buttonContainer: {
       flexDirection: "row",
@@ -240,6 +255,10 @@ const BidCard = ({ bid, onBidClosed }) => {
     timestampText: {
       fontSize: normalize(12),
       color: "#64748B",
+    },
+    horizontalSeperator: {
+      borderWidth: 0.3,
+      borderColor: "#E2E8F0",
     },
   });
 
@@ -276,8 +295,7 @@ const BidCard = ({ bid, onBidClosed }) => {
               {bid.offeredTo?.name || "Unknown User"}
             </Text>
             <Text style={styles.role} numberOfLines={1} ellipsizeMode="tail">
-              {bid.offeredTo
-              ?.userType || "User"}
+              {bid.offeredTo?.userType || "User"}
             </Text>
           </View>
         </View>
@@ -289,13 +307,11 @@ const BidCard = ({ bid, onBidClosed }) => {
       </View>
 
       <View style={styles.materialContainer}>
-       
-          <Image
-            source={require("../../../assets/images/parcel.png")}
-            style={styles.materialImage}
-            resizeMode='contain'
-          />
-        
+        <Image
+          source={require("../../../assets/images/parcel.png")}
+          style={styles.materialImage}
+          resizeMode='contain'
+        />
         <View style={styles.materialInfo}>
           <Text style={styles.materialType} numberOfLines={1} ellipsizeMode="tail">
             {bid.materialType || "Unknown Material"}
@@ -329,6 +345,7 @@ const BidCard = ({ bid, onBidClosed }) => {
           </Text>
         </View>
       </View>
+      <View style={styles.horizontalSeperator} />
 
       <View style={styles.specs}>
         <View style={styles.specItem}>
@@ -363,16 +380,31 @@ const BidCard = ({ bid, onBidClosed }) => {
           </Text>
         </View>
       </View>
-
+      <View style={styles.horizontalSeperator} />
+    
       <View style={styles.priceContainer}>
-        <Text style={styles.price}>₹{bid.offeredAmount?.total || 0}</Text>
-        <Text style={styles.pricePerTonne}>
-          ₹
-          {(
-            (bid.offeredAmount?.total || 0) / (bid.truckId?.truckCapacity || 1)
-          ).toFixed(2)}
-          /Tonne
-        </Text>
+        <View style={styles.priceDetails}>
+          <View style={styles.priceInfo}>
+            <Text style={styles.priceLabel}>Your Bid Amount</Text>
+            <Text style={styles.priceValue}>₹{bid.biddedAmount?.total || 0}</Text>
+            <Text style={styles.priceLabel}>
+              Advance: {bid.biddedAmount?.advancePercentage || 0} 
+            </Text>
+            <Text style={styles.priceLabel}>
+              Diesel: ₹{bid.biddedAmount?.dieselAmount || 0}
+            </Text>
+          </View>
+          <View style={{...styles.priceInfo, alignItems: 'flex-end'}}>
+            <Text style={styles.priceLabel}>Original Amount</Text>
+            <Text style={styles.priceValue}>₹{bid.offeredAmount?.total || 0}</Text>
+            <Text style={styles.priceLabel}>
+              Advance: {bid.offeredAmount?.advancePercentage || 0} 
+            </Text>
+            <Text style={styles.priceLabel}>
+              Diesel: ₹{bid.offeredAmount?.dieselAmount || 0}
+            </Text>
+          </View>
+        </View>
       </View>
         
       <View style={styles.buttonContainer}>

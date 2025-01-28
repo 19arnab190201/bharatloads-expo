@@ -7,6 +7,8 @@ import {
   ScrollView,
   Modal,
   Platform,
+  TextInput,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
@@ -48,6 +50,122 @@ const FILTER_OPTIONS = {
   },
 };
 
+const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
+  const { colour } = useAuth();
+  const [biddedAmount, setBiddedAmount] = useState({
+    total: "",
+    advancePercentage: "0",
+    dieselAmount: "",
+  });
+
+  useEffect(() => {
+    if (load && visible) {
+      // Pre-fill with load's offered amount
+      setBiddedAmount({
+        total: load.offeredAmount.total.toString(),
+        advancePercentage: load.offeredAmount.advancePercentage.toString(),
+        dieselAmount: load.offeredAmount.dieselAmount.toString(),
+      });
+    }
+  }, [load, visible]);
+
+  const validateAmount = () => {
+    const total = parseFloat(biddedAmount.total);
+    const advance = parseFloat(biddedAmount.advancePercentage);
+    const diesel = parseFloat(biddedAmount.dieselAmount);
+
+    if (isNaN(total) || total <= 0) {
+      Alert.alert("Error", "Please enter a valid total amount");
+      return false;
+    }
+
+    if (isNaN(advance) || advance < 0) {
+      Alert.alert("Error", "Advance must be greater than 0");
+      return false;
+    }
+
+    if (isNaN(diesel) || diesel < 0) {
+      Alert.alert("Error", "Please enter a valid diesel amount");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = () => {
+    if (!validateAmount()) return;
+    onSubmit(biddedAmount);
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.bidModalContent}>
+          <Text style={styles.bidModalTitle}>Place Your Bid</Text>
+          
+          <View style={styles.bidInputContainer}>
+            <Text style={styles.bidInputLabel}>Total Amount (₹)</Text>
+            <TextInput
+              style={styles.bidInput}
+              value={biddedAmount.total}
+              onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, total: text }))}
+              keyboardType="numeric"
+              placeholder="Enter total amount"
+            />
+          </View>
+
+          <View style={styles.bidInputContainer}>
+            <Text style={styles.bidInputLabel}>Advance (%)</Text>
+            <TextInput
+              style={styles.bidInput}
+              value={biddedAmount.advancePercentage}
+              onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, advancePercentage: text }))}
+              keyboardType="numeric"
+              placeholder="Enter advance percentage"
+            />
+          </View>
+
+          <View style={styles.bidInputContainer}>
+            <Text style={styles.bidInputLabel}>Diesel Amount (₹)</Text>
+            <TextInput
+              style={styles.bidInput}
+              value={biddedAmount.dieselAmount}
+              onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, dieselAmount: text }))}
+              keyboardType="numeric"
+              placeholder="Enter diesel amount"
+            />
+          </View>
+
+          {load && (
+            <Text style={styles.originalAmount}>
+              Original offered amount: ₹{load.offeredAmount.total}
+              {"\n"}(Advance: {load.offeredAmount.advancePercentage}% | 
+              Diesel: ₹{load.offeredAmount.dieselAmount})
+            </Text>
+          )}
+
+          <View style={styles.bidModalButtons}>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.submitButton, !biddedAmount.total && styles.disabledButton]} 
+              onPress={handleSubmit}
+              disabled={!biddedAmount.total}>
+              <Text style={styles.submitButtonText}>Submit Bid</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 const SearchLoad = () => {
   const { colour } = useAuth();
   const [loads, setLoads] = useState([]);
@@ -65,7 +183,9 @@ const SearchLoad = () => {
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [showTruckSelector, setShowTruckSelector] = useState(false);
-  const [selectedLoadId, setSelectedLoadId] = useState(null);
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [selectedLoad, setSelectedLoad] = useState(null);
+  const [selectedTruck, setSelectedTruck] = useState(null);
   const [trucks, setTrucks] = useState([]);
   const [loadingTrucks, setLoadingTrucks] = useState(false);
 
@@ -178,32 +298,39 @@ const SearchLoad = () => {
     }
   };
 
-  // Handle bid placement
-  const handlePlaceBid = (loadId) => {
-    setSelectedLoadId(loadId);
+  const handlePlaceBid = (load) => {
+    setSelectedLoad(load);
     fetchUserTrucks();
     setShowTruckSelector(true);
   };
 
-  // Handle truck selection and bid placement
-  const handleTruckSelect = async (truck) => {
+  const handleTruckSelect = (truck) => {
+    setSelectedTruck(truck);
+    setShowTruckSelector(false);
+    setShowBidModal(true);
+  };
+
+  const handleBidSubmit = async (biddedAmount) => {
     try {
       const response = await api.post('/bid', {
-        loadId: selectedLoadId,
-        truckId: truck._id,
+        loadId: selectedLoad._id,
+        truckId: selectedTruck._id,
         bidType: "LOAD_BID",
+        biddedAmount: {
+          total: parseFloat(biddedAmount.total),
+          advancePercentage: parseFloat(biddedAmount.advancePercentage),
+          dieselAmount: parseFloat(biddedAmount.dieselAmount),
+        },
       });
       
-      // Close modal and refresh loads
-      setShowTruckSelector(false);
+      Alert.alert("Success", "Bid placed successfully!");
+      setShowBidModal(false);
       if (selectedLocation) {
         fetchLoads(selectedLocation);
       }
-      
-      alert('Bid placed successfully!');
     } catch (error) {
       console.error("Place bid error:", error);
-      alert('Failed to place bid. Please try again.');
+      Alert.alert("Error", error.response?.data?.message || "Failed to place bid");
     }
   };
 
@@ -301,7 +428,7 @@ const SearchLoad = () => {
             <SearchLoadCard 
               key={load._id} 
               data={load} 
-              onBidPress={() => handlePlaceBid(load._id)}
+              onBidPress={() => handlePlaceBid(load)}
             />
           ))
         )}
@@ -313,6 +440,14 @@ const SearchLoad = () => {
         trucks={trucks}
         onSelect={handleTruckSelect}
         loading={loadingTrucks}
+      />
+
+      <BidModal
+        visible={showBidModal}
+        onClose={() => setShowBidModal(false)}
+        load={selectedLoad}
+        truck={selectedTruck}
+        onSubmit={handleBidSubmit}
       />
     </SafeAreaView>
   );
@@ -412,6 +547,69 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  bidModalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: "80%",
+  },
+  bidModalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  bidInputContainer: {
+    marginBottom: 16,
+  },
+  bidInputLabel: {
+    fontSize: 14,
+    marginBottom: 8,
+    color: "#333",
+  },
+  bidInput: {
+    backgroundColor: "#f5f5f5",
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  originalAmount: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  bidModalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "#f5f5f5",
+  },
+  cancelButtonText: {
+    color: "#333",
+    textAlign: "center",
+    fontWeight: "600",
+  },
+  submitButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "#007AFF",
+  },
+  submitButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "600",
+  },
+  disabledButton: {
+    backgroundColor: "#ccc",
   },
 });
 

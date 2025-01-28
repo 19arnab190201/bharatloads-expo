@@ -209,8 +209,8 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
       flexDirection: "row",
       justifyContent: "space-between",
       gap: normalize(24),
-      marginTop: normalize(16),
-      marginBottom: normalize(20),
+      marginTop: normalize(2),
+      marginBottom: normalize(2),
     },
     specItem: {
       flexDirection: "row",
@@ -226,15 +226,23 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
     priceContainer: {
       marginBottom: normalize(16),
     },
-    price: {
-      fontSize: normalize(20),
-      fontWeight: "700",
-      color: "#1E293B",
+    priceDetails: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    priceInfo: {
+      flex: 1,
+    },
+    priceLabel: {
+      fontSize: normalize(14),
+      fontWeight: "600",
+      color: "#64748B",
       marginBottom: normalize(2),
     },
-    pricePerTonne: {
-      fontSize: normalize(14),
-      color: "#64748B",
+    priceValue: {
+      fontSize: normalize(16),
+      fontWeight: "700",
+      color: "#1E293B",
     },
     buttonContainer: {
       flexDirection: "row",
@@ -273,6 +281,11 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
     timestampText: {
       fontSize: normalize(12),
       color: "#64748B",
+    },
+    horizontalSeperator: {
+      borderWidth: 0.5,
+      borderColor: "#E2E8F0",
+      marginVertical: normalize(12),
     },
   });
 
@@ -350,7 +363,7 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
           </Text>
         </View>
       </View>
-
+      <View style={styles.horizontalSeperator} />
       <View style={styles.specs}>
         <View style={styles.specItem}>
           <MaterialIcons
@@ -384,12 +397,30 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
           </Text>
         </View>
       </View>
+      <View style={styles.horizontalSeperator} />
+
 
       <View style={styles.priceContainer}>
-        <Text style={styles.price}>₹{offer.offeredAmount?.total || 0}</Text>
-        <Text style={styles.pricePerTonne}>
-          ₹{((offer.offeredAmount?.total || 0) / (offer.weight || 1)).toFixed(2)}/Tonne
-        </Text>
+        <View style={styles.priceDetails}>
+          <View style={styles.priceInfo}>
+            <Text style={styles.priceLabel}>Bidded Amount</Text>
+            <Text style={styles.priceValue}>₹{offer.biddedAmount?.total || 0}</Text>
+            <Text style={styles.priceLabel}>
+              Advance: {offer.biddedAmount?.advancePercentage || 0}</Text>
+            <Text style={styles.priceLabel}>
+              Diesel: ₹{offer.biddedAmount?.dieselAmount || 0}
+            </Text>
+          </View>
+          <View style={{...styles.priceInfo, alignItems: 'flex-end'}}>
+            <Text style={styles.priceLabel}>Your Original Amount</Text>
+            <Text style={styles.priceValue}>₹{offer.offeredAmount?.total || 0}</Text>
+            <Text style={styles.priceLabel}>
+              Advance: {offer.offeredAmount?.advancePercentage || 0}</Text>
+            <Text style={styles.priceLabel}>
+              Diesel: ₹{offer.offeredAmount?.dieselAmount || 0}
+            </Text>
+          </View>
+        </View>
       </View>
 
       {offer.status === "PENDING" ? (

@@ -360,7 +360,7 @@ export default function LoadCard({ data, onLoadUpdated }) {
         <View style={styles.priceSection}>
           <Text style={styles.price}>₹{offeredAmount.total}</Text>
           <Text style={styles.advance}>
-            ₹{advanceAmount} ({Math.round(advancePercentage)}%)
+            ₹{advanceAmount} ({Math.round(advancePercentage)})
           </Text>
           <Text style={styles.advance}>Advance</Text>
         </View>
