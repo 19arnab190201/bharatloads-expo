@@ -93,7 +93,7 @@ export default function Dashboard() {
 
   useFocusEffect(
     useCallback(() => {
-      if (userType.toLowerCase() === "transporter") {
+      if (userType?.toLowerCase() === "transporter") {
         fetchLoads();
       } else {
         fetchTrucks();
@@ -107,7 +107,7 @@ export default function Dashboard() {
     return <Loader />;
   }
 
-  if (userType.toLowerCase() === "transporter") {
+  if (userType?.toLowerCase() === "transporter") {
     return (
       <ScrollView style={styles.container}>
         <StatusBar barStyle='dark-content' backgroundColor='#fff' />
@@ -151,7 +151,7 @@ export default function Dashboard() {
       </TouchableOpacity> */}
       </ScrollView>
     );
-  } else if (userType.toLowerCase()) {
+  } else if (userType?.toLowerCase() === "trucker"  ) {
     return (
       <ScrollView style={styles.container}>
         <StatusBar barStyle='dark-content' backgroundColor='#fff' />

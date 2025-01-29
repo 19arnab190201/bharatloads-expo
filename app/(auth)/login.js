@@ -11,6 +11,7 @@ import {
   Platform,
   Image,
   ScrollView,
+  SafeAreaView
 } from "react-native";
 import { Link, router } from "expo-router";
 import { useAuth } from "../../context/AuthProvider";
@@ -54,18 +55,18 @@ export default function Login() {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}>
+        <SafeAreaView>
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         
-        {/* Login Illustration */}
-        <View style={styles.illustrationContainer}>
-          <Image
-            source={require("../../assets/images/login.png")}
-            style={styles.illustration}
-            resizeMode="contain"
-          />
-        </View>
+       <View style={styles.header}>
+        <Text style={styles.headerText}>Hi, Welcome Back! 👋  </Text>
+        <Text style={styles.subHeaderText}>Hello again, you've been missed!</Text>
+
+        
+       </View>
 
         <View style={styles.formContainer}>
           {/* Phone Input */}
@@ -118,20 +119,46 @@ export default function Login() {
             </Link>
           </View>
         </View>
+         {/* Login Illustration */}
+         <View style={styles.illustrationContainer}>
+          <Image
+            source={require("../../assets/images/login1.png")}
+            style={styles.illustration}
+            resizeMode="contain"
+          />
+        </View>
       </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
   },
   scrollContent: {
-    flexGrow: 1,
     paddingHorizontal: width * 0.05,
     paddingBottom: 20,
+    justifyContent: "center",
+    marginTop: height * 0.15,
+  },
+  header: {
+    marginTop: height * 0.05,
+    position: "relative",
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  subHeaderText: {
+    fontSize: 16,
+    color: "#93A2B7",
+    marginTop: height * 0.01,
+    fontWeight: "500",
+    marginBottom: height * 0.04,
   },
   illustrationContainer: {
     height: height * 0.3,
@@ -140,7 +167,7 @@ const styles = StyleSheet.create({
     marginTop: height * 0.05,
   },
   illustration: {
-    width: width * 0.8,
+    width: width,
     height: height * 0.25,
   },
   formContainer: {
@@ -157,12 +184,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#E8E8E8",
     borderRadius: 8,
-    padding: Platform.OS === "ios" ? 16 : 12,
+    padding: Platform.OS === "ios" ? 16 : 20,
     fontSize: 16,
-    backgroundColor: "#F7F7F7",
+    backgroundColor: "#F1F5F9",
   },
   optionsRow: {
     flexDirection: "row",
@@ -201,7 +226,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#00BFA6",
-    padding: Platform.OS === "ios" ? 16 : 14,
+    padding: Platform.OS === "ios" ? 16 : 20,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",

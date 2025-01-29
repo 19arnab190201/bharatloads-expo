@@ -23,7 +23,7 @@ export default function Verify() {
   const [timer, setTimer] = useState(30);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { verifyOTP } = useAuth();
+  const { verifyOTP, login } = useAuth();
 
   const inputRefs = useRef([]);
 
@@ -51,6 +51,22 @@ export default function Verify() {
       router.replace("/(app)");
     } catch (err) {
       setError(err.message || "Invalid OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (timer > 0) return;
+    
+    try {
+      setLoading(true);
+      await login(phoneNumber);
+      setTimer(30);
+      setOtp(["", "", "", "", ""]);
+      setError("");
+    } catch (err) {
+      setError(err.message || "Failed to resend OTP");
     } finally {
       setLoading(false);
     }
@@ -146,7 +162,13 @@ export default function Verify() {
           <View style={styles.resendContainer}>
             <Text style={styles.resendText}>
               Didn't receive OTP?{" "}
-              <Text style={styles.resendLink}>Resend</Text>
+              {timer > 0 ? (
+                <Text style={styles.timerText}>Wait {timer}s</Text>
+              ) : (
+                <TouchableOpacity onPress={handleResendOTP} disabled={loading}>
+                  <Text style={styles.resendLink}>Resend</Text>
+                </TouchableOpacity>
+              )}
             </Text>
           </View>
 
@@ -248,6 +270,10 @@ const styles = StyleSheet.create({
   resendText: {
     color: "#666",
     fontSize: 14,
+  },
+  timerText: {
+    color: "#999",
+    fontWeight: "600",
   },
   resendLink: {
     color: "#fe7f4a",

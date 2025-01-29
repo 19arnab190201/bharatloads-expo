@@ -10,10 +10,11 @@ import {
   Platform,
   Image,
   ScrollView,
+  SafeAreaView,
 } from "react-native";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../../context/AuthProvider";
-
+import { styles  as loginStyles} from "./login";
 const { width, height } = Dimensions.get("window");
 
 export default function Signup() {
@@ -54,9 +55,16 @@ export default function Signup() {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}>
+      <SafeAreaView>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
+           <View style={{...loginStyles.header, marginTop:100}}>
+        <Text style={loginStyles.headerText}>Create an account </Text>
+        <Text style={loginStyles.subHeaderText}>Let's get you started!</Text>
+
+        
+       </View>
         
         <View style={styles.formContainer}>
           {/* Name Input */}
@@ -163,6 +171,7 @@ export default function Signup() {
           </View>
         </View>
       </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
@@ -179,7 +188,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     flex: 1,
-    paddingTop: height * 0.05,
+    paddingTop: 12,
   },
   inputLabel: {
     fontSize: 14,
@@ -191,12 +200,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#E8E8E8",
     borderRadius: 8,
-    padding: Platform.OS === "ios" ? 16 : 12,
+    padding: Platform.OS === "ios" ? 16 : 20,
     fontSize: 16,
-    backgroundColor: "#F7F7F7",
+    backgroundColor: "#F1F5F9"  ,
   },
   accountTypeContainer: {
     flexDirection: "row",
@@ -205,7 +212,7 @@ const styles = StyleSheet.create({
   },
   accountTypeButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 22,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#E8E8E8",
@@ -219,13 +226,14 @@ const styles = StyleSheet.create({
   accountTypeText: {
     fontSize: 16,
     color: "#333",
+    fontWeight: "500",
   },
   accountTypeTextSelected: {
     color: "#fff",
   },
   button: {
     backgroundColor: "#00BFA6",
-    padding: Platform.OS === "ios" ? 16 : 14,
+    padding: Platform.OS === "ios" ? 16 : 20,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",

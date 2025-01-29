@@ -14,8 +14,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { normalize } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
 import Loader from "../../../components/Loader";
-
+import { useRouter } from "expo-router";
 const BidCard = ({ bid, onBidClosed }) => {
+  const router = useRouter();
   const { colour, user, token } = useAuth();
   const [isClosing, setIsClosing] = useState(false);
 
@@ -61,8 +62,7 @@ const BidCard = ({ bid, onBidClosed }) => {
   };
 
   const handleChat = () => {
-    // TODO: Implement chat functionality
-    Alert.alert("Coming Soon", "Chat functionality will be available soon!");
+    router.push(`/chat`);
   };
 
   const calculateAverageRating = () => {
