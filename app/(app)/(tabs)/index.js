@@ -32,10 +32,11 @@ export default function Dashboard() {
   const router = useRouter();
 
   const userType = user?.userType;
-
   const [loads, setLoads] = useState([]);
   const [trucks, setTrucks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const coins = loads.coins || 0;
+  console.log("coinrfhrfhurys", coins);
 
   const styles = StyleSheet.create({
     container: {

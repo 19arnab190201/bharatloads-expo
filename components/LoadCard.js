@@ -32,9 +32,9 @@ export default function LoadCard({ data, onLoadUpdated }) {
     tripDistance,
   } = data;
 
-  const advanceAmount = offeredAmount.advancePercentage; // value in money not percentage
-  const advancePercentage =
-    100 - ((offeredAmount.total - advanceAmount) / offeredAmount.total) * 100;
+  console.log("offeredAmount", offeredAmount);
+  const advanceAmount = offeredAmount.advanceAmount; // value in money not percentage
+
 
   const [showInfoDrawer, setShowInfoDrawer] = useState(false);
 
@@ -360,7 +360,7 @@ export default function LoadCard({ data, onLoadUpdated }) {
         <View style={styles.priceSection}>
           <Text style={styles.price}>₹{offeredAmount.total}</Text>
           <Text style={styles.advance}>
-            ₹{advanceAmount} ({Math.round(advancePercentage)})
+            ₹{advanceAmount} 
           </Text>
           <Text style={styles.advance}>Advance</Text>
         </View>

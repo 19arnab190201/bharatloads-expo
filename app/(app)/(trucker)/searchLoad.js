@@ -54,7 +54,7 @@ const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
   const { colour } = useAuth();
   const [biddedAmount, setBiddedAmount] = useState({
     total: "",
-    advancePercentage: "0",
+    advanceAmount: "0",
     dieselAmount: "",
   });
 
@@ -63,7 +63,7 @@ const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
       // Pre-fill with load's offered amount
       setBiddedAmount({
         total: load.offeredAmount.total.toString(),
-        advancePercentage: load.offeredAmount.advancePercentage.toString(),
+        advanceAmount: load.offeredAmount.advanceAmount.toString(),
         dieselAmount: load.offeredAmount.dieselAmount.toString(),
       });
     }
@@ -71,7 +71,7 @@ const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
 
   const validateAmount = () => {
     const total = parseFloat(biddedAmount.total);
-    const advance = parseFloat(biddedAmount.advancePercentage);
+    const advance = parseFloat(biddedAmount.advanceAmount);
     const diesel = parseFloat(biddedAmount.dieselAmount);
 
     if (isNaN(total) || total <= 0) {
@@ -123,10 +123,10 @@ const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
             <Text style={styles.bidInputLabel}>Advance (%)</Text>
             <TextInput
               style={styles.bidInput}
-              value={biddedAmount.advancePercentage}
-              onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, advancePercentage: text }))}
+              value={biddedAmount.advanceAmount}
+              onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, advanceAmount: text }))}
               keyboardType="numeric"
-              placeholder="Enter advance percentage"
+              placeholder="Enter advance amount"
             />
           </View>
 
@@ -144,7 +144,7 @@ const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
           {load && (
             <Text style={styles.originalAmount}>
               Original offered amount: ₹{load.offeredAmount.total}
-              {"\n"}(Advance: {load.offeredAmount.advancePercentage}% | 
+              {"\n"}(Advance: {load.offeredAmount.advanceAmount}% | 
               Diesel: ₹{load.offeredAmount.dieselAmount})
             </Text>
           )}
@@ -318,7 +318,7 @@ const SearchLoad = () => {
         bidType: "LOAD_BID",
         biddedAmount: {
           total: parseFloat(biddedAmount.total),
-          advancePercentage: parseFloat(biddedAmount.advancePercentage),
+          advanceAmount: parseFloat(biddedAmount.advanceAmount),
           dieselAmount: parseFloat(biddedAmount.dieselAmount),
         },
       });

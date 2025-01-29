@@ -6,9 +6,24 @@ import TruckInsurance from "../../assets/images/profile/TruckInsurance";
 import LoadFuelPurchase from "../../assets/images/profile/Loadfuelpurchase";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
+import { api } from "../../utils/api";
+import { useNavigation } from '@react-navigation/native';
+import Coins from "../../components/Coins";
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser } = useAuth();
+  const navigation = useNavigation();
+  const fetchUser = async () => {
+    const response = await api.get("/user/profile");
+    console.log("response", response.data);
+    setUser(response.data.user);
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+        fetchUser();
+    }, [])
+  );
 
   const handleLogout = () => {
     Alert.alert(
@@ -39,10 +54,13 @@ const Profile = () => {
       <ScrollView>
         {/* Header with back button and coins */}
         <View style={styles.header}>
-          <Ionicons name="arrow-back" size={24} color="black" />
-          <View style={styles.coinsContainer}>
-            <Text>🪙 {user?.BlCoins || 0}</Text>
-          </View>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          {
+            console.log("use22r", user)
+          }
+          <Coins coins={user?.BlCoins} />
         </View>
 
         <View style={styles.mainContent}>
@@ -131,11 +149,6 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     paddingHorizontal: 26,
-  },
-  coinsContainer: {
-    backgroundColor: '#FFF6E7',
-    padding: 8,
-    borderRadius: 20,
   },
   profileSection: {
     alignItems: 'center',

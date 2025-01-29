@@ -74,6 +74,7 @@ export function AuthProvider({ children }) {
         console.log("Token is valid");
         // Token is valid, user is authenticated
         setIsAuthenticated(true);
+        setUser(response.data.user);  
       }
     } catch (error) {
       // Token is invalid, navigate to Login
@@ -202,6 +203,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         token,
         isAuthenticated,
         login,

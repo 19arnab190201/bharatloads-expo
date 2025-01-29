@@ -388,7 +388,7 @@ const BidCard = ({ bid, onBidClosed }) => {
             <Text style={styles.priceLabel}>Your Bid Amount</Text>
             <Text style={styles.priceValue}>₹{bid.biddedAmount?.total || 0}</Text>
             <Text style={styles.priceLabel}>
-              Advance: {bid.biddedAmount?.advancePercentage || 0} 
+              Advance: {bid.biddedAmount?.advanceAmount || 0} 
             </Text>
             <Text style={styles.priceLabel}>
               Diesel: ₹{bid.biddedAmount?.dieselAmount || 0}
@@ -398,7 +398,7 @@ const BidCard = ({ bid, onBidClosed }) => {
             <Text style={styles.priceLabel}>Original Amount</Text>
             <Text style={styles.priceValue}>₹{bid.offeredAmount?.total || 0}</Text>
             <Text style={styles.priceLabel}>
-              Advance: {bid.offeredAmount?.advancePercentage || 0} 
+              Advance: {bid.offeredAmount?.advanceAmount || 0} 
             </Text>
             <Text style={styles.priceLabel}>
               Diesel: ₹{bid.offeredAmount?.dieselAmount || 0}

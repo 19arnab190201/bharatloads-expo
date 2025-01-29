@@ -18,7 +18,7 @@ export default function BidSelectionModal({ visible, onClose, loads, truckId }) 
   const [selectedLoad, setSelectedLoad] = useState(null);
   const [biddedAmount, setBiddedAmount] = useState({
     total: "",
-    advancePercentage: "50",
+    advanceAmount: "50",
     dieselAmount: "",
   });
 
@@ -27,14 +27,14 @@ export default function BidSelectionModal({ visible, onClose, loads, truckId }) 
     // Pre-fill the bidded amount with the offered amount for reference
     setBiddedAmount({
       total: load.offeredAmount.total.toString(),
-      advancePercentage: load.offeredAmount.advancePercentage.toString(),
+      advanceAmount: load.offeredAmount.advanceAmount.toString(),
       dieselAmount: load.offeredAmount.dieselAmount.toString(),
     });
   };
 
   const validateAmount = () => {
     const total = parseFloat(biddedAmount.total);
-    const advance = parseFloat(biddedAmount.advancePercentage);
+    const advance = parseFloat(biddedAmount.advanceAmount);
     const diesel = parseFloat(biddedAmount.dieselAmount);
 
     if (isNaN(total) || total <= 0) {
@@ -61,7 +61,7 @@ export default function BidSelectionModal({ visible, onClose, loads, truckId }) 
       return;
     }
 
-    if (!biddedAmount.total || !biddedAmount.advancePercentage || !biddedAmount.dieselAmount) {
+    if (!biddedAmount.total || !biddedAmount.advanceAmount || !biddedAmount.dieselAmount) {
       Alert.alert("Error", "Please fill in all amount fields");
       return;
     }
@@ -79,7 +79,7 @@ export default function BidSelectionModal({ visible, onClose, loads, truckId }) 
           truckId: truckId,
           biddedAmount: {
             total: parseFloat(biddedAmount.total),
-            advancePercentage: parseFloat(biddedAmount.advancePercentage),
+            advanceAmount: parseFloat(biddedAmount.advanceAmount),
             dieselAmount: parseFloat(biddedAmount.dieselAmount),
           },
         },
@@ -227,8 +227,8 @@ export default function BidSelectionModal({ visible, onClose, loads, truckId }) 
                   <Text style={styles.inputLabel}>Advance </Text>
                   <TextInput
                     style={styles.input}
-                    value={biddedAmount.advancePercentage}
-                    onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, advancePercentage: text }))}
+                    value={biddedAmount.advanceAmount}
+                    onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, advanceAmount: text }))}
                     keyboardType="numeric"
                     placeholder="Enter advance percentage"
                   />
@@ -245,7 +245,7 @@ export default function BidSelectionModal({ visible, onClose, loads, truckId }) 
                 </View>
                 <Text style={styles.offeredAmount}>
                   Original offered amount: ₹{selectedLoad.offeredAmount.total} 
-                  (Advance: {selectedLoad.offeredAmount.advancePercentage} | 
+                  (Advance: {selectedLoad.offeredAmount.advanceAmount} | 
                   Diesel: ₹{selectedLoad.offeredAmount.dieselAmount})
                 </Text>
               </View>

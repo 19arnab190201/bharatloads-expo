@@ -628,7 +628,7 @@ const StepThree = ({
         numberOfWheels: Number(formState.numTires),
         offeredAmount: {
           total: Number(formState.totalOfferedAmount),
-          advancePercentage: Number(formState.advancePercentage),
+          advanceAmount: Number(formState.advanceAmount),
           dieselAmount: Number(formState.advanceDiesel) || 0,
           cashAmount: Number(formState.advanceCash) || 0,
         },
@@ -948,7 +948,7 @@ const StepThree = ({
           handleFormChange(field);
           // Reset advance fields when total amount changes
           handleFormChange({
-            advancePercentage: null,
+            advanceAmount: null,
             advanceCash: "",
             advanceDiesel: "",
           });
@@ -961,7 +961,7 @@ const StepThree = ({
         Icon={LoadingPoint}
         label='How much advance would you like to pay ?'
         placeholder='Enter Advance Amount'
-        name='advancePercentage'
+        name='advanceAmount'
         type='number'
         min={0}
         max={
@@ -971,7 +971,7 @@ const StepThree = ({
         }
         onChange={(field) => {
           const totalAmount = Number(formState.totalOfferedAmount);
-          const advanceAmount = Number(field.advancePercentage);
+          const advanceAmount = Number(field.advanceAmount);
 
           if (!totalAmount) {
             Alert.alert("Error", "Please enter total amount first");
@@ -994,7 +994,7 @@ const StepThree = ({
             advanceDiesel: "0",
           });
         }}
-        value={formState.advancePercentage}
+        value={formState.advanceAmount}
       />
 
       {/* Advance Amount Details */}
@@ -1015,7 +1015,7 @@ const StepThree = ({
             name='advanceCash'
             type='number'
             onChange={(field) => {
-              const advanceAmount = Number(formState.advancePercentage);
+              const advanceAmount = Number(formState.advanceAmount);
               const cashAmount = Number(field.advanceCash);
 
               if (!advanceAmount) {
@@ -1045,8 +1045,8 @@ const StepThree = ({
             }}
             value={formState.advanceCash}
             max={
-              formState.advancePercentage
-                ? Number(formState.advancePercentage)
+              formState.advanceAmount
+                ? Number(formState.advanceAmount)
                 : 0
             }
           />
@@ -1058,7 +1058,7 @@ const StepThree = ({
             name='advanceDiesel'
             type='number'
             onChange={(field) => {
-              const advanceAmount = Number(formState.advancePercentage);
+              const advanceAmount = Number(formState.advanceAmount);
               const cashAmount = Number(formState.advanceCash);
               const dieselAmount = Number(field.advanceDiesel);
 
@@ -1089,8 +1089,8 @@ const StepThree = ({
             }}
             value={formState.advanceDiesel}
             max={
-              formState.advancePercentage
-                ? Number(formState.advancePercentage)
+              formState.advanceAmount
+                ? Number(formState.advanceAmount)
                 : 0
             }
           />
@@ -1247,7 +1247,7 @@ const PostLoad = () => {
     truckBodyType: "open",
     numTires: null,
     totalOfferedAmount: "",
-    advancePercentage: "",
+    advanceAmount: "",
     advanceCash: "",
     advanceDiesel: "",
     schedule: "immediately",
@@ -1296,7 +1296,7 @@ const PostLoad = () => {
         numTires: loadData.numTires || prev.numTires,
         totalOfferedAmount:
           loadData.totalOfferedAmount || prev.totalOfferedAmount,
-        advancePercentage: loadData.advancePercentage || prev.advancePercentage,
+        advanceAmount: loadData.advanceAmount || prev.advanceAmount,
         advanceCash: loadData.advanceCash || prev.advanceCash,
         advanceDiesel: loadData.advanceDiesel || prev.advanceDiesel,
         schedule: loadData.schedule || prev.schedule,
@@ -1334,7 +1334,7 @@ const PostLoad = () => {
       case 3:
         return !!(
           formState.totalOfferedAmount &&
-          formState.advancePercentage &&
+          formState.advanceAmount &&
           (formState.advanceCash || formState.advanceDiesel) &&
           formState.schedule &&
           (formState.schedule === "immediately" ||

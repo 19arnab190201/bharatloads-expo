@@ -139,8 +139,8 @@ export default function TruckInfoDrawer({
         truckBodyType: data.vehicleBodyType === "OPEN_BODY" ? "open" : "closed",
         numTires: data.numberOfWheels,
         totalOfferedAmount: data.offeredAmount.total.toString(),
-        advancePercentage:
-          data.offeredAmount.advancePercentage?.toString() || "",
+        advanceAmount:
+          data.offeredAmount.advanceAmount?.toString() || "",
         advanceCash: data.offeredAmount.cashAmount?.toString() || "",
         advanceDiesel: data.offeredAmount.dieselAmount?.toString() || "",
         schedule: data.whenNeeded === "IMMEDIATE" ? "immediately" : "later",

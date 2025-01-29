@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Text, Pressable } from "react-native";
+import Coins from "./Coins";
 
 import { useAuth } from "../context/AuthProvider";
 import { useNavigation } from "expo-router";
@@ -75,6 +76,9 @@ const Header = () => {
           </Text>
           <Text style={styles.headerSubText}>{user?.userType}</Text>
         </View>
+      </View>
+      <View style={styles.headerRight}>
+        <Coins coins={user?.BlCoins || 0} />
       </View>
     </View>
   );

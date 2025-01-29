@@ -406,7 +406,7 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
             <Text style={styles.priceLabel}>Bidded Amount</Text>
             <Text style={styles.priceValue}>₹{offer.biddedAmount?.total || 0}</Text>
             <Text style={styles.priceLabel}>
-              Advance: {offer.biddedAmount?.advancePercentage || 0}</Text>
+              Advance: {offer.biddedAmount?.advanceAmount || 0}</Text>
             <Text style={styles.priceLabel}>
               Diesel: ₹{offer.biddedAmount?.dieselAmount || 0}
             </Text>
@@ -415,7 +415,7 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
             <Text style={styles.priceLabel}>Your Original Amount</Text>
             <Text style={styles.priceValue}>₹{offer.offeredAmount?.total || 0}</Text>
             <Text style={styles.priceLabel}>
-              Advance: {offer.offeredAmount?.advancePercentage || 0}</Text>
+              Advance: {offer.offeredAmount?.advanceAmount || 0}</Text>
             <Text style={styles.priceLabel}>
               Diesel: ₹{offer.offeredAmount?.dieselAmount || 0}
             </Text>
@@ -442,17 +442,7 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
             </Text>
           </Pressable>
         </View>
-      ) : offer.status === "REJECTED" ? (
-        <View style={styles.buttonContainer}>
-          <Pressable
-            style={[styles.button, styles.acceptButton]}
-            onPress={handleAcceptOffer}
-            disabled={isProcessing}>
-            <Text style={styles.buttonText("accept")}>
-              {isProcessing ? "Processing..." : "Accept"}
-            </Text>
-          </Pressable>
-        </View>
+      ) : offer.status === "REJECTED" ? ( null 
       ) : offer.status === "ACCEPTED" ? (
         <View style={styles.buttonContainer}>
           <Pressable
