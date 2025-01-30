@@ -21,10 +21,12 @@ import LoadCard from "../../../components/LoadCard";
 import { api } from "../../../utils/api";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
+import SearchIcon from "../../../assets/images/icons/Search";
 import TruckCard from "../../../components/TruckCard";
 import { normalize } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
 import Loader from "../../../components/Loader";
+import LocationIcon from "../../../assets/images/icons/LocationIcon";
 
 export default function Dashboard() {
   const { user, logout, colour } = useAuth();
@@ -123,24 +125,42 @@ export default function Dashboard() {
         />
         <TouchableOpacity
           style={{
-            backgroundColor: colour.inputBackground,
+            backgroundColor: colour.placeHolderBackground2,
             borderRadius: 10,
+            borderWidth: 1,
+            borderColor: colour.inputBackground,
             padding: 10,
             paddingVertical: 18,
             marginTop: 20,
             flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
             gap: 10,
           }}
           onPress={() => router.push("/(transporter)/searchTrucks")}>
-          <LoadingPoint />
-          <Text>Search Trucks</Text>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <SearchIcon />
+            <Text style={{ color: colour.iconColor }}>Search Trucks...</Text>
+          </View>
+          <View
+            style={{
+              borderLeftWidth: 1,
+              borderColor: colour.iconColor,
+              paddingLeft: 10,
+              flexDirection: "row",
+              gap: 10,
+              alignItems: "center",
+            }}>
+            <LocationIcon />
+            <Text style={{ color: colour.iconColor }}>Location</Text>
+          </View>
         </TouchableOpacity>
 
         <View style={{ marginTop: 20 }}>
           <Text style={styles.title}>Your Loads</Text>
 
           {loads.map((load) => (
-            <LoadCard key={load._id} data={load} onLoadUpdated={fetchLoads}/>
+            <LoadCard key={load._id} data={load} onLoadUpdated={fetchLoads} />
           ))}
         </View>
 
@@ -151,7 +171,7 @@ export default function Dashboard() {
       </TouchableOpacity> */}
       </ScrollView>
     );
-  } else if (userType?.toLowerCase() === "trucker"  ) {
+  } else if (userType?.toLowerCase() === "trucker") {
     return (
       <ScrollView style={styles.container}>
         <StatusBar barStyle='dark-content' backgroundColor='#fff' />
@@ -167,26 +187,46 @@ export default function Dashboard() {
         />
         <TouchableOpacity
           style={{
-            backgroundColor: colour.inputBackground,
+            backgroundColor: colour.placeHolderBackground2,
             borderRadius: 10,
+            borderWidth: 1,
+            borderColor: colour.inputBackground,
             padding: 10,
             paddingVertical: 18,
             marginTop: 20,
             flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
             gap: 10,
           }}
           onPress={() => router.push("/(trucker)/searchLoad")}>
-          <LoadingPoint />
-          <Text>Search Loads</Text>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <LoadingPoint />
+            <Text style={{ color: colour.iconColor }}>Search Loads</Text>
+          </View>
+          <View
+            style={{
+              borderLeftWidth: 1,
+              borderColor: colour.iconColor,
+              paddingLeft: 10,
+              flexDirection: "row",
+              gap: 10,
+              alignItems: "center",
+            }}>
+            <LocationIcon />
+            <Text style={{ color: colour.iconColor }}>Location</Text>
+          </View>
         </TouchableOpacity>
 
         <View style={{ marginTop: 20 }}>
           <Text style={styles.title}>Your Trucks</Text>
 
           {trucks.map((truck) => (
-            
-              <TruckCard key={truck._id} data={truck} onTruckUpdated={fetchTrucks} />
-            
+            <TruckCard
+              key={truck._id}
+              data={truck}
+              onTruckUpdated={fetchTrucks}
+            />
           ))}
         </View>
 

@@ -29,6 +29,8 @@ import { debounce } from "lodash";
 import { normalize } from "../../../utils/functions";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Popup from "../../../components/Popup";
+import DetailLocationIcon from "../../../assets/images/icons/DetailLocationIcon";
+import WeightIcon from "../../../assets/images/icons/WeightIcon";
 
 const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
   const { colour } = useAuth();
@@ -310,9 +312,12 @@ const StepOne = ({ formState, setFormState }) => {
             placeholder='Qty'
             name='quantity'
             value={formState.quantity}
-            onChange={(field) =>
-              setFormState((prev) => ({ ...prev, ...field }))
-            }
+            onChange={(field) => {
+              setFormState((prev) => ({
+                ...prev,
+                quantity: field.quantity,
+              }));
+            }}
             type='number'
             min={1}
             max={1000}
@@ -356,7 +361,7 @@ const StepOne = ({ formState, setFormState }) => {
   );
 };
 
-const StepTwo = ({ formState, setFormState }) => {
+const StepTwo = ({ formState, setFormState, setStep }) => {
   const { colour } = useAuth();
   const handleFormChange = (updatedField) => {
     setFormState((prev) => ({
@@ -395,6 +400,7 @@ const StepTwo = ({ formState, setFormState }) => {
       borderRadius: 12,
       borderColor: "#14B8A6",
       marginBottom: 20,
+      backgroundColor: "#F5FCFB",
     },
     vehicleTypeContainer: {
       flexDirection: "row",
@@ -452,9 +458,13 @@ const StepTwo = ({ formState, setFormState }) => {
     },
     boxSkeletonContainer: {
       position: "absolute",
-      right: 10,
+      right: 0,
       top: 10,
       opacity: 0.5,
+      height: normalize(140),
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
     },
   });
 
@@ -462,6 +472,7 @@ const StepTwo = ({ formState, setFormState }) => {
     <View>
       <View style={stepTwoStyles.detailsCard}>
         <Pressable
+          onPress={() => setStep(1)}
           style={{
             position: "absolute",
             top: -10,
@@ -472,19 +483,60 @@ const StepTwo = ({ formState, setFormState }) => {
             justifyContent: "center",
             alignItems: "center",
             borderRadius: 25,
-            backgroundColor: "#f1f1f1",
+            backgroundColor: colour.primaryColor,
           }}>
-          <Edit />
+          <View
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}>
+            <Edit
+              style={{ width: 28, height: 28, marginTop: 12, marginLeft: 12 }}
+            />
+          </View>
         </Pressable>
-        <View style={stepTwoStyles.boxSkeletonContainer}>
-          <Boxskeleton />
+        <View
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 10,
+            opacity: 0.5,
+            height: normalize(140),
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+          <Boxskeleton style={{ borderWidth: 1, borderColor: "#FE7F4A" }} />
         </View>
-        <Text style={{ fontSize: 22, marginBottom: 10 }}>Load Details</Text>
-        <Text>{formState.source.placeName}</Text>
-        <Text>{formState.destination.placeName}</Text>
-        <Text>
-          {formState.materialType} • {formState.quantity} • {formState.unit}
+
+        <Text
+          style={{
+            fontSize: 22,
+            marginBottom: 10,
+            fontWeight: "500",
+          }}>
+          Load Details
         </Text>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <DetailLocationIcon fill='#FE7F4A' />
+          <Text style={{ fontSize: 16, marginBottom: 10, fontWeight: "400" }}>
+            {formState.source.placeName}
+          </Text>
+        </View>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <DetailLocationIcon />
+          <Text style={{ fontSize: 16, marginBottom: 10, fontWeight: "400" }}>
+            {formState.destination.placeName}
+          </Text>
+        </View>
+
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <WeightIcon />
+          <Text style={{ fontSize: 16, marginBottom: 10, fontWeight: "400" }}>
+            {formState.materialType} • {formState.quantity} {formState.unit}
+          </Text>
+        </View>
       </View>
 
       <FormInput
@@ -571,12 +623,13 @@ const StepTwo = ({ formState, setFormState }) => {
   );
 };
 
-const StepThree = ({ 
-  formState, 
-  setFormState, 
+const StepThree = ({
+  formState,
+  setFormState,
   validateStep,
   isEditMode,
-  loadData 
+  loadData,
+  setStep,
 }) => {
   const { colour, token } = useAuth();
   const router = useRouter();
@@ -859,7 +912,7 @@ const StepThree = ({
     },
     boxSkeletonContainer: {
       position: "absolute",
-      right: 10,
+      right: 0,
       top: 10,
       opacity: 0.5,
     },
@@ -868,7 +921,7 @@ const StepThree = ({
   return (
     <View>
       {/* Load Details Summary Card */}
-      <View style={stepTwoStyles.detailsCard}>
+      <View style={[stepTwoStyles.detailsCard, { backgroundColor: "#F5FCFB" }]}>
         <Pressable
           onPress={() => setStep(1)}
           style={{
@@ -881,54 +934,133 @@ const StepThree = ({
             justifyContent: "center",
             alignItems: "center",
             borderRadius: 25,
-            backgroundColor: "#14B8A6",
+            backgroundColor: colour.primaryColor,
+            zIndex: 1,
           }}>
-          <Edit />
+          <Edit
+            style={{ width: 28, height: 28, marginTop: 12, marginLeft: 12 }}
+          />
         </Pressable>
-        <View style={stepTwoStyles.boxSkeletonContainer}>
-          <Boxskeleton />
+        <View
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 10,
+            opacity: 0.5,
+            height: normalize(140),
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+          <Boxskeleton style={{ borderWidth: 1, borderColor: "#FE7F4A" }} />
         </View>
-        <Text style={{ fontSize: 22, marginBottom: 10 }}>Load Details</Text>
-        <Text>{formState.source.placeName}</Text>
-        <Text>{formState.destination.placeName}</Text>
-        <Text>
-          {formState.materialType} • {formState.quantity} • {formState.unit}
+
+        <Text style={{ fontSize: 22, marginBottom: 10, fontWeight: "500" }}>
+          Load Details
         </Text>
+        <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
+          <DetailLocationIcon fill='#FE7F4A' />
+          <Text style={{ fontSize: 16, fontWeight: "400" }}>
+            {formState.source.placeName}
+          </Text>
+        </View>
+        <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
+          <DetailLocationIcon />
+          <Text style={{ fontSize: 16, fontWeight: "400" }}>
+            {formState.destination.placeName}
+          </Text>
+        </View>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <WeightIcon />
+          <Text style={{ fontSize: 16, fontWeight: "400" }}>
+            {formState.materialType} • {formState.quantity} {formState.unit}
+          </Text>
+        </View>
       </View>
 
       {/* Vehicle Requirements Summary Card */}
-      <View style={stepThreeStyles.summaryCard}>
+      <View style={[stepTwoStyles.detailsCard, { backgroundColor: "#F5FCFB" }]}>
         <Pressable
-          style={stepThreeStyles.editButton}
+          style={{
+            position: "absolute",
+            top: -10,
+            right: -10,
+            width: 35,
+            height: 35,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 25,
+            backgroundColor: colour.primaryColor,
+            zIndex: 1,
+          }}
           onPress={() => setStep(2)}>
-          <Edit />
+          <Edit
+            style={{ width: 28, height: 28, marginTop: 12, marginLeft: 12 }}
+          />
         </Pressable>
-        <Text style={stepThreeStyles.cardTitle}>Vehicle Requirement</Text>
-        <View style={stepThreeStyles.detailRow}>
+        <View
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 10,
+            opacity: 0.5,
+            height: normalize(140),
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+          <Boxskeleton style={{ borderWidth: 1, borderColor: "#FE7F4A" }} />
+        </View>
+
+        <Text style={{ fontSize: 22, marginBottom: 15, fontWeight: "500" }}>
+          Vehicle Requirement
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 15,
+          }}>
           <Image
             source={require("../../../assets/images/trucktype/truck.png")}
             style={{ width: 40, height: 40, marginRight: 10 }}
           />
-          <Text style={stepThreeStyles.detailText}>
+          <Text style={{ fontSize: 16, fontWeight: "400" }}>
             {formState.vehicleType.toUpperCase()}
           </Text>
         </View>
-        <View style={stepThreeStyles.vehicleInfo}>
-          <View style={stepThreeStyles.infoColumn}>
-            <Text style={stepThreeStyles.infoLabel}>Body Type</Text>
-            <Text style={stepThreeStyles.infoValue}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingHorizontal: 10,
+            width: "100%",
+            marginTop: 10,
+          }}>
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ fontSize: 14, color: "#666", marginBottom: 5 }}>
+              Body Type
+            </Text>
+            <Text style={{ fontSize: 16, fontWeight: "500" }}>
               {formState.vehicleBodyType === "open" ? "OPEN" : "CLOSED"}
             </Text>
           </View>
-          <View style={stepThreeStyles.infoColumn}>
-            <Text style={stepThreeStyles.infoLabel}>Truck Body</Text>
-            <Text style={stepThreeStyles.infoValue}>
-              {formState.truckBodyType === "open" ? "OPEN BODY" : "CLOSED BODY"}
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ fontSize: 14, color: "#666", marginBottom: 5 }}>
+              Truck Body
+            </Text>
+            <Text style={{ fontSize: 16, fontWeight: "500" }}>
+              {formState.truckBodyType === "full" ? "FULL BODY" : "HALF BODY"}
             </Text>
           </View>
-          <View style={stepThreeStyles.infoColumn}>
-            <Text style={stepThreeStyles.infoLabel}>Tyre</Text>
-            <Text style={stepThreeStyles.infoValue}>{formState.numTires}</Text>
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ fontSize: 14, color: "#666", marginBottom: 5 }}>
+              Tyre
+            </Text>
+            <Text style={{ fontSize: 16, fontWeight: "500" }}>
+              {formState.numTires}
+            </Text>
           </View>
         </View>
       </View>
@@ -1044,11 +1176,7 @@ const StepThree = ({
               });
             }}
             value={formState.advanceCash}
-            max={
-              formState.advanceAmount
-                ? Number(formState.advanceAmount)
-                : 0
-            }
+            max={formState.advanceAmount ? Number(formState.advanceAmount) : 0}
           />
         </View>
         <View style={stepThreeStyles.halfWidth}>
@@ -1088,11 +1216,7 @@ const StepThree = ({
               });
             }}
             value={formState.advanceDiesel}
-            max={
-              formState.advanceAmount
-                ? Number(formState.advanceAmount)
-                : 0
-            }
+            max={formState.advanceAmount ? Number(formState.advanceAmount) : 0}
           />
         </View>
       </View>
@@ -1438,7 +1562,11 @@ const PostLoad = () => {
 
         {step === 2 && (
           <>
-            <StepTwo formState={formState} setFormState={setFormState} />
+            <StepTwo
+              formState={formState}
+              setFormState={setFormState}
+              setStep={setStep}
+            />
             <Pressable style={styles.nextButton} onPress={handleNext}>
               <Text style={styles.nextButtonText}>Next</Text>
             </Pressable>
@@ -1452,6 +1580,7 @@ const PostLoad = () => {
             validateStep={validateStep}
             isEditMode={isEditMode}
             loadData={loadData}
+            setStep={setStep}
           />
         )}
       </View>

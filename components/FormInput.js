@@ -1,9 +1,17 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, TextInput, Image, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useAuth } from "../context/AuthProvider";
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 
 const FormInput = ({
   Icon,
@@ -44,13 +52,13 @@ const FormInput = ({
       if (fileInfo.size > 1024 * 1024) {
         // Implement compression logic here if needed
         // For now, we'll just alert the user
-        alert('Image size should be less than 1MB');
+        alert("Image size should be less than 1MB");
         return null;
       }
 
       return `data:image/jpeg;base64,${imageBase64}`;
     } catch (error) {
-      console.error('Error processing image:', error);
+      console.error("Error processing image:", error);
       return null;
     }
   };
@@ -75,8 +83,8 @@ const FormInput = ({
         }
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      alert('Error picking image. Please try again.');
+      console.error("Error picking image:", error);
+      alert("Error picking image. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -89,7 +97,7 @@ const FormInput = ({
     },
     label: {
       fontSize: 14,
-      fontWeight: "700",
+      fontWeight: "600",
       marginBottom: 8,
       color: "#333",
     },
@@ -119,6 +127,7 @@ const FormInput = ({
       paddingRight: 10,
       fontSize: 16,
       backgroundColor: colour.inputBackground,
+      color: colour.iconColor,
     },
     textarea: {
       height: 80,
@@ -133,21 +142,21 @@ const FormInput = ({
       backgroundColor: colour.inputBackground,
       borderRadius: 12,
       padding: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       height: 60,
-      flexDirection: 'row',
+      flexDirection: "row",
       gap: 10,
     },
     imagePreviewContainer: {
       marginTop: 8,
       borderRadius: 8,
-      overflow: 'hidden',
+      overflow: "hidden",
     },
     imagePreview: {
-      width: '100%',
+      width: "100%",
       height: 200,
-      resizeMode: 'cover',
+      resizeMode: "cover",
     },
   });
 
@@ -155,13 +164,9 @@ const FormInput = ({
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
       <View style={styles.inputContainer}>
-        {
-          type === "select" ? (
-              Icon && <Icon style={styles.icon} />
-          ) : (
-            Icon && <Icon style={styles.icon} />
-          )
-        }
+        {type === "select"
+          ? Icon && <Icon style={styles.icon} />
+          : Icon && <Icon style={styles.icon} />}
 
         {type === "text" || type === "number" ? (
           <TextInput
@@ -170,8 +175,9 @@ const FormInput = ({
             keyboardType={type === "number" ? "numeric" : "default"}
             value={value}
             type={type}
+            placeholderTextColor={colour.placeHolderText}
             maxLength={max}
-            minLength={min} 
+            minLength={min}
             onChangeText={handleInputChange}
             {...rest}
           />
@@ -180,21 +186,18 @@ const FormInput = ({
             style={{
               borderRadius: 10,
               borderWidth: 1,
-              borderColor: "#bdc3c7",
               overflow: "hidden",
-              paddingLeft: 0,  
+              borderColor: colour.inputBackground,
+              paddingLeft: 0,
             }}>
             <Picker
-              style={
-                {
-                  ...styles.pickerInput,
-                  ...(Icon && {
-                    paddingLeft: 160,
-                  })
-                }
-              }
+              style={{
+                ...styles.pickerInput,
+                ...(Icon && {
+                  paddingLeft: 160,
+                }),
+              }}
               {...rest}
-              
               enabled={!disabled}
               selectedValue={value}
               onValueChange={(itemValue) =>
@@ -202,7 +205,7 @@ const FormInput = ({
                   [name]: itemValue,
                 })
               }>
-                   <Picker.Item label='Select Option' value='0'/>
+              <Picker.Item label='Select Option' value='0' />
 
               {options.map((option, index) => (
                 <Picker.Item
@@ -225,22 +228,25 @@ const FormInput = ({
           />
         ) : type === "file" ? (
           <View>
-            <TouchableOpacity 
-              style={styles.imagePickerButton} 
+            <TouchableOpacity
+              style={styles.imagePickerButton}
               onPress={pickImage}
               disabled={isProcessing}>
               {isProcessing ? (
                 <>
-                  <ActivityIndicator size="small" color="#000" />
+                  <ActivityIndicator size='small' color='#000' />
                   <Text>Processing...</Text>
                 </>
               ) : (
-                <Text>{imagePreview ? 'Change Image' : placeholder}</Text>
+                <Text>{imagePreview ? "Change Image" : placeholder}</Text>
               )}
             </TouchableOpacity>
             {imagePreview && (
               <View style={styles.imagePreviewContainer}>
-                <Image source={{ uri: imagePreview }} style={styles.imagePreview} />
+                <Image
+                  source={{ uri: imagePreview }}
+                  style={styles.imagePreview}
+                />
               </View>
             )}
           </View>
