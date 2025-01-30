@@ -169,10 +169,13 @@ const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
 const SearchLoad = () => {
   const { colour } = useAuth();
   const [loads, setLoads] = useState([]);
-  const [search, setSearch] = useState("");
-  const [locations, setLocations] = useState([]);
+  const [sourceSearch, setSourceSearch] = useState("");
+  const [destinationSearch, setDestinationSearch] = useState("");
+  const [sourceLocations, setSourceLocations] = useState([]);
+  const [destinationLocations, setDestinationLocations] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedSource, setSelectedSource] = useState(null);
+  const [selectedDestination, setSelectedDestination] = useState(null);
   const [filters, setFilters] = useState({
     materialType: "",
     vehicleType: "",
@@ -180,7 +183,8 @@ const SearchLoad = () => {
     radius: "100",
   });
   const [activeFilter, setActiveFilter] = useState(null);
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [showSourceDropdown, setShowSourceDropdown] = useState(false);
+  const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [showTruckSelector, setShowTruckSelector] = useState(false);
   const [showBidModal, setShowBidModal] = useState(false);
@@ -189,24 +193,40 @@ const SearchLoad = () => {
   const [trucks, setTrucks] = useState([]);
   const [loadingTrucks, setLoadingTrucks] = useState(false);
 
-  // Debounced function for location search
-  const debouncedLocationSearch = useCallback(
+  // Debounced functions for location search
+  const debouncedSourceSearch = useCallback(
     debounce(async (query) => {
       if (query.length < 3) {
-        setLocations([]);
+        setSourceLocations([]);
         return;
       }
 
       try {
-        setLoading(true);
         const response = await api.get(`/locationsearch?query=${query}`);
-        setLocations(response.data.data);
-        setShowLocationDropdown(true);
+        setSourceLocations(response.data.data);
+        setShowSourceDropdown(true);
       } catch (error) {
-        console.error("Location search error:", error);
-        setLocations([]);
-      } finally {
-        setLoading(false);
+        console.error("Source location search error:", error);
+        setSourceLocations([]);
+      }
+    }, 500),
+    []
+  );
+
+  const debouncedDestinationSearch = useCallback(
+    debounce(async (query) => {
+      if (query.length < 3) {
+        setDestinationLocations([]);
+        return;
+      }
+
+      try {
+        const response = await api.get(`/locationsearch?query=${query}`);
+        setDestinationLocations(response.data.data);
+        setShowDestinationDropdown(true);
+      } catch (error) {
+        console.error("Destination location search error:", error);
+        setDestinationLocations([]);
       }
     }, 500),
     []
@@ -223,17 +243,15 @@ const SearchLoad = () => {
         }
 
         const location = await Location.getCurrentPositionAsync({});
-        setUserLocation({
+        const userLoc = {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude
-        });
+        };
+        setUserLocation(userLoc);
         
-        // Fetch loads near user's location
+        // Fetch loads near user's location initially
         fetchLoads({
-          coordinates: {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude
-          }
+          sourceCoords: userLoc
         });
       } catch (error) {
         console.error('Error getting location:', error);
@@ -242,24 +260,34 @@ const SearchLoad = () => {
   }, []);
 
   // Handle search input changes
-  const handleSearchChange = (text) => {
-    setSearch(text);
-    debouncedLocationSearch(text);
+  const handleSourceSearchChange = (text) => {
+    setSourceSearch(text);
+    debouncedSourceSearch(text);
   };
 
-  // Fetch loads based on selected location and filters
-  const fetchLoads = async (location) => {
-    if (!location?.coordinates) return;
+  const handleDestinationSearchChange = (text) => {
+    setDestinationSearch(text);
+    debouncedDestinationSearch(text);
+  };
 
+  // Fetch loads based on selected locations and filters
+  const fetchLoads = async ({ sourceCoords, destCoords } = {}) => {
     try {
       setLoading(true);
-      const { latitude, longitude } = location.coordinates;
       const queryParams = new URLSearchParams({
-        latitude,
-        longitude,
         radius: filters.radius,
         ...filters,
-      }).toString();
+      });
+
+      if (sourceCoords) {
+        queryParams.append('sourceLatitude', sourceCoords.latitude);
+        queryParams.append('sourceLongitude', sourceCoords.longitude);
+      }
+
+      if (destCoords) {
+        queryParams.append('destinationLatitude', destCoords.latitude);
+        queryParams.append('destinationLongitude', destCoords.longitude);
+      }
 
       const response = await api.get(`/load/nearby?${queryParams}`);
       setLoads(response.data.data);
@@ -271,13 +299,33 @@ const SearchLoad = () => {
     }
   };
 
-  // Handle location selection
-  const handleLocationSelect = (location) => {
-    setSelectedLocation(location);
-    setSearch(location.name);
-    setShowLocationDropdown(false);
+  // Handle location selections
+  const handleSourceSelect = (location) => {
+    setSelectedSource(location);
+    setSourceSearch(location.name);
+    setShowSourceDropdown(false);
     fetchLoads({
-      coordinates: {
+      sourceCoords: {
+        latitude: location.coordinates.lat,
+        longitude: location.coordinates.lng
+      },
+      destCoords: selectedDestination ? {
+        latitude: selectedDestination.coordinates.lat,
+        longitude: selectedDestination.coordinates.lng
+      } : null
+    });
+  };
+
+  const handleDestinationSelect = (location) => {
+    setSelectedDestination(location);
+    setDestinationSearch(location.name);
+    setShowDestinationDropdown(false);
+    fetchLoads({
+      sourceCoords: selectedSource ? {
+        latitude: selectedSource.coordinates.lat,
+        longitude: selectedSource.coordinates.lng
+      } : null,
+      destCoords: {
         latitude: location.coordinates.lat,
         longitude: location.coordinates.lng
       }
@@ -325,8 +373,12 @@ const SearchLoad = () => {
       
       Alert.alert("Success", "Bid placed successfully!");
       setShowBidModal(false);
-      if (selectedLocation) {
-        fetchLoads(selectedLocation);
+      if (selectedSource) {
+        fetchLoads({
+          sourceCoords: selectedSource
+        });
+      } else if (userLocation) {
+        fetchLoads({ coordinates: userLocation });
       }
     } catch (error) {
       console.error("Place bid error:", error);
@@ -362,8 +414,12 @@ const SearchLoad = () => {
                       [filterKey]: option.value,
                     }));
                     onClose();
-                    if (selectedLocation) {
-                      fetchLoads(selectedLocation);
+                    if (selectedSource) {
+                      fetchLoads({
+                        sourceCoords: selectedSource
+                      });
+                    } else if (userLocation) {
+                      fetchLoads({ coordinates: userLocation });
                     }
                   }}>
                   <Text
@@ -388,23 +444,54 @@ const SearchLoad = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
+        {/* Source Search */}
         <FormInput
           Icon={LoadingPoint}
-          placeholder='Search location'
-          name='origin'
-          value={search}
-          onChangeText={handleSearchChange}
-          onFocus={() => setShowLocationDropdown(true)}
+          placeholder='Search source location'
+          name='source'
+          value={sourceSearch}
+          onChangeText={handleSourceSearchChange}
+          onFocus={() => setShowSourceDropdown(true)}
         />
 
-        {/* Location suggestions dropdown */}
-        {showLocationDropdown && locations.length > 0 && (
+        {/* Source Location suggestions dropdown */}
+        {showSourceDropdown && sourceLocations.length > 0 && (
           <View style={styles.dropdownContainer}>
-            {locations.map((location, index) => (
+            {sourceLocations.map((location, index) => (
               <TouchableOpacity
                 key={index}
                 style={styles.dropdownItem}
-                onPress={() => handleLocationSelect(location)}>
+                onPress={() => handleSourceSelect(location)}>
+                <Text numberOfLines={1} style={styles.dropdownText}>
+                  {location.name}
+                </Text>
+                <Text numberOfLines={2} style={styles.dropdownSubText}>
+                  {location.description}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* Destination Search */}
+        <FormInput
+          Icon={LoadingPoint}
+          placeholder='Search destination location'
+          name='destination'
+          value={destinationSearch}
+          onChangeText={handleDestinationSearchChange}
+          onFocus={() => setShowDestinationDropdown(true)}
+          containerStyle={styles.destinationInput}
+        />
+
+        {/* Destination Location suggestions dropdown */}
+        {showDestinationDropdown && destinationLocations.length > 0 && (
+          <View style={styles.dropdownContainer}>
+            {destinationLocations.map((location, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.dropdownItem}
+                onPress={() => handleDestinationSelect(location)}>
                 <Text numberOfLines={1} style={styles.dropdownText}>
                   {location.name}
                 </Text>
@@ -429,6 +516,7 @@ const SearchLoad = () => {
               key={load._id} 
               data={load} 
               onBidPress={() => handlePlaceBid(load)}
+              matchType={load.matchType}
             />
           ))
         )}
@@ -610,6 +698,9 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: "#ccc",
+  },
+  destinationInput: {
+    marginTop: 10,
   },
 });
 

@@ -11,18 +11,12 @@ import Home from "../../../assets/images/icons/Home";
 import Loads from "../../../assets/images/icons/Loads";
 import Chat from "../../../assets/images/icons/Chat";
 import Offer from "../../../assets/images/icons/Offer";
-
-const BackButton = ({ onPress }) => (
-  <TouchableOpacity
-    onPress={onPress}
-    style={{
-      marginLeft: 20,
-    }}>
-    <Text style={styles.backButtonText}>Back</Text>
-  </TouchableOpacity>
-);
+import { useAuth } from "../../../context/AuthProvider";
+import Truck from "../../../assets/images/icons/Truck";
 
 export default function TabLayout() {
+  const { user } = useAuth();
+  const isTrucker = user?.userType === "TRUCKER";
   return (
     <Tabs
       pressColor={"transparent"}
@@ -67,19 +61,22 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* //if user is a trucker show title as your trucks */}
+      {/* //if user is a transporter show title as your loads */}
       <Tabs.Screen
         name='loads'
         options={{
-          title: "Your Loads",
+          title: isTrucker ? "Your Trucks" : "Your Loads",
           tabBarIcon: ({ focused }) => (
             <View style={{ alignItems: "center" }}>
               {focused ? (
                 <View style={styles.tabButtonInner}>
-                  <Loads />
+                  {isTrucker ? <Truck /> :  <Loads />}
+                  
                   <View style={styles.tabButtonActiveChip}></View>
                 </View>
               ) : (
-                <Loads />
+                isTrucker ? <Truck /> :  <Loads />
               )}
             </View>
           ),

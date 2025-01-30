@@ -429,7 +429,7 @@ export default function TruckInfoDrawer({
 
               <Pressable
                 style={[styles.actionButton, styles.deleteButton]}
-                onPress={handleDelete}
+                onPress={handlePause}
                 disabled={isLoading}>
                 <Text style={styles.buttonText}>
                   {isLoading ? "Loading..." : "Delete"}

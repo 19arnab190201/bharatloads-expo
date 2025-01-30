@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 import BidSelectionModal from "./BidSelectionModal";
+import BidAmountModal from "./BidAmountModal";
 import TruckInfoDrawer from "./TruckInfoDrawer";
 import { limitText } from "../utils/functions";
 
@@ -27,9 +28,11 @@ import { normalize, formatText } from "../utils/functions";
 export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
   const { colour, user, token } = useAuth();
   const [showInfoDrawer, setShowInfoDrawer] = useState(false);
-  const [showBidModal, setShowBidModal] = useState(false);
+  const [showBidSelectionModal, setShowBidSelectionModal] = useState(false);
+  const [showBidAmountModal, setShowBidAmountModal] = useState(false);
   const [userLoads, setUserLoads] = useState([]);
   const [isLoadingLoads, setIsLoadingLoads] = useState(false);
+  const [selectedLoad, setSelectedLoad] = useState(null);
 
   const {
     truckOwner,
@@ -71,11 +74,18 @@ export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
 
   const handleBidButtonPress = async () => {
     await fetchUserLoads();
-    setShowBidModal(true);
+    setShowBidSelectionModal(true);
+  };
+
+  const handleLoadSelect = (load) => {
+    setSelectedLoad(load);
+    setShowBidSelectionModal(false);
+    setShowBidAmountModal(true);
   };
 
   const handleBidComplete = () => {
-    setShowBidModal(false);
+    setShowBidAmountModal(false);
+    setSelectedLoad(null);
     if (onBidPlaced) {
       onBidPlaced();
     }
@@ -465,9 +475,17 @@ export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
 
 
       <BidSelectionModal
-        visible={showBidModal}
-        onClose={() => setShowBidModal(false)}
+        visible={showBidSelectionModal}
+        onClose={() => setShowBidSelectionModal(false)}
         loads={userLoads}
+        onLoadSelect={handleLoadSelect}
+        loading={isLoadingLoads}
+      />
+
+      <BidAmountModal
+        visible={showBidAmountModal}
+        onClose={() => setShowBidAmountModal(false)}
+        selectedLoad={selectedLoad}
         truckId={_id}
         onBidPlaced={handleBidComplete}
       />

@@ -4,21 +4,22 @@ import Coins from "./Coins";
 
 import { useAuth } from "../context/AuthProvider";
 import { useNavigation } from "expo-router";
+import { normalize } from "../utils/functions";
 
 const Avatar = ({ name }) => {
   const navigation = useNavigation();
   const styles = StyleSheet.create({
     avatar: {
-      width: 50,
-      height: 50,
-      borderRadius: 50,
+      width: normalize(50),
+      height: normalize(50),
+      borderRadius: normalize(50),
       backgroundColor: "#24CAB6",
       justifyContent: "center",
       alignItems: "center",
     },
     avatarText: {
       color: "#fff",
-      fontSize: 20,
+      fontSize: normalize(20),
       fontWeight: "500",
       textTransform: "uppercase",
     },
@@ -49,16 +50,16 @@ const Header = () => {
       flexDirection: "row",
     },
     headerLeftSub: {
-      marginLeft: 10,
+      marginLeft: normalize(10),
     },
     headerText: {
-      fontSize: 20,
+      fontSize: normalize(20),
       fontWeight: "500",
       textTransform: "capitalize",
       color: colour.text,
     },
     headerSubText: {
-      fontSize: 16,
+      fontSize: normalize(16),
       color: "#666",
       textTransform: "capitalize",
       color: colour.secondaryColor,
@@ -72,7 +73,7 @@ const Header = () => {
         <Avatar name={user?.name || "U"} />
         <View style={styles.headerLeftSub}>
           <Text style={styles.headerText}>
-            {user?.name ? `${user.name}!` : "Welcome!"}
+            {user?.name ? `${user.name}` : "Welcome!"}
           </Text>
           <Text style={styles.headerSubText}>{user?.userType}</Text>
         </View>
