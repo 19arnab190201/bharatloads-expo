@@ -421,6 +421,7 @@ const StepTwo = ({ formState, setFormState, setStep }) => {
     },
     vehicleTypeCardSelected: {
       borderColor: "#14B8A6",
+      backgroundColor: "#F5FCFB",
     },
     vehicleTypeImage: {
       width: 50,
@@ -441,20 +442,27 @@ const StepTwo = ({ formState, setFormState, setStep }) => {
       marginTop: 10,
     },
     tyreButton: {
-      paddingHorizontal: 20,
-      paddingVertical: 10,
+      justifyContent: "center",
+      alignItems: "center",
       borderRadius: 25,
+      width: 50,
+      height: 50,
       backgroundColor: colour.inputBackground,
     },
     tyreButtonSelected: {
-      backgroundColor: "#14B8A6",
+      backgroundColor: "#F5FCFB",
+      borderWidth: 2,
+      borderColor: "#14B8A6",
+      color: "#757575",
     },
     tyreText: {
       fontSize: 16,
-      color: "#333",
+      color: "#757575",
+      fontWeight: "bold",
     },
     tyreTextSelected: {
-      color: "#fff",
+      color: "#757575",
+      fontWeight: "bold",
     },
     boxSkeletonContainer: {
       position: "absolute",
