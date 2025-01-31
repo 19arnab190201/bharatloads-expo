@@ -241,7 +241,7 @@ const SearchLoadCard = ({ data, onBidPress }) => {
         <View style={styles.priceSection}>
           <Text style={styles.price}>₹{formatMoneytext(offeredAmount.total)}</Text>
           <Text style={styles.advance}>
-           formatMoneytext({offeredAmount.advanceAmount})  Advance
+           {formatMoneytext(offeredAmount.advanceAmount)}  Advance
           </Text>
         </View>
       </View>

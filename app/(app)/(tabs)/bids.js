@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   Image,
+  ActivityIndicator,
   Alert,
 } from "react-native";
 import { api } from "../../../utils/api";
@@ -448,9 +449,11 @@ const BidCard = ({ bid, onBidClosed }) => {
             style={[styles.button, styles.closeButton]}
             onPress={handleCloseBid}
             disabled={isClosing || bid.status === "ACCEPTED"}>
-            <Text style={styles.buttonText("close")}>
-              {isClosing ? "Closing..." : "Close Bid"}
-            </Text>
+            {isClosing ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.buttonText("close")}>Close Bid</Text>
+            )}
           </Pressable>
         )}
         {bid.status === "ACCEPTED" && (

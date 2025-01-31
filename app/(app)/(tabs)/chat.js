@@ -27,11 +27,13 @@ const ChatItem = ({ chat, onPress }) => {
 
   const styles = StyleSheet.create({
     chatItem: {
-      flexDirection: "row",
-      padding: 15,
+      backgroundColor: colour.background,
+      borderRadius: normalize(12),
+      padding: normalize(16),
+      marginVertical: normalize(8),
       borderBottomWidth: 1,
-      borderBottomColor: "#eee",
-      alignItems: "center",
+      borderBottomColor: "#E5E5E5",
+      flexDirection: "row",
     },
     avatar: {
       width: normalize(50),
@@ -54,30 +56,46 @@ const ChatItem = ({ chat, onPress }) => {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      marginBottom: normalize(4),
     },
     chatName: {
       fontSize: normalize(16),
       fontWeight: "600",
+      color: colour.text,
       flex: 1,
       marginRight: normalize(8),
     },
     companyName: {
       fontSize: normalize(14),
-      color: "#666",
-      marginTop: 2,
+      color: colour.iconText,
+      marginBottom: normalize(8),
     },
-    lastMessage: {
+    time: {
+      fontSize: normalize(12),
+      color: colour.iconText,
+    },
+    messageContainer: {
+      marginTop: normalize(4),
+    },
+    regularMessage: {
       fontSize: normalize(14),
-      color: "#666",
-      marginTop: 4,
+      color: colour.iconText,
+    },
+    bidMessageContainer: {
+      backgroundColor: "#E6F7F5",
+      padding: normalize(8),
+      borderRadius: normalize(8),
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: normalize(4),
+    },
+    bidIcon: {
+      marginRight: normalize(8),
     },
     bidMessage: {
       color: colour.primaryColor,
       fontWeight: "500",
-    },
-    time: {
-      fontSize: normalize(12),
-      color: "#999",
+      fontSize: normalize(14),
     },
   });
 
@@ -99,17 +117,29 @@ const ChatItem = ({ chat, onPress }) => {
               : ""}
           </Text>
         </View>
-        <Text style={styles.companyName}>{otherParticipant.companyName}</Text>
+        <Text style={styles.companyName} numberOfLines={1}>
+          {otherParticipant.companyName}
+        </Text>
         {lastMessage && (
-          <Text 
-            style={[
-              styles.lastMessage,
-              isBidMessage && styles.bidMessage
-            ]} 
-            numberOfLines={1}
-          >
-            {isBidMessage ? "🤝 New Bid Accepted" : lastMessage.content}
-          </Text>
+          <View style={styles.messageContainer}>
+            {isBidMessage ? (
+              <View style={styles.bidMessageContainer}>
+                <MaterialIcons
+                  name="local-offer"
+                  size={normalize(18)}
+                  color={colour.primaryColor}
+                  style={styles.bidIcon}
+                />
+                <Text style={styles.bidMessage}>
+                  Bid Accepted - Let's start the journey!
+                </Text>
+              </View>
+            ) : (
+              <Text style={styles.regularMessage} numberOfLines={1}>
+                {lastMessage.content}
+              </Text>
+            )}
+          </View>
         )}
       </View>
     </TouchableOpacity>
@@ -126,22 +156,45 @@ export default function Chat() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      padding: 20,
+      backgroundColor: colour.background,
+    },
+    contentContainer: {
+      flex: 1,
+      padding: normalize(16),
+    },
+    header: {
+      paddingHorizontal: normalize(16),
+      paddingVertical: normalize(12),
+      borderBottomWidth: 1,
+      borderBottomColor: "#E5E5E5",
+      backgroundColor: colour.background,
     },
     title: {
       fontSize: normalize(24),
       fontWeight: "bold",
-      marginBottom: 20,
+      color: colour.text,
     },
     emptyContainer: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+      padding: normalize(20),
+    },
+    emptyIcon: {
+      marginBottom: normalize(16),
+    },
+    emptyTitle: {
+      fontSize: normalize(18),
+      fontWeight: "600",
+      color: colour.text,
+      marginBottom: normalize(8),
+      textAlign: "center",
     },
     emptyText: {
-      fontSize: normalize(16),
+      fontSize: normalize(14),
       textAlign: "center",
-      color: "#666",
+      color: colour.iconText,
+      lineHeight: normalize(20),
     },
     listContainer: {
       flexGrow: 1,
@@ -164,7 +217,6 @@ export default function Chat() {
       setIsLoading(true);
       fetchChats();
 
-      // Set up polling interval
       pollingIntervalRef.current = setInterval(fetchChats, 30000);
 
       return () => {
@@ -180,27 +232,39 @@ export default function Chat() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colour.background }]}>
-      <Text style={[styles.title, { color: colour.text }]}>Messages</Text>
-      {chats.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: colour.text }]}>
-            No messages yet. Accept a bid to start chatting!
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={chats}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <ChatItem
-              chat={item}
-              onPress={() => router.push(`/(app)/chat/${item._id}`)}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Messages</Text>
+      </View>
+      <View style={styles.contentContainer}>
+        {chats.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <MaterialIcons
+              name="chat-bubble-outline"
+              size={normalize(64)}
+              color={colour.iconColor}
+              style={styles.emptyIcon}
             />
-          )}
-          contentContainerStyle={styles.listContainer}
-        />
-      )}
+            <Text style={styles.emptyTitle}>No Messages Yet</Text>
+            <Text style={styles.emptyText}>
+              Your messages will appear here once you start chatting with transporters or truckers after accepting bids.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={chats}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <ChatItem
+                chat={item}
+                onPress={() => router.push(`/(app)/chat/${item._id}`)}
+              />
+            )}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }

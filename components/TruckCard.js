@@ -406,7 +406,7 @@ export default function TruckCard({
           : handleBidButtonPress
       }>
       {/* Owner Header Section */}
-      {showOwner && (
+      {showOwner ? (
         <View style={styles.header}>
           <View style={styles.userInfo}>
             {data.truckOwner?.profileImage ? (
@@ -422,6 +422,7 @@ export default function TruckCard({
                 </Text>
               </View>
             )}
+          
             <View style={styles.nameContainer}>
               <Text style={styles.name} numberOfLines={1} ellipsizeMode='tail'>
                 {data.truckOwner?.name || "Unknown User"}
@@ -442,7 +443,23 @@ export default function TruckCard({
             {getTimeLeft(expiresAt)}
           </Text>
         </View>
-      )}
+      ): 
+      <View style={
+        {
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }
+      }>
+        {/* SHOW TiME LEFT */}
+        <Text style={styles.timeLeft}>
+          {getTimeLeft(expiresAt)}
+        </Text>
+      </View>
+      
+      }
+
+
 
       {/* Main Content */}
       <View style={styles.content}>

@@ -411,11 +411,11 @@ export default function TruckInfoDrawer({
             </View>
 
             <View style={styles.actionButtonsContainer}>
-              <Pressable
+              {/* <Pressable
                 style={[styles.actionButton, styles.editButton]}
                 onPress={handleEdit}>
                 <Text style={styles.buttonText}>Edit</Text>
-              </Pressable>
+              </Pressable> */}
 
               <Pressable
                 style={[styles.actionButton, styles.pauseButton]}
