@@ -162,9 +162,6 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
             </View>
           </View>
         </View>
-        <View style={styles.tripTag}>
-          <Text style={styles.tripDistance}>{tripDistance} kms Trip</Text>
-        </View>
       </View>
 
       <View style={styles.divider} />
@@ -193,7 +190,9 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
             <Text style={styles.detailIcon}>
               <Container width={25} height={25} fill={colour.iconColor} />
             </Text>
-            <Text style={styles.detailText}>{vehicleBodyType}</Text>
+            <Text style={styles.detailText}>
+              {vehicleBodyType == "CLOSED_BODY" ? "Closed Body" : "Open Body"}
+            </Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailIcon}>

@@ -18,7 +18,7 @@ import TruckCard from "../../../components/TruckCard";
 import { api } from "../../../utils/api";
 import debounce from "lodash/debounce";
 import { normalize } from "../../../utils/functions";
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 
 const FILTER_OPTIONS = {
   vehicleBodyType: {
@@ -86,32 +86,31 @@ const SearchTrucks = () => {
     []
   );
 
-
   // Get user's current location when component mounts
   useEffect(() => {
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          console.error('Permission to access location was denied');
+        if (status !== "granted") {
+          console.error("Permission to access location was denied");
           return;
         }
 
         const location = await Location.getCurrentPositionAsync({});
         setUserLocation({
           latitude: location.coords.latitude,
-          longitude: location.coords.longitude
+          longitude: location.coords.longitude,
         });
-        
+
         // Fetch trucks near user's location
         fetchTrucks({
           coordinates: {
             latitude: location.coords.latitude,
-            longitude: location.coords.longitude
-          }
+            longitude: location.coords.longitude,
+          },
         });
       } catch (error) {
-        console.error('Error getting location:', error);
+        console.error("Error getting location:", error);
       }
     })();
   }, []);
@@ -154,8 +153,8 @@ const SearchTrucks = () => {
     fetchTrucks({
       coordinates: {
         latitude: location.coordinates.lat,
-        longitude: location.coordinates.lng
-      }
+        longitude: location.coordinates.lng,
+      },
     });
   };
 
@@ -288,7 +287,9 @@ const SearchTrucks = () => {
         ) : trucks.length === 0 ? (
           <Text style={styles.messageText}>No nearby trucks found</Text>
         ) : (
-          trucks.map((truck) => <TruckCard key={truck._id} data={truck} />)
+          trucks.map((truck) => (
+            <TruckCard showOwner={true} key={truck._id} data={truck} />
+          ))
         )}
       </ScrollView>
     </SafeAreaView>

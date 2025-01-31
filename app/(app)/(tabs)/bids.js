@@ -78,7 +78,7 @@ const BidCard = ({ bid, onBidClosed }) => {
     card: {
       backgroundColor: "#fff",
       borderRadius: normalize(12),
-      padding: normalize(16),
+      paddingBottom: normalize(16),
       marginBottom: normalize(16),
       shadowColor: "#000",
       shadowOffset: {
@@ -92,9 +92,15 @@ const BidCard = ({ bid, onBidClosed }) => {
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
+      borderTopEndRadius: normalize(12),
+      borderTopStartRadius: normalize(12),
+      padding: normalize(16),
       alignItems: "center",
       marginBottom: normalize(12),
+      borderColor: "#ff0000",
+      backgroundColor: "#FFF9F0",
     },
+
     userInfo: {
       flexDirection: "row",
       alignItems: "center",
@@ -130,17 +136,29 @@ const BidCard = ({ bid, onBidClosed }) => {
       fontSize: normalize(14),
       color: "#64748B",
     },
-    statusBadge: {
+    statusBadge: (status) => ({
       paddingHorizontal: normalize(12),
       paddingVertical: normalize(4),
-      borderRadius: normalize(12),
-      backgroundColor: "#F8FAFC",
-    },
+      borderRadius: normalize(52),
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor:
+        status === "ACCEPTED"
+          ? "#10B981"
+          : status === "REJECTED"
+          ? "#EF4444"
+          : "#F59E0B",
+    }),
     statusText: (status) => ({
       fontSize: normalize(14),
       fontWeight: "600",
-      color: status === "ACCEPTED" ? "#10B981" : 
-             status === "REJECTED" ? "#EF4444" : "#F59E0B",
+
+      color:
+        status === "ACCEPTED"
+          ? "#10B981"
+          : status === "REJECTED"
+          ? "#EF4444"
+          : "#F59E0B",
     }),
     materialImage: {
       width: normalize(56),
@@ -154,6 +172,8 @@ const BidCard = ({ bid, onBidClosed }) => {
       alignItems: "center",
       marginBottom: normalize(12),
       position: "relative",
+      paddingHorizontal: normalize(16),
+      paddingVertical: normalize(12),
     },
     materialInfo: {
       flex: 1,
@@ -182,6 +202,7 @@ const BidCard = ({ bid, onBidClosed }) => {
       gap: normalize(24),
       marginTop: normalize(12),
       marginBottom: normalize(12),
+      paddingHorizontal: normalize(16),
     },
     specItem: {
       flexDirection: "row",
@@ -196,6 +217,7 @@ const BidCard = ({ bid, onBidClosed }) => {
     },
     priceContainer: {
       marginBottom: normalize(16),
+      paddingHorizontal: normalize(16),
       marginTop: normalize(12),
     },
     price: {
@@ -225,6 +247,7 @@ const BidCard = ({ bid, onBidClosed }) => {
     buttonContainer: {
       flexDirection: "row",
       gap: normalize(12),
+      paddingHorizontal: normalize(16),
     },
     button: {
       flex: 1,
@@ -259,6 +282,7 @@ const BidCard = ({ bid, onBidClosed }) => {
     horizontalSeperator: {
       borderWidth: 0.3,
       borderColor: "#E2E8F0",
+      marginHorizontal: normalize(16),
     },
   });
 
@@ -291,18 +315,16 @@ const BidCard = ({ bid, onBidClosed }) => {
             </View>
           )}
           <View style={styles.nameContainer}>
-            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+            <Text style={styles.name} numberOfLines={1} ellipsizeMode='tail'>
               {bid.offeredTo?.name || "Unknown User"}
             </Text>
-            <Text style={styles.role} numberOfLines={1} ellipsizeMode="tail">
+            <Text style={styles.role} numberOfLines={1} ellipsizeMode='tail'>
               {bid.offeredTo?.userType || "User"}
             </Text>
           </View>
         </View>
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusText(bid.status)}>
-            {bid.status}
-          </Text>
+        <View style={styles.statusBadge(bid.status)}>
+          <Text style={styles.statusText(bid.status)}>{bid.status}</Text>
         </View>
       </View>
 
@@ -313,7 +335,10 @@ const BidCard = ({ bid, onBidClosed }) => {
           resizeMode='contain'
         />
         <View style={styles.materialInfo}>
-          <Text style={styles.materialType} numberOfLines={1} ellipsizeMode="tail">
+          <Text
+            style={styles.materialType}
+            numberOfLines={1}
+            ellipsizeMode='tail'>
             {bid.materialType || "Unknown Material"}
           </Text>
           <View style={styles.locationContainer}>
@@ -323,7 +348,10 @@ const BidCard = ({ bid, onBidClosed }) => {
               color='#14B8A6'
               style={styles.locationIcon}
             />
-            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
+            <Text
+              style={styles.locationText}
+              numberOfLines={1}
+              ellipsizeMode='tail'>
               {bid.source?.placeName || "Unknown Location"}
             </Text>
           </View>
@@ -334,7 +362,10 @@ const BidCard = ({ bid, onBidClosed }) => {
               color='#F43F5E'
               style={styles.locationIcon}
             />
-            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
+            <Text
+              style={styles.locationText}
+              numberOfLines={1}
+              ellipsizeMode='tail'>
               {bid.destination?.placeName || "Unknown Location"}
             </Text>
           </View>
@@ -364,7 +395,7 @@ const BidCard = ({ bid, onBidClosed }) => {
             color='#64748B'
             style={styles.specIcon}
           />
-          <Text style={styles.specText} numberOfLines={1} ellipsizeMode="tail">
+          <Text style={styles.specText} numberOfLines={1} ellipsizeMode='tail'>
             {bid.truckId?.truckType || "Unknown"}
           </Text>
         </View>
@@ -381,24 +412,28 @@ const BidCard = ({ bid, onBidClosed }) => {
         </View>
       </View>
       <View style={styles.horizontalSeperator} />
-    
+
       <View style={styles.priceContainer}>
         <View style={styles.priceDetails}>
           <View style={styles.priceInfo}>
             <Text style={styles.priceLabel}>Your Bid Amount</Text>
-            <Text style={styles.priceValue}>₹{bid.biddedAmount?.total || 0}</Text>
+            <Text style={styles.priceValue}>
+              ₹{bid.biddedAmount?.total || 0}
+            </Text>
             <Text style={styles.priceLabel}>
-              Advance: {bid.biddedAmount?.advanceAmount || 0} 
+              Advance: {bid.biddedAmount?.advanceAmount || 0}
             </Text>
             <Text style={styles.priceLabel}>
               Diesel: ₹{bid.biddedAmount?.dieselAmount || 0}
             </Text>
           </View>
-          <View style={{...styles.priceInfo, alignItems: 'flex-end'}}>
+          <View style={{ ...styles.priceInfo, alignItems: "flex-end" }}>
             <Text style={styles.priceLabel}>Original Amount</Text>
-            <Text style={styles.priceValue}>₹{bid.offeredAmount?.total || 0}</Text>
+            <Text style={styles.priceValue}>
+              ₹{bid.offeredAmount?.total || 0}
+            </Text>
             <Text style={styles.priceLabel}>
-              Advance: {bid.offeredAmount?.advanceAmount || 0} 
+              Advance: {bid.offeredAmount?.advanceAmount || 0}
             </Text>
             <Text style={styles.priceLabel}>
               Diesel: ₹{bid.offeredAmount?.dieselAmount || 0}
@@ -406,24 +441,26 @@ const BidCard = ({ bid, onBidClosed }) => {
           </View>
         </View>
       </View>
-        
+
       <View style={styles.buttonContainer}>
         {bid.status === "PENDING" && (
-        <Pressable
-          style={[styles.button, styles.closeButton]}
-          onPress={handleCloseBid}
-          disabled={isClosing || bid.status === "ACCEPTED"}>
-          <Text style={styles.buttonText("close")}>
-            {isClosing ? "Closing..." : "Close Bid"}
-          </Text>
-        </Pressable>)}
+          <Pressable
+            style={[styles.button, styles.closeButton]}
+            onPress={handleCloseBid}
+            disabled={isClosing || bid.status === "ACCEPTED"}>
+            <Text style={styles.buttonText("close")}>
+              {isClosing ? "Closing..." : "Close Bid"}
+            </Text>
+          </Pressable>
+        )}
         {bid.status === "ACCEPTED" && (
-        <Pressable
-          style={[styles.button, styles.chatButton]}
-          onPress={handleChat}
-          disabled={bid.status === "REJECTED"}>
-          <Text style={styles.buttonText("chat")}>Chat</Text>
-        </Pressable>)}
+          <Pressable
+            style={[styles.button, styles.chatButton]}
+            onPress={handleChat}
+            disabled={bid.status === "REJECTED"}>
+            <Text style={styles.buttonText("chat")}>Chat</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -544,7 +581,7 @@ const Bids = () => {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <View style={[styles.loadingContainer, { backgroundColor: '#fff' }]}>
+        <View style={[styles.loadingContainer, { backgroundColor: "#fff" }]}>
           <Loader />
         </View>
       );

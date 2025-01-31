@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../../context/AuthProvider";
-import { styles  as loginStyles} from "./login";
+import { styles as loginStyles } from "./login";
 const { width, height } = Dimensions.get("window");
 
 export default function Signup() {
@@ -31,8 +31,17 @@ export default function Signup() {
   const { signup } = useAuth();
 
   const handleSignup = async () => {
-    if (!form.name || !form.phoneNumber || !form.companyName || !form.companyLocation) {
-      setError("Please fill all fields");
+    if (!form.name || !form.phoneNumber) {
+      setError("Please fill all required fields");
+      return;
+    }
+
+    // Only validate company fields for transporter
+    if (
+      form.userType === "transporter" &&
+      (!form.companyName || !form.companyLocation)
+    ) {
+      setError("Please fill all required fields");
       return;
     }
 
@@ -56,121 +65,136 @@ export default function Signup() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}>
       <SafeAreaView>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-           <View style={{...loginStyles.header, marginTop:100}}>
-        <Text style={loginStyles.headerText}>Create an account </Text>
-        <Text style={loginStyles.subHeaderText}>Let's get you started!</Text>
-
-        
-       </View>
-        
-        <View style={styles.formContainer}>
-          {/* Name Input */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Your Name"
-              value={form.name}
-              onChangeText={(value) => handleInputChange("name", value)}
-              editable={!loading}
-            />
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <View style={{ ...loginStyles.header, marginTop: 100 }}>
+            <Text style={loginStyles.headerText}>Create an account </Text>
+            <Text style={loginStyles.subHeaderText}>
+              Let's get you started!
+            </Text>
           </View>
 
-          {/* Phone Number Input */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Phone Number</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Your Phone Number"
-              keyboardType="phone-pad"
-              value={form.phoneNumber}
-              onChangeText={(value) => handleInputChange("phoneNumber", value)}
-              editable={!loading}
-            />
-          </View>
+          <View style={styles.formContainer}>
+            {/* Name Input */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Name</Text>
+              <TextInput
+                style={styles.input}
+                placeholder='Enter Your Name'
+                value={form.name}
+                onChangeText={(value) => handleInputChange("name", value)}
+                editable={!loading}
+              />
+            </View>
 
-          {/* Account Type Selection */}
-          <View style={styles.accountTypeContainer}>
-            <TouchableOpacity
-              style={[
-                styles.accountTypeButton,
-                form.userType === "transporter" && styles.accountTypeButtonSelected,
-              ]}
-              onPress={() => handleInputChange("userType", "transporter")}>
-              <Text
+            {/* Phone Number Input */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <TextInput
+                style={styles.input}
+                placeholder='Enter Your Phone Number'
+                keyboardType='phone-pad'
+                value={form.phoneNumber}
+                onChangeText={(value) =>
+                  handleInputChange("phoneNumber", value)
+                }
+                editable={!loading}
+              />
+            </View>
+
+            {/* Account Type Selection */}
+            <View style={styles.accountTypeContainer}>
+              <TouchableOpacity
                 style={[
-                  styles.accountTypeText,
-                  form.userType === "transporter" && styles.accountTypeTextSelected,
-                ]}>
-                Transporter
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.accountTypeButton,
-                form.userType === "trucker" && styles.accountTypeButtonSelected,
-              ]}
-              onPress={() => handleInputChange("userType", "trucker")}>
-              <Text
+                  styles.accountTypeButton,
+                  form.userType === "transporter" &&
+                    styles.accountTypeButtonSelected,
+                ]}
+                onPress={() => handleInputChange("userType", "transporter")}>
+                <Text
+                  style={[
+                    styles.accountTypeText,
+                    form.userType === "transporter" &&
+                      styles.accountTypeTextSelected,
+                  ]}>
+                  Transporter
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={[
-                  styles.accountTypeText,
-                  form.userType === "trucker" && styles.accountTypeTextSelected,
-                ]}>
-                Trucker
-              </Text>
-            </TouchableOpacity>
-          </View>
+                  styles.accountTypeButton,
+                  form.userType === "trucker" &&
+                    styles.accountTypeButtonSelected,
+                ]}
+                onPress={() => handleInputChange("userType", "trucker")}>
+                <Text
+                  style={[
+                    styles.accountTypeText,
+                    form.userType === "trucker" &&
+                      styles.accountTypeTextSelected,
+                  ]}>
+                  Trucker
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-          {/* Company Name Input */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Company Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Your Company Name"
-              value={form.companyName}
-              onChangeText={(value) => handleInputChange("companyName", value)}
-              editable={!loading}
-            />
-          </View>
+            {/* Company fields - Only show for transporter */}
+            {form.userType === "transporter" && (
+              <>
+                {/* Company Name Input */}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Company Name</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder='Enter Your Company Name'
+                    value={form.companyName}
+                    onChangeText={(value) =>
+                      handleInputChange("companyName", value)
+                    }
+                    editable={!loading}
+                  />
+                </View>
 
-          {/* Company Location Input */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Company Location</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Your Company Location"
-              value={form.companyLocation}
-              onChangeText={(value) => handleInputChange("companyLocation", value)}
-              editable={!loading}
-            />
-          </View>
-
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-          {/* Get Started Button */}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleSignup}
-            disabled={loading}>
-            {loading ? (
-              <Text style={styles.buttonText}>Loading...</Text>
-            ) : (
-              <Text style={styles.buttonText}>Get Started</Text>
+                {/* Company Location Input */}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Company Location</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder='Enter Your Company Location'
+                    value={form.companyLocation}
+                    onChangeText={(value) =>
+                      handleInputChange("companyLocation", value)
+                    }
+                    editable={!loading}
+                  />
+                </View>
+              </>
             )}
-          </TouchableOpacity>
 
-          {/* Sign In Link */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <Link href="/login">
-              <Text style={styles.link}>Sign In</Text>
-            </Link>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+            {/* Get Started Button */}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleSignup}
+              disabled={loading}>
+              {loading ? (
+                <Text style={styles.buttonText}>Loading...</Text>
+              ) : (
+                <Text style={styles.buttonText}>Get Started</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Sign In Link */}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <Link href='/login'>
+                <Text style={styles.link}>Sign In</Text>
+              </Link>
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
@@ -203,7 +227,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: Platform.OS === "ios" ? 16 : 20,
     fontSize: 16,
-    backgroundColor: "#F1F5F9"  ,
+    backgroundColor: "#F1F5F9",
   },
   accountTypeContainer: {
     flexDirection: "row",

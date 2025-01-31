@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Pressable,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 import BidSelectionModal from "./BidSelectionModal";
@@ -23,9 +24,12 @@ import { getTimeLeft } from "../utils/functions";
 import { api } from "../utils/api";
 import { normalize, formatText } from "../utils/functions";
 
-
-
-export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
+export default function TruckCard({
+  data,
+  onBidPlaced,
+  onTruckUpdated,
+  showOwner = false,
+}) {
   const { colour, user, token } = useAuth();
   const [showInfoDrawer, setShowInfoDrawer] = useState(false);
   const [showBidSelectionModal, setShowBidSelectionModal] = useState(false);
@@ -119,15 +123,62 @@ export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
+      borderTopEndRadius: normalize(12),
+      borderTopStartRadius: normalize(12),
+      padding: normalize(16),
+      alignItems: "center",
+      marginBottom: normalize(12),
+      borderColor: "#ff0000",
+      backgroundColor: "#FFF9F0",
+    },
+    userInfo: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: normalize(8),
+      width: "60%",
+    },
+    avatar: {
+      width: normalize(40),
+      height: normalize(40),
+      borderRadius: normalize(20),
+      backgroundColor: "#FEF3C7",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    avatarText: {
+      fontSize: normalize(16),
+      fontWeight: "600",
+      color: "#D97706",
+    },
+    nameContainer: {
+      flex: 1,
+    },
+    name: {
+      fontSize: normalize(16),
+      fontWeight: "600",
+      color: "#1E293B",
+      marginBottom: normalize(2),
+    },
+    role: {
+      fontSize: normalize(14),
+      color: "#64748B",
     },
     timeLeft: {
       backgroundColor: "#E6F7F5",
       color: colour.primaryColor,
-      borderRadius: 12,
-      height: normalize(28),
-      padding: 5,
-      paddingHorizontal: 10,
-      fontSize: normalize(11),
+      borderRadius: normalize(12),
+      padding: normalize(5),
+      paddingHorizontal: normalize(10),
+      fontSize: normalize(12),
+      fontWeight: "600",
+    },
+    expiredTimeLeft: {
+      backgroundColor: colour.expired,
+      color: colour.expiredText,
+      borderRadius: normalize(12),
+      padding: normalize(5),
+      paddingHorizontal: normalize(10),
+      fontSize: normalize(12),
       fontWeight: "600",
     },
     content: {
@@ -254,24 +305,6 @@ export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
       elevation: 4,
       zIndex: 1,
     },
-    timeLeft: {
-      backgroundColor: "#E6F7F5",
-      color: colour.primaryColor,
-      borderRadius: normalize(12),
-      padding: normalize(5),
-      paddingHorizontal: normalize(10),
-      fontSize: normalize(12),
-      fontWeight: "600",
-    },
-    expiredTimeLeft: {
-      backgroundColor: colour.expired,
-      color: colour.expiredText,
-      borderRadius: normalize(12),
-      padding: normalize(5),
-      paddingHorizontal: normalize(10),
-      fontSize: normalize(12),
-      fontWeight: "600",
-    },
     menuItem: {
       padding: 10,
       borderBottomWidth: 1,
@@ -334,43 +367,65 @@ export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
       fontSize: 13,
       fontWeight: "600",
     },
+    loadingOverlay: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(255, 255, 255, 0.7)",
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 12,
+    },
   });
 
-
   return (
-    <View style={styles.card}>
-      {/* Top Section */}
-      <View style={styles.header}>
-        <Text
-          style={
-            new Date(expiresAt) < new Date()
-              ? styles.expiredTimeLeft
-              : styles.timeLeft
-          }>
-          {getTimeLeft(expiresAt)}
-        </Text>
-        {truckOwner === user._id ? (
-          <TouchableOpacity 
-            style={styles.menuButton} 
-            onPress={() => setShowInfoDrawer(true)}
-          >
-            <MaterialIcons
-              name='more-vert'
-              size={24}
-              color={colour.iconColor}
-            />
-          </TouchableOpacity>
-        ) : (
-          <Pressable 
-            style={styles.bidButton}
-            onPress={handleBidButtonPress}
-          >
-            <Text style={styles.bidButtonText}>
-              {isLoadingLoads ? "Loading..." : "Place Bid"}
-            </Text>
-          </Pressable>
-        )}
-      </View>
+    <Pressable
+      style={styles.card}
+      onPress={
+        truckOwner === user._id
+          ? () => setShowInfoDrawer(true)
+          : handleBidButtonPress
+      }>
+      {/* Owner Header Section */}
+      {showOwner && (
+        <View style={styles.header}>
+          <View style={styles.userInfo}>
+            {data.truckOwner?.profileImage ? (
+              <Image
+                source={{ uri: data.truckOwner.profileImage }}
+                style={styles.avatar}
+                resizeMode='cover'
+              />
+            ) : (
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>
+                  {data.truckOwner?.name?.charAt(0)?.toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <View style={styles.nameContainer}>
+              <Text style={styles.name} numberOfLines={1} ellipsizeMode='tail'>
+                {data.truckOwner?.name || "Unknown User"}
+              </Text>
+              <Text style={styles.role} numberOfLines={1} ellipsizeMode='tail'>
+                {data.truckOwner?.userType === "transporter"
+                  ? "Transporter"
+                  : "Trucker"}
+              </Text>
+            </View>
+          </View>
+          <Text
+            style={
+              new Date(expiresAt) < new Date()
+                ? styles.expiredTimeLeft
+                : styles.timeLeft
+            }>
+            {getTimeLeft(expiresAt)}
+          </Text>
+        </View>
+      )}
 
       {/* Main Content */}
       <View style={styles.content}>
@@ -392,7 +447,9 @@ export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
                   justifyContent: "flex-start",
                 }}>
                 <FontAwesome6 name='location-dot' size={16} color='#A855F7' />
-                <Text style={styles.source}>{limitText(truckLocation?.placeName, 25)}</Text>
+                <Text style={styles.source}>
+                  {limitText(truckLocation?.placeName, 25)}
+                </Text>
               </View>
             </View>
             <Text style={styles.materialTypeStyles}>
@@ -401,6 +458,13 @@ export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
           </View>
         </View>
       </View>
+
+      {/* Loading indicator overlay when fetching loads */}
+      {isLoadingLoads && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size='small' color={colour.primaryColor} />
+        </View>
+      )}
 
       {/* Card Content */}
       <View style={styles.row}>
@@ -473,7 +537,6 @@ export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
         </Text>
       </View> */}
 
-
       <BidSelectionModal
         visible={showBidSelectionModal}
         onClose={() => setShowBidSelectionModal(false)}
@@ -497,6 +560,6 @@ export default function TruckCard({ data, onBidPlaced, onTruckUpdated }) {
         onRepost={handleRepost}
         onPause={handlePause}
       />
-    </View>
+    </Pressable>
   );
 }

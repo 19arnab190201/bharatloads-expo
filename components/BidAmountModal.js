@@ -13,12 +13,12 @@ import { useAuth } from "../context/AuthProvider";
 import { normalize } from "../utils/functions";
 import { api } from "../utils/api";
 
-export default function BidAmountModal({ 
-  visible, 
-  onClose, 
+export default function BidAmountModal({
+  visible,
+  onClose,
   selectedLoad,
   truckId,
-  onBidPlaced 
+  onBidPlaced,
 }) {
   const { colour, token } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,6 +99,7 @@ export default function BidAmountModal({
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
       padding: 20,
+      maxHeight: "80%",
     },
     header: {
       flexDirection: "row",
@@ -107,62 +108,81 @@ export default function BidAmountModal({
       marginBottom: 20,
     },
     title: {
-      fontSize: 20,
+      fontSize: normalize(20),
       fontWeight: "bold",
-      color: colour.text,
+      color: "#1E293B",
+      textAlign: "center",
+      flex: 1,
     },
     closeButton: {
       padding: 8,
     },
     closeText: {
-      fontSize: 16,
-      color: colour.text,
+      fontSize: normalize(16),
+      color: "#64748B",
+      fontWeight: "500",
     },
     amountContainer: {
-      backgroundColor: "#f5f5f5",
+      backgroundColor: "#F8FAFC",
       padding: 16,
-      borderRadius: 8,
+      borderRadius: 12,
       marginBottom: 20,
     },
-    amountLabel: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: colour.text,
-      marginBottom: 8,
-    },
     inputRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: 12,
+      marginBottom: 16,
     },
     inputLabel: {
-      width: 120,
-      fontSize: 14,
-      color: colour.text,
+      fontSize: normalize(14),
+      color: "#64748B",
+      marginBottom: 8,
+      fontWeight: "500",
     },
     input: {
-      flex: 1,
       backgroundColor: "#fff",
-      padding: 8,
-      borderRadius: 4,
+      padding: 12,
+      borderRadius: 8,
       borderWidth: 1,
-      borderColor: "#ddd",
+      borderColor: "#E2E8F0",
+      fontSize: normalize(16),
+      color: "#1E293B",
     },
     offeredAmount: {
-      fontSize: 14,
-      color: "#666",
-      marginTop: 4,
+      fontSize: normalize(14),
+      color: "#64748B",
+      marginTop: 16,
+      backgroundColor: "#F1F5F9",
+      padding: 12,
+      borderRadius: 8,
+      lineHeight: 20,
     },
-    submitButton: {
-      backgroundColor: colour.primaryColor,
+    buttonContainer: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 8,
+    },
+    cancelButton: {
+      flex: 1,
       padding: 16,
       borderRadius: 8,
+      backgroundColor: "#F1F5F9",
+      alignItems: "center",
+    },
+    submitButton: {
+      flex: 1,
+      padding: 16,
+      borderRadius: 8,
+      backgroundColor: colour.primaryColor,
       alignItems: "center",
       opacity: isSubmitting ? 0.7 : 1,
     },
+    cancelButtonText: {
+      color: "#64748B",
+      fontSize: normalize(16),
+      fontWeight: "600",
+    },
     submitButtonText: {
       color: "#fff",
-      fontSize: 16,
+      fontSize: normalize(16),
       fontWeight: "600",
     },
   });
@@ -170,10 +190,9 @@ export default function BidAmountModal({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType='slide'
       transparent
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.content}>
           <View style={styles.header}>
@@ -184,58 +203,73 @@ export default function BidAmountModal({
           </View>
 
           <View style={styles.amountContainer}>
-            <Text style={styles.amountLabel}>Your Bid Amount</Text>
             <View style={styles.inputRow}>
               <Text style={styles.inputLabel}>Total Amount (₹)</Text>
               <TextInput
                 style={styles.input}
                 value={biddedAmount.total}
-                onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, total: text }))}
-                keyboardType="numeric"
-                placeholder="Enter total amount"
+                onChangeText={(text) =>
+                  setBiddedAmount((prev) => ({ ...prev, total: text }))
+                }
+                keyboardType='numeric'
+                placeholder='Enter total amount'
                 editable={!isSubmitting}
               />
             </View>
+
             <View style={styles.inputRow}>
-              <Text style={styles.inputLabel}>Advance </Text>
+              <Text style={styles.inputLabel}>Advance Amount (₹)</Text>
               <TextInput
                 style={styles.input}
                 value={biddedAmount.advanceAmount}
-                onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, advanceAmount: text }))}
-                keyboardType="numeric"
-                placeholder="Enter advance "
+                onChangeText={(text) =>
+                  setBiddedAmount((prev) => ({ ...prev, advanceAmount: text }))
+                }
+                keyboardType='numeric'
+                placeholder='Enter advance amount'
                 editable={!isSubmitting}
               />
             </View>
+
             <View style={styles.inputRow}>
               <Text style={styles.inputLabel}>Diesel Amount (₹)</Text>
               <TextInput
                 style={styles.input}
                 value={biddedAmount.dieselAmount}
-                onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, dieselAmount: text }))}
-                keyboardType="numeric"
-                placeholder="Enter diesel amount"
+                onChangeText={(text) =>
+                  setBiddedAmount((prev) => ({ ...prev, dieselAmount: text }))
+                }
+                keyboardType='numeric'
+                placeholder='Enter diesel amount'
                 editable={!isSubmitting}
               />
             </View>
+
             <Text style={styles.offeredAmount}>
               Original offered amount: ₹{selectedLoad?.offeredAmount.total}
-              {"\n"}(Advance: {selectedLoad?.offeredAmount.advanceAmount} | 
-              Diesel: ₹{selectedLoad?.offeredAmount.dieselAmount})
+              {"\n"}Advance: ₹{selectedLoad?.offeredAmount.advanceAmount} |
+              Diesel: ₹{selectedLoad?.offeredAmount.dieselAmount}
             </Text>
           </View>
 
-          <Pressable
-            style={styles.submitButton}
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-          >
-            <Text style={styles.submitButtonText}>
-              {isSubmitting ? "Placing Bid..." : "Place Bid"}
-            </Text>
-          </Pressable>
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={styles.cancelButton}
+              onPress={onClose}
+              disabled={isSubmitting}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </Pressable>
+            <Pressable
+              style={styles.submitButton}
+              onPress={handleSubmit}
+              disabled={isSubmitting}>
+              <Text style={styles.submitButtonText}>
+                {isSubmitting ? "Placing Bid..." : "Place Bid"}
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </Modal>
   );
-} 
+}

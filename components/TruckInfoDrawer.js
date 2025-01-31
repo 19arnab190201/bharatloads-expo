@@ -139,8 +139,7 @@ export default function TruckInfoDrawer({
         truckBodyType: data.vehicleBodyType === "OPEN_BODY" ? "open" : "closed",
         numTires: data.numberOfWheels,
         totalOfferedAmount: data.offeredAmount.total.toString(),
-        advanceAmount:
-          data.offeredAmount.advanceAmount?.toString() || "",
+        advanceAmount: data.offeredAmount.advanceAmount?.toString() || "",
         advanceCash: data.offeredAmount.cashAmount?.toString() || "",
         advanceDiesel: data.offeredAmount.dieselAmount?.toString() || "",
         schedule: data.whenNeeded === "IMMEDIATE" ? "immediately" : "later",
@@ -427,14 +426,14 @@ export default function TruckInfoDrawer({
                 </Text>
               </Pressable>
 
-              <Pressable
+              {/* <Pressable
                 style={[styles.actionButton, styles.deleteButton]}
                 onPress={handlePause}
                 disabled={isLoading}>
                 <Text style={styles.buttonText}>
                   {isLoading ? "Loading..." : "Delete"}
                 </Text>
-              </Pressable>
+              </Pressable> */}
             </View>
           </ScrollView>
         </View>
