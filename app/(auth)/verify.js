@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useAuth } from "../../context/AuthProvider";
 import { router, useLocalSearchParams, Link } from "expo-router";
+import { updateDeviceToken, setupNotificationListeners } from '../../utils/notifications';
 
 const { width, height } = Dimensions.get("window");
 
@@ -48,6 +49,9 @@ export default function Verify() {
       setLoading(true);
       setError("");
       await verifyOTP(otpString, phoneNumber);
+      // Initialize notifications after successful verification
+      await updateDeviceToken();
+      const cleanup = setupNotificationListeners();
       router.replace("/(app)");
     } catch (err) {
       setError(err.message || "Invalid OTP");

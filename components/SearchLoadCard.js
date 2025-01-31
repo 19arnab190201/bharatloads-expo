@@ -4,7 +4,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
-import { normalize, formatText, limitText,calculateDistance, getTimeLeft } from "../utils/functions";
+import { normalize, formatText, limitText,calculateDistance, getTimeLeft, formatMoneytext } from "../utils/functions";
 import { useAuth } from "../context/AuthProvider";
 
 
@@ -239,9 +239,9 @@ const SearchLoadCard = ({ data, onBidPress }) => {
 
         {/* Price Section */}
         <View style={styles.priceSection}>
-          <Text style={styles.price}>₹{offeredAmount.total}</Text>
+          <Text style={styles.price}>₹{formatMoneytext(offeredAmount.total)}</Text>
           <Text style={styles.advance}>
-            {offeredAmount.advanceAmount} Advance
+           formatMoneytext({offeredAmount.advanceAmount})  Advance
           </Text>
         </View>
       </View>

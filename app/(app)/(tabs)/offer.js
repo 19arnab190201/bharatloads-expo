@@ -11,7 +11,7 @@ import {
 import { api } from "../../../utils/api";
 import { useAuth } from "../../../context/AuthProvider";
 import { MaterialIcons } from "@expo/vector-icons";
-import { normalize } from "../../../utils/functions";
+import { normalize, formatMoneytext } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
 import Loader from "../../../components/Loader";
 
@@ -404,20 +404,20 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
         <View style={styles.priceDetails}>
           <View style={styles.priceInfo}>
             <Text style={styles.priceLabel}>Bidded Amount</Text>
-            <Text style={styles.priceValue}>₹{offer.biddedAmount?.total || 0}</Text>
+            <Text style={styles.priceValue}>₹{formatMoneytext(offer.biddedAmount?.total || 0)}</Text>
             <Text style={styles.priceLabel}>
-              Advance: {offer.biddedAmount?.advanceAmount || 0}</Text>
+              Advance: {formatMoneytext(offer.biddedAmount?.advanceAmount || 0)}</Text>
             <Text style={styles.priceLabel}>
-              Diesel: ₹{offer.biddedAmount?.dieselAmount || 0}
+              Diesel: ₹{formatMoneytext(offer.biddedAmount?.dieselAmount || 0)}
             </Text>
           </View>
           <View style={{...styles.priceInfo, alignItems: 'flex-end'}}>
             <Text style={styles.priceLabel}>Your Original Amount</Text>
-            <Text style={styles.priceValue}>₹{offer.offeredAmount?.total || 0}</Text>
+            <Text style={styles.priceValue}>₹{formatMoneytext(offer.offeredAmount?.total || 0)}</Text>
             <Text style={styles.priceLabel}>
-              Advance: {offer.offeredAmount?.advanceAmount || 0}</Text>
+              Advance: {formatMoneytext(offer.offeredAmount?.advanceAmount || 0)}</Text>
             <Text style={styles.priceLabel}>
-              Diesel: ₹{offer.offeredAmount?.dieselAmount || 0}
+              Diesel: ₹{formatMoneytext(offer.offeredAmount?.dieselAmount || 0)}
             </Text>
           </View>
         </View>

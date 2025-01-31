@@ -15,7 +15,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
-import { formatText } from "../utils/functions";
+import { formatText, formatMoneytext } from "../utils/functions";
 import { useRouter } from "expo-router";
 import { Buffer } from "buffer";
 
@@ -402,7 +402,7 @@ export default function TruckInfoDrawer({
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Total Amount</Text>
                     <Text style={styles.detailValue}>
-                      ₹{data?.offeredAmount?.total}
+                      ₹{formatMoneytext(data?.offeredAmount?.total)}
                     </Text>
                   </View>
                   <View style={styles.divider} />

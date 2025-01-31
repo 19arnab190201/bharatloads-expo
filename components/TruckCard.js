@@ -106,6 +106,23 @@ export default function TruckCard({
       onTruckUpdated();
     }
   };
+  const vehicleTypes = [
+    {
+      id: "trailer",
+      label: "TRAILER",
+      icon: require("../assets/images/trucktype/trailer.png"),
+    },
+    {
+      id: "hyva",
+      label: "HYVA",
+      icon: require("../assets/images/trucktype/hyva.png"),
+    },
+    {
+      id: "truck",
+      label: "TRUCK",
+      icon: require("../assets/images/trucktype/truck.png"),
+    },
+  ];
 
   const styles = StyleSheet.create({
     card: {
@@ -431,7 +448,7 @@ export default function TruckCard({
       <View style={styles.content}>
         <View style={styles.materialSection}>
           <Image
-            source={require("../assets/images/trucktype/hyva.png")}
+            source={vehicleTypes.find(label => label.label === truckType)?.icon}
             style={styles.materialImage}
           />
           <View style={styles.materialSubSection}>

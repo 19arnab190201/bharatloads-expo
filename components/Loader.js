@@ -1,4 +1,4 @@
-import { View, StyleSheet, Dimensions,Text } from 'react-native';
+import { View, StyleSheet, Dimensions, Text, Image } from 'react-native';
 import { useEffect } from 'react';
 import Animated, {
   useSharedValue,
@@ -34,8 +34,10 @@ const Loader = () => {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.logoContainer, animatedStyle]}>
-        <BLLogo width={width * 0.6} height={width * 0.25} />
-        <Text style={styles.text}>BHARATLOADS</Text>
+        <Image 
+          source={require('../assets/images/bllogo.png')}
+          style={styles.logo}
+        />
       </Animated.View>
     </View>
   );
@@ -47,16 +49,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 999,
   },
   logoContainer: {
+    width: width * 0.8,
+    
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#fff',
+
+  },
+  logo: {
+    width: '80%',
+    height: '80%',
+    resizeMode: 'contain',
   },
   text: {
     fontSize: normalize(24),
     fontWeight: 'bold',
     color: '#000',
-    marginTop: "10"
+    marginTop: 10,
   },
 });
 

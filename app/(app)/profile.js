@@ -10,6 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { api } from "../../utils/api";
 import { useNavigation } from '@react-navigation/native';
 import Coins from "../../components/Coins";
+import { Linking } from 'react-native';
 
 const Profile = () => {
   const { user, logout, setUser } = useAuth();
@@ -114,15 +115,11 @@ const Profile = () => {
           <View style={styles.moreSection}>
             <Text style={styles.sectionTitle}>More</Text>
             
-            <TouchableOpacity style={styles.optionItem}>
-              <Text>Refer & Earn</Text>
+            <TouchableOpacity disabled={true} style={{...styles.optionItem, opacity: 0.3}}>
+              <Text>Refer & Earn (Coming Soon)</Text>
             </TouchableOpacity>
 
-            <View style={styles.optionItem}>
-              <Text>Dark Mode</Text>
-            </View>
-
-            <TouchableOpacity style={styles.optionItem}>
+            <TouchableOpacity onPress={() => Linking.openURL('https://wa.me/+919942588783')} style={styles.optionItem}>
               <Text>Help & Support</Text>
             </TouchableOpacity>
 

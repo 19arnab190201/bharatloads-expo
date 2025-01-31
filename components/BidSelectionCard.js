@@ -6,6 +6,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Container from "../assets/images/icons/Container";
 import Wheel from "../assets/images/icons/Wheel";
+import { normalize, formatText, formatMoneytext } from "../utils/functions";
 
 export default function BidSelectionCard({ data, onSelect, isSelected }) {
   const { colour } = useAuth();
@@ -213,8 +214,8 @@ export default function BidSelectionCard({ data, onSelect, isSelected }) {
         </View>
 
         <View style={styles.priceSection}>
-          <Text style={styles.price}>₹{offeredAmount.total}</Text>
-          <Text style={styles.advance}>50% Advance</Text>
+          <Text style={styles.price}>₹{formatMoneytext(offeredAmount.total)}</Text>
+          <Text style={styles.advance}>₹{formatMoneytext(offeredAmount?.advanceAmount)} Advance</Text>
         </View>
       </View>
 

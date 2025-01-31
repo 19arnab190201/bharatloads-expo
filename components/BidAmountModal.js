@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
-import { normalize } from "../utils/functions";
+import { normalize, formatMoneytext } from "../utils/functions";
 import { api } from "../utils/api";
 
 export default function BidAmountModal({
@@ -112,7 +112,6 @@ export default function BidAmountModal({
       fontWeight: "bold",
       color: "#1E293B",
       textAlign: "center",
-      flex: 1,
     },
     closeButton: {
       padding: 8,
@@ -246,9 +245,9 @@ export default function BidAmountModal({
             </View>
 
             <Text style={styles.offeredAmount}>
-              Original offered amount: ₹{selectedLoad?.offeredAmount.total}
-              {"\n"}Advance: ₹{selectedLoad?.offeredAmount.advanceAmount} |
-              Diesel: ₹{selectedLoad?.offeredAmount.dieselAmount}
+              Original offered amount: ₹{formatMoneytext(selectedLoad?.offeredAmount.total)}
+              {"\n"}Advance: ₹{formatMoneytext(selectedLoad?.offeredAmount.advanceAmount)} |
+              Diesel: ₹{formatMoneytext(selectedLoad?.offeredAmount.dieselAmount)}
             </Text>
           </View>
 
