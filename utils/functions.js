@@ -64,3 +64,13 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const distance = R * c * 1.11; // Distance in kilometers
   return Math.round(distance);
 }
+// make 10000 to 10,000 and like 10000000 to 1,00,00,000 use international numberfunction for money set to inr
+export const formatMoneytext = (amount) => {
+  if (!amount) return "0";
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount).replace('₹', '');
+}

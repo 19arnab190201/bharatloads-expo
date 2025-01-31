@@ -14,6 +14,7 @@ import {
   limitText,
 } from "../utils/functions";
 import TruckInfoDrawer from "./TruckInfoDrawer";
+import { formatMoneytext } from "../utils/functions";
 
 export default function LoadCard({ data, onLoadUpdated }) {
   const { colour, user } = useAuth();
@@ -32,7 +33,6 @@ export default function LoadCard({ data, onLoadUpdated }) {
     tripDistance,
   } = data;
 
-  console.log("offeredAmount", offeredAmount);
   const advanceAmount = offeredAmount.advanceAmount; // value in money not percentage
 
 
@@ -356,11 +356,10 @@ export default function LoadCard({ data, onLoadUpdated }) {
         </View>
 
         {/* Price Section */}
-        {console.log("Advance Amount: ", offeredAmount)}
         <View style={styles.priceSection}>
-          <Text style={styles.price}>₹{offeredAmount.total}</Text>
+          <Text style={styles.price}>₹{formatMoneytext(offeredAmount.total)}</Text>
           <Text style={styles.advance}>
-            ₹{advanceAmount} 
+            ₹{formatMoneytext(advanceAmount)} 
           </Text>
           <Text style={styles.advance}>Advance</Text>
         </View>
