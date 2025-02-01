@@ -24,7 +24,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.arnab.d.kumar.bharatloads",
+      "package": "com.bharatloads",
       "googleServicesFile": "./google-services.json"
     },
     "web": {
