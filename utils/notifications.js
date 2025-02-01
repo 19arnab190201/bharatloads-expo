@@ -1,7 +1,8 @@
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import { Platform } from 'react-native';
-import { api } from './api';
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import { Platform } from "react-native";
+import { api } from "./api";
+import Constants from "expo-constants";
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -15,41 +16,56 @@ Notifications.setNotificationHandler({
 export async function registerForPushNotificationsAsync() {
   let token;
 
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('chat-messages', {
-      name: 'Chat Messages',
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("chat-messages", {
+      name: "Chat Messages",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
+      lightColor: "#FF231F7C",
     });
 
-    await Notifications.setNotificationChannelAsync('bid-updates', {
-      name: 'Bid Updates',
+    await Notifications.setNotificationChannelAsync("bid-updates", {
+      name: "Bid Updates",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
+      lightColor: "#FF231F7C",
     });
   }
 
   if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    
-    if (existingStatus !== 'granted') {
+
+    if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    
-    if (finalStatus !== 'granted') {
-      console.log('Failed to get push token for push notification!');
+
+    if (finalStatus !== "granted") {
+      console.log("Failed to get push token for push notification!");
       return;
     }
-    
-    token = (await Notifications.getExpoPushTokenAsync({
-      projectId: process.env.EXPO_PROJECT_ID, // Add this to your .env file
-    })).data;
+
+    // Get push token - handle both Expo Go and standalone builds
+    try {
+      if (Constants.appOwnership === "expo") {
+        // Using Expo Go
+        token = (
+          await Notifications.getExpoPushTokenAsync({
+            projectId: process.env.EXPO_PROJECT_ID,
+          })
+        ).data;
+      } else {
+        // Standalone build
+        token = (await Notifications.getDevicePushTokenAsync()).data;
+      }
+      console.log("Push token:", token);
+    } catch (error) {
+      console.error("Error getting push token:", error);
+    }
   } else {
-    console.log('Must use physical device for Push Notifications');
+    console.log("Must use physical device for Push Notifications");
   }
 
   return token;
@@ -59,40 +75,43 @@ export async function updateDeviceToken() {
   try {
     const token = await registerForPushNotificationsAsync();
     if (token) {
-      await api.post('/user/device-token', {
+      await api.post("/user/device-token", {
         token,
         platform: Platform.OS,
       });
     }
   } catch (error) {
-    console.error('Error updating device token:', error);
+    console.error("Error updating device token:", error);
   }
 }
 
 export function setupNotificationListeners(navigation) {
   // Handle notification when app is in foreground
-  const foregroundSubscription = Notifications.addNotificationReceivedListener(notification => {
-    // You can handle foreground notifications differently if needed
-    console.log('Received notification in foreground:', notification);
-  });
+  const foregroundSubscription = Notifications.addNotificationReceivedListener(
+    (notification) => {
+      // You can handle foreground notifications differently if needed
+      console.log("Received notification in foreground:", notification);
+    }
+  );
 
   // Handle notification when user taps on it
-  const responseSubscription = Notifications.addNotificationResponseReceivedListener(response => {
-    const data = response.notification.request.content.data;
-    
-    if (data.click_action === 'CHAT_NOTIFICATION') {
-      navigation.navigate('(app)', {
-        screen: 'chat',
-        params: {
-          id: data.chatId,
-        },
-      });
-    } else if (data.click_action === 'BID_NOTIFICATION') {
-      navigation.navigate('(app)', {
-        screen: 'offer',
-      });
-    }
-  });
+  const responseSubscription =
+    Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data;
+
+      if (data.click_action === "CHAT_NOTIFICATION") {
+        navigation.navigate("(app)", {
+          screen: "chat",
+          params: {
+            id: data.chatId,
+          },
+        });
+      } else if (data.click_action === "BID_NOTIFICATION") {
+        navigation.navigate("(app)", {
+          screen: "offer",
+        });
+      }
+    });
 
   // Return cleanup function
   return () => {
@@ -105,4 +124,4 @@ export function setupNotificationListeners(navigation) {
 export function handleBackgroundNotification(notification) {
   // This function will be called when a notification is received in the background
   return Promise.resolve();
-} 
+}
