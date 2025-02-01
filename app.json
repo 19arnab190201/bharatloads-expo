@@ -8,6 +8,9 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "notification": {
+      "androidSound": false
+    },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -40,15 +43,7 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-secure-store",
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification-icon.png",
-          "color": "#ffffff",
-          "sounds": ["./assets/notification-sound.wav"]
-        }
-      ]
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
