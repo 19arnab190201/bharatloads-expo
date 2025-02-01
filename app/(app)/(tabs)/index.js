@@ -17,7 +17,6 @@ import { useRouter } from "expo-router";
 import Header from "../../../components/Header";
 import Banner from "../../../components/Banner";
 import LoadCard from "../../../components/LoadCard";
-// import Animated, { Easing } from "react-native-reanimated";
 import { api } from "../../../utils/api";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
