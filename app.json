@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "bharatloads",
+    "name": "Bharatloads",
     "slug": "bharatloads",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -24,7 +24,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.bharatloads",
+      "package": "com.bharatloadsv2.app",
       "googleServicesFile": "./google-services.json"
     },
     "web": {

@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:949676261491:android:bc5678c71dfbfad7a5aa06",
+        "mobilesdk_app_id": "1:949676261491:android:55041b3d678aa1e7a5aa06",
         "android_client_info": {
-          "package_name": "com.bharatloads"
+          "package_name": "com.bharatloadsv2.app"
         }
       },
       "oauth_client": [],
