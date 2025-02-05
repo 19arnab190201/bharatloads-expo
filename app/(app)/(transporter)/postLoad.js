@@ -31,6 +31,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import Popup from "../../../components/Popup";
 import DetailLocationIcon from "../../../assets/images/icons/DetailLocationIcon";
 import WeightIcon from "../../../assets/images/icons/WeightIcon";
+import DateTimePicker from "../../../components/DateTimePicker";
 
 const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
   const { colour } = useAuth();
@@ -663,6 +664,32 @@ const StepThree = ({
         return;
       }
 
+      let scheduleDateTime = null;
+      if (formState.schedule === "later") {
+        if (!formState.scheduleDate || !formState.scheduleTime) {
+          setPopup({
+            visible: true,
+            title: "Missing Schedule",
+            message: "Please select both date and time for scheduled loads",
+            type: "error",
+          });
+          return;
+        }
+
+        scheduleDateTime = new Date(
+          `${formState.scheduleDate}T${formState.scheduleTime}`
+        );
+        if (scheduleDateTime <= new Date()) {
+          setPopup({
+            visible: true,
+            title: "Invalid Schedule",
+            message: "Schedule time must be in the future",
+            type: "error",
+          });
+          return;
+        }
+      }
+
       const payload = {
         materialType: formState.materialType.toUpperCase(),
         weight:
@@ -695,8 +722,10 @@ const StepThree = ({
         },
         whenNeeded:
           formState.schedule === "immediately" ? "IMMEDIATE" : "SCHEDULED",
-        scheduleDate: formState.scheduleDate,
-        scheduleTime: formState.scheduleTime,
+        scheduleDate:
+          formState.schedule === "later" ? formState.scheduleDate : null,
+        scheduleTime:
+          formState.schedule === "later" ? formState.scheduleTime : null,
         additionalNotes: formState.additionalNotes,
       };
 
@@ -738,14 +767,10 @@ const StepThree = ({
       setPopup({
         visible: true,
         title: "Error",
-        message: `Failed to ${
-          isEditMode ? "update" : "post"
-        } load. Please try again.`,
+        message:
+          error.response?.data?.message ||
+          "Failed to post load. Please try again.",
         type: "error",
-        primaryAction: {
-          label: "Try Again",
-          onPress: () => setPopup((prev) => ({ ...prev, visible: false })),
-        },
       });
     } finally {
       setIsLoading(false);
@@ -863,6 +888,7 @@ const StepThree = ({
       borderRadius: 12,
       borderColor: "#14B8A6",
       marginBottom: 20,
+      backgroundColor: "#F5FCFB",
     },
     vehicleTypeContainer: {
       flexDirection: "row",
@@ -883,6 +909,7 @@ const StepThree = ({
     },
     vehicleTypeCardSelected: {
       borderColor: "#14B8A6",
+      backgroundColor: "#F5FCFB",
     },
     vehicleTypeImage: {
       width: 50,
@@ -903,29 +930,39 @@ const StepThree = ({
       marginTop: 10,
     },
     tyreButton: {
-      paddingHorizontal: 20,
-      paddingVertical: 10,
+      justifyContent: "center",
+      alignItems: "center",
       borderRadius: 25,
+      width: 50,
+      height: 50,
       backgroundColor: colour.inputBackground,
     },
     tyreButtonSelected: {
-      backgroundColor: "#14B8A6",
+      backgroundColor: "#F5FCFB",
+      borderWidth: 2,
+      borderColor: "#14B8A6",
+      color: "#757575",
     },
     tyreText: {
       fontSize: 16,
-      color: "#333",
+      color: "#757575",
+      fontWeight: "bold",
     },
     tyreTextSelected: {
-      color: "#fff",
+      color: "#757575",
+      fontWeight: "bold",
     },
     boxSkeletonContainer: {
       position: "absolute",
       right: 0,
       top: 10,
       opacity: 0.5,
+      height: normalize(140),
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
     },
   });
-
   return (
     <View>
       {/* Load Details Summary Card */}
@@ -1246,7 +1283,13 @@ const StepThree = ({
             formState.schedule === "immediately" &&
               stepThreeStyles.scheduleButtonSelected,
           ]}
-          onPress={() => handleFormChange({ schedule: "immediately" })}>
+          onPress={() => {
+            handleFormChange({
+              schedule: "immediately",
+              scheduleDate: null,
+              scheduleTime: null,
+            });
+          }}>
           <Text
             style={[
               stepThreeStyles.scheduleText,
@@ -1277,23 +1320,50 @@ const StepThree = ({
       {formState.schedule === "later" && (
         <View style={stepThreeStyles.dateTimeContainer}>
           <View style={stepThreeStyles.halfWidth}>
-            <FormInput
+            <DateTimePicker
               Icon={LoadingPoint}
               label='Date'
               placeholder='Select Date'
-              name='scheduleDate'
-              type='date'
-              onChange={handleFormChange}
+              mode='date'
+              value={formState.scheduleDate}
+              onChange={(field) => {
+                // Ensure date is not in the past
+                const selectedDate = new Date(field.scheduleDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (selectedDate < -1) {
+                  Alert.alert("Invalid Date", "Please select a future date");
+                  return;
+                }
+                handleFormChange(field);
+              }}
+              minimumDate={new Date()}
             />
           </View>
           <View style={stepThreeStyles.halfWidth}>
-            <FormInput
+            <DateTimePicker
               Icon={LoadingPoint}
               label='Time'
               placeholder='Select Time'
-              name='scheduleTime'
-              type='time'
-              onChange={handleFormChange}
+              mode='time'
+              value={formState.scheduleTime}
+              onChange={(field) => {
+                // If date is today, ensure time is in the future
+                if (formState.scheduleDate) {
+                  const selectedDateTime = new Date(
+                    `${formState.scheduleDate}T${field.scheduleTime}`
+                  );
+                  if (selectedDateTime <= new Date()) {
+                    Alert.alert(
+                      "Invalid Time",
+                      "Please select a future time for today's date"
+                    );
+                    return;
+                  }
+                }
+                handleFormChange(field);
+              }}
             />
           </View>
         </View>
@@ -1464,14 +1534,22 @@ const PostLoad = () => {
           formState.numTires
         );
       case 3:
-        return !!(
-          formState.totalOfferedAmount &&
-          formState.advanceAmount &&
-          (formState.advanceCash || formState.advanceDiesel) &&
-          formState.schedule &&
-          (formState.schedule === "immediately" ||
-            (formState.scheduleDate && formState.scheduleTime))
-        );
+        if (!formState.totalOfferedAmount || !formState.advanceAmount) {
+          return false;
+        }
+        if (formState.schedule === "later") {
+          if (!formState.scheduleDate || !formState.scheduleTime) {
+            return false;
+          }
+          // Validate future date/time
+          const scheduledDateTime = new Date(
+            `${formState.scheduleDate}T${formState.scheduleTime}`
+          );
+          if (scheduledDateTime <= new Date()) {
+            return false;
+          }
+        }
+        return true;
       default:
         return false;
     }

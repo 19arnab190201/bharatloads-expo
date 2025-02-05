@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { formatVehicle } from "../../../utils/functions";
 import {
   SafeAreaView,
@@ -16,7 +16,7 @@ import {
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
-import {api} from "../../../utils/api";
+import { api } from "../../../utils/api";
 import { useRouter } from "expo-router";
 import debounce from "lodash/debounce";
 import Loader from "../../../components/Loader";
@@ -158,26 +158,26 @@ const StepOne = ({ formState, setFormState }) => {
 
   // Handle location selection
   const handleLocationSelect = (location) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       truckLocation: {
         placeName: location.name,
         coordinates: {
           latitude: location.coordinates.lat,
-          longitude: location.coordinates.lng
-        }
-      }
+          longitude: location.coordinates.lng,
+        },
+      },
     }));
     setShowLocationDropdown(false);
   };
 
   const handleLocationChange = (text) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       truckLocation: {
         placeName: text,
-        coordinates: null
-      }
+        coordinates: null,
+      },
     }));
     debouncedLocationSearch(text);
   };
@@ -191,19 +191,20 @@ const StepOne = ({ formState, setFormState }) => {
         name='truckNumber'
         value={formState.truckNumber}
         onChangeText={(text) => handleFormChange({ truckNumber: text })}
+        allowOnlyCaps={true}
       />
 
-      <View style={{ position: 'relative', zIndex: 1000 }}>
+      <View style={{ position: "relative", zIndex: 1000 }}>
         <FormInput
           Icon={LoadingPoint}
           label='Vehicle Location'
           placeholder='Enter Vehicle Location'
           name='truckLocation'
-          value={formState.truckLocation?.placeName || ''}
+          value={formState.truckLocation?.placeName || ""}
           onChangeText={handleLocationChange}
           onFocus={() => setShowLocationDropdown(true)}
         />
-        
+
         {/* Location suggestions dropdown */}
         {showLocationDropdown && locations.length > 0 && (
           <View style={styles.dropdownContainer}>
@@ -436,7 +437,7 @@ const PostTruck = () => {
     truckNumber: "",
     truckLocation: {
       placeName: "",
-      coordinates: null
+      coordinates: null,
     },
     truckPermit: "",
     vehicleBodyType: "",
@@ -490,7 +491,10 @@ const PostTruck = () => {
   const handleSubmit = async () => {
     try {
       if (!formState.truckLocation.coordinates) {
-        Alert.alert("Error", "Please select a valid location from the dropdown");
+        Alert.alert(
+          "Error",
+          "Please select a valid location from the dropdown"
+        );
         return;
       }
 
@@ -513,12 +517,12 @@ const PostTruck = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       Alert.alert("Success", "Truck posted successfully!", [
         {
           text: "OK",
-          onPress: () => router.push("/")
-        }
+          onPress: () => router.push("/"),
+        },
       ]);
     } catch (error) {
       console.error("Error posting truck:", error);
@@ -548,8 +552,8 @@ const PostTruck = () => {
       alignItems: "center",
       marginTop: 20,
       marginBottom: 30,
-      flexDirection: 'row',
-      justifyContent: 'center',
+      flexDirection: "row",
+      justifyContent: "center",
       gap: 10,
       opacity: isSubmitting ? 0.7 : 1,
     },
@@ -589,13 +593,13 @@ const PostTruck = () => {
         {step === 2 && (
           <>
             <StepTwo formState={formState} setFormState={setFormState} />
-            <Pressable 
-              style={styles.nextButton} 
+            <Pressable
+              style={styles.nextButton}
               onPress={handleSubmit}
               disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                <ActivityIndicator size='small' color='#fff' />
+                  <ActivityIndicator size='small' color='#fff' />
                 </>
               ) : (
                 <Text style={styles.nextButtonText}>Submit</Text>

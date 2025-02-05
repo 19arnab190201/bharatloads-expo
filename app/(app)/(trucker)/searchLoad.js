@@ -17,7 +17,7 @@ import FormInput from "../../../components/FormInput";
 import { api } from "../../../utils/api";
 import debounce from "lodash/debounce";
 import { normalize } from "../../../utils/functions";
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 import SearchLoadCard from "../../../components/SearchLoadCard";
 import TruckSelectionModal from "../../../components/TruckSelectionModal";
 
@@ -100,33 +100,36 @@ const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType='slide'
       transparent
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.bidModalContent}>
           <Text style={styles.bidModalTitle}>Place Your Bid</Text>
-          
+
           <View style={styles.bidInputContainer}>
             <Text style={styles.bidInputLabel}>Total Amount (₹)</Text>
             <TextInput
               style={styles.bidInput}
               value={biddedAmount.total}
-              onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, total: text }))}
-              keyboardType="numeric"
-              placeholder="Enter total amount"
+              onChangeText={(text) =>
+                setBiddedAmount((prev) => ({ ...prev, total: text }))
+              }
+              keyboardType='numeric'
+              placeholder='Enter total amount'
             />
           </View>
 
           <View style={styles.bidInputContainer}>
-            <Text style={styles.bidInputLabel}>Advance (%)</Text>
+            <Text style={styles.bidInputLabel}>Advance (₹)</Text>
             <TextInput
               style={styles.bidInput}
               value={biddedAmount.advanceAmount}
-              onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, advanceAmount: text }))}
-              keyboardType="numeric"
-              placeholder="Enter advance amount"
+              onChangeText={(text) =>
+                setBiddedAmount((prev) => ({ ...prev, advanceAmount: text }))
+              }
+              keyboardType='numeric'
+              placeholder='Enter advance amount'
             />
           </View>
 
@@ -135,17 +138,19 @@ const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
             <TextInput
               style={styles.bidInput}
               value={biddedAmount.dieselAmount}
-              onChangeText={(text) => setBiddedAmount(prev => ({ ...prev, dieselAmount: text }))}
-              keyboardType="numeric"
-              placeholder="Enter diesel amount"
+              onChangeText={(text) =>
+                setBiddedAmount((prev) => ({ ...prev, dieselAmount: text }))
+              }
+              keyboardType='numeric'
+              placeholder='Enter diesel amount'
             />
           </View>
 
           {load && (
             <Text style={styles.originalAmount}>
               Original offered amount: ₹{load.offeredAmount.total}
-              {"\n"}(Advance: {load.offeredAmount.advanceAmount}% | 
-              Diesel: ₹{load.offeredAmount.dieselAmount})
+              {"\n"}(Advance: {load.offeredAmount.advanceAmount} | Diesel: ₹
+              {load.offeredAmount.dieselAmount})
             </Text>
           )}
 
@@ -153,8 +158,11 @@ const BidModal = ({ visible, onClose, load, truck, onSubmit }) => {
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.submitButton, !biddedAmount.total && styles.disabledButton]} 
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                !biddedAmount.total && styles.disabledButton,
+              ]}
               onPress={handleSubmit}
               disabled={!biddedAmount.total}>
               <Text style={styles.submitButtonText}>Submit Bid</Text>
@@ -237,24 +245,24 @@ const SearchLoad = () => {
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          console.error('Permission to access location was denied');
+        if (status !== "granted") {
+          console.error("Permission to access location was denied");
           return;
         }
 
         const location = await Location.getCurrentPositionAsync({});
         const userLoc = {
           latitude: location.coords.latitude,
-          longitude: location.coords.longitude
+          longitude: location.coords.longitude,
         };
         setUserLocation(userLoc);
-        
+
         // Fetch loads near user's location initially
         fetchLoads({
-          sourceCoords: userLoc
+          sourceCoords: userLoc,
         });
       } catch (error) {
-        console.error('Error getting location:', error);
+        console.error("Error getting location:", error);
       }
     })();
   }, []);
@@ -280,13 +288,13 @@ const SearchLoad = () => {
       });
 
       if (sourceCoords) {
-        queryParams.append('sourceLatitude', sourceCoords.latitude);
-        queryParams.append('sourceLongitude', sourceCoords.longitude);
+        queryParams.append("sourceLatitude", sourceCoords.latitude);
+        queryParams.append("sourceLongitude", sourceCoords.longitude);
       }
 
       if (destCoords) {
-        queryParams.append('destinationLatitude', destCoords.latitude);
-        queryParams.append('destinationLongitude', destCoords.longitude);
+        queryParams.append("destinationLatitude", destCoords.latitude);
+        queryParams.append("destinationLongitude", destCoords.longitude);
       }
 
       const response = await api.get(`/load/nearby?${queryParams}`);
@@ -307,12 +315,14 @@ const SearchLoad = () => {
     fetchLoads({
       sourceCoords: {
         latitude: location.coordinates.lat,
-        longitude: location.coordinates.lng
+        longitude: location.coordinates.lng,
       },
-      destCoords: selectedDestination ? {
-        latitude: selectedDestination.coordinates.lat,
-        longitude: selectedDestination.coordinates.lng
-      } : null
+      destCoords: selectedDestination
+        ? {
+            latitude: selectedDestination.coordinates.lat,
+            longitude: selectedDestination.coordinates.lng,
+          }
+        : null,
     });
   };
 
@@ -321,14 +331,16 @@ const SearchLoad = () => {
     setDestinationSearch(location.name);
     setShowDestinationDropdown(false);
     fetchLoads({
-      sourceCoords: selectedSource ? {
-        latitude: selectedSource.coordinates.lat,
-        longitude: selectedSource.coordinates.lng
-      } : null,
+      sourceCoords: selectedSource
+        ? {
+            latitude: selectedSource.coordinates.lat,
+            longitude: selectedSource.coordinates.lng,
+          }
+        : null,
       destCoords: {
         latitude: location.coordinates.lat,
-        longitude: location.coordinates.lng
-      }
+        longitude: location.coordinates.lng,
+      },
     });
   };
 
@@ -336,11 +348,11 @@ const SearchLoad = () => {
   const fetchUserTrucks = async () => {
     try {
       setLoadingTrucks(true);
-      const response = await api.get('/truck');
+      const response = await api.get("/truck");
       setTrucks(response.data.data);
     } catch (error) {
       console.error("Fetch trucks error:", error);
-      alert('Failed to load trucks. Please try again.');
+      alert("Failed to load trucks. Please try again.");
     } finally {
       setLoadingTrucks(false);
     }
@@ -360,7 +372,7 @@ const SearchLoad = () => {
 
   const handleBidSubmit = async (biddedAmount) => {
     try {
-      const response = await api.post('/bid', {
+      const response = await api.post("/bid", {
         loadId: selectedLoad._id,
         truckId: selectedTruck._id,
         bidType: "LOAD_BID",
@@ -370,19 +382,22 @@ const SearchLoad = () => {
           dieselAmount: parseFloat(biddedAmount.dieselAmount),
         },
       });
-      
+
       Alert.alert("Success", "Bid placed successfully!");
       setShowBidModal(false);
       if (selectedSource) {
         fetchLoads({
-          sourceCoords: selectedSource
+          sourceCoords: selectedSource,
         });
       } else if (userLocation) {
         fetchLoads({ coordinates: userLocation });
       }
     } catch (error) {
       console.error("Place bid error:", error);
-      Alert.alert("Error", error.response?.data?.message || "Failed to place bid");
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to place bid"
+      );
     }
   };
 
@@ -406,7 +421,8 @@ const SearchLoad = () => {
                   key={option.value}
                   style={[
                     styles.optionItem,
-                    filters[filterKey] === option.value && styles.selectedOption,
+                    filters[filterKey] === option.value &&
+                      styles.selectedOption,
                   ]}
                   onPress={() => {
                     setFilters((prev) => ({
@@ -416,7 +432,7 @@ const SearchLoad = () => {
                     onClose();
                     if (selectedSource) {
                       fetchLoads({
-                        sourceCoords: selectedSource
+                        sourceCoords: selectedSource,
                       });
                     } else if (userLocation) {
                       fetchLoads({ coordinates: userLocation });
@@ -425,7 +441,8 @@ const SearchLoad = () => {
                   <Text
                     style={[
                       styles.optionText,
-                      filters[filterKey] === option.value && styles.selectedOptionText,
+                      filters[filterKey] === option.value &&
+                        styles.selectedOptionText,
                     ]}>
                     {option.label}
                   </Text>
@@ -512,9 +529,9 @@ const SearchLoad = () => {
           <Text style={styles.messageText}>No nearby loads found</Text>
         ) : (
           loads.map((load) => (
-            <SearchLoadCard 
-              key={load._id} 
-              data={load} 
+            <SearchLoadCard
+              key={load._id}
+              data={load}
               onBidPress={() => handlePlaceBid(load)}
               matchType={load.matchType}
             />

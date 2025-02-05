@@ -30,11 +30,12 @@ export default function LoadCard({ data, onLoadUpdated }) {
     bids,
     views = 100,
     expiresAt,
-    tripDistance,
+    whenNeeded,
+    scheduleDate,
+    isActive,
   } = data;
 
   const advanceAmount = offeredAmount.advanceAmount; // value in money not percentage
-
 
   const [showInfoDrawer, setShowInfoDrawer] = useState(false);
 
@@ -75,6 +76,15 @@ export default function LoadCard({ data, onLoadUpdated }) {
     timeLeft: {
       backgroundColor: "#E6F7F5",
       color: colour.primaryColor,
+      borderRadius: normalize(12),
+      padding: normalize(5),
+      paddingHorizontal: normalize(10),
+      fontSize: normalize(12),
+      fontWeight: "600",
+    },
+    scheduledTimeLeft: {
+      backgroundColor: "#FFF3E0",
+      color: "#FB8C00",
       borderRadius: normalize(12),
       padding: normalize(5),
       paddingHorizontal: normalize(10),
@@ -188,20 +198,34 @@ export default function LoadCard({ data, onLoadUpdated }) {
       right: 0,
       top: 0,
     },
+    scheduledText: {
+      fontSize: normalize(12),
+      color: colour.primaryColor,
+      marginTop: normalize(4),
+    },
   });
 
   return (
     <View style={styles.card}>
       {/* Top Section */}
       <View style={styles.header}>
-        <Text
-          style={
-            new Date(expiresAt) < new Date()
-              ? styles.expiredTimeLeft
-              : styles.timeLeft
-          }>
-          {getTimeLeft(expiresAt)}
-        </Text>
+        <View>
+          <Text
+            style={
+              whenNeeded === "SCHEDULED" && !isActive
+                ? styles.scheduledTimeLeft
+                : new Date(expiresAt) < new Date()
+                ? styles.expiredTimeLeft
+                : styles.timeLeft
+            }>
+            {getTimeLeft(expiresAt, scheduleDate, whenNeeded)}
+          </Text>
+          {/* {whenNeeded === "SCHEDULED" && !isActive && (
+            <Text style={styles.scheduledText}>
+              Available from: {new Date(scheduleDate).toLocaleString()}
+            </Text>
+          )} */}
+        </View>
         {user._id === data.transporterId && (
           <TouchableOpacity
             style={styles.menuButton}
@@ -258,7 +282,6 @@ export default function LoadCard({ data, onLoadUpdated }) {
                   color='#F43D74'
                 />
                 <Text style={styles.destination}>
-                  {" "}
                   {limitText(destination.placeName, 20)}
                 </Text>
               </View>
@@ -357,10 +380,10 @@ export default function LoadCard({ data, onLoadUpdated }) {
 
         {/* Price Section */}
         <View style={styles.priceSection}>
-          <Text style={styles.price}>₹{formatMoneytext(offeredAmount.total)}</Text>
-          <Text style={styles.advance}>
-            ₹{formatMoneytext(advanceAmount)} 
+          <Text style={styles.price}>
+            ₹{formatMoneytext(offeredAmount.total)}
           </Text>
+          <Text style={styles.advance}>₹{formatMoneytext(advanceAmount)}</Text>
           <Text style={styles.advance}>Advance</Text>
         </View>
       </View>

@@ -24,8 +24,10 @@ const FormInput = ({
   error = "",
   value,
   onChange,
+  onChangeText,
   disabled = false,
   name,
+  allowOnlyCaps = false,
   ...rest
 }) => {
   const { colour } = useAuth();
@@ -36,9 +38,13 @@ const FormInput = ({
     const updatedValue =
       type === "number" ? parseFloat(inputValue) : inputValue;
 
-    onChange({
-      [name]: updatedValue,
-    });
+    if (onChangeText) {
+      onChangeText(updatedValue);
+    } else {
+      onChange({
+        [name]: updatedValue,
+      });
+    }
   };
 
   const processImage = async (uri) => {
@@ -178,6 +184,7 @@ const FormInput = ({
             placeholderTextColor={colour.placeHolderText}
             maxLength={max}
             minLength={min}
+            autoCapitalize={allowOnlyCaps ? "characters" : "none"}
             onChangeText={handleInputChange}
             {...rest}
           />

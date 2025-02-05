@@ -14,96 +14,95 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { normalize, formatMoneytext } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
 import Loader from "../../../components/Loader";
+import { useRouter } from "expo-router";
 
 const OfferCard = ({ offer, onOfferStatusChange }) => {
   const { colour, token } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const router = useRouter();
 
   const handleAcceptOffer = () => {
-    Alert.alert(
-      "Accept Offer",
-      "Are you sure you want to accept this offer?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Accept",
-          style: "default",
-          onPress: async () => {
-            setIsProcessing(true);
-            try {
-              await api.put(`/bid/${offer._id}/accept`, {}, {
+    Alert.alert("Accept Offer", "Are you sure you want to accept this offer?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Accept",
+        style: "default",
+        onPress: async () => {
+          setIsProcessing(true);
+          try {
+            await api.put(
+              `/bid/${offer._id}/accept`,
+              {},
+              {
                 headers: {
                   "Content-Type": "application/json",
                   Authorization: `Bearer ${token}`,
                 },
-              });
-              Alert.alert("Success", "Offer accepted successfully");
-              if (typeof onOfferStatusChange === "function") {
-                onOfferStatusChange(offer._id, "ACCEPTED");
               }
-            } catch (error) {
-              console.error("Error accepting offer:", error);
-              Alert.alert(
-                "Error",
-                error.response?.data?.message || "Failed to accept offer"
-              );
-            } finally {
-              setIsProcessing(false);
+            );
+            Alert.alert("Success", "Offer accepted successfully");
+            if (typeof onOfferStatusChange === "function") {
+              onOfferStatusChange(offer._id, "ACCEPTED");
             }
-          },
+          } catch (error) {
+            console.error("Error accepting offer:", error);
+            Alert.alert(
+              "Error",
+              error.response?.data?.message || "Failed to accept offer"
+            );
+          } finally {
+            setIsProcessing(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleRejectOffer = () => {
-    Alert.alert(
-      "Reject Offer",
-      "Are you sure you want to reject this offer?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Reject",
-          style: "destructive",
-          onPress: async () => {
-            setIsProcessing(true);
-            try {
-              await api.put(`/bid/${offer._id}/status`, 
-                { status: "REJECTED" },
-                {
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
-              );
-              Alert.alert("Success", "Offer rejected successfully");
-              if (typeof onOfferStatusChange === "function") {
-                onOfferStatusChange(offer._id, "REJECTED");
+    Alert.alert("Reject Offer", "Are you sure you want to reject this offer?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Reject",
+        style: "destructive",
+        onPress: async () => {
+          setIsProcessing(true);
+          try {
+            await api.put(
+              `/bid/${offer._id}/status`,
+              { status: "REJECTED" },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
               }
-            } catch (error) {
-              console.error("Error rejecting offer:", error);
-              Alert.alert(
-                "Error",
-                error.response?.data?.message || "Failed to reject offer"
-              );
-            } finally {
-              setIsProcessing(false);
+            );
+            Alert.alert("Success", "Offer rejected successfully");
+            if (typeof onOfferStatusChange === "function") {
+              onOfferStatusChange(offer._id, "REJECTED");
             }
-          },
+          } catch (error) {
+            console.error("Error rejecting offer:", error);
+            Alert.alert(
+              "Error",
+              error.response?.data?.message || "Failed to reject offer"
+            );
+          } finally {
+            setIsProcessing(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleChat = () => {
-    Alert.alert("Coming Soon", "Chat functionality will be available soon!");
+    router.push(`/chat`);
   };
 
   const styles = StyleSheet.create({
@@ -168,8 +167,12 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
     statusText: (status) => ({
       fontSize: normalize(14),
       fontWeight: "600",
-      color: status === "ACCEPTED" ? "#10B981" : 
-             status === "REJECTED" ? "#EF4444" : "#F59E0B",
+      color:
+        status === "ACCEPTED"
+          ? "#10B981"
+          : status === "REJECTED"
+          ? "#EF4444"
+          : "#F59E0B",
     }),
     materialContainer: {
       flexDirection: "row",
@@ -266,8 +269,12 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
     buttonText: (variant) => ({
       fontSize: normalize(15),
       fontWeight: "600",
-      color: variant === "reject" ? "#DC2626" : 
-             variant === "accept" ? "#10B981" : "#fff",
+      color:
+        variant === "reject"
+          ? "#DC2626"
+          : variant === "accept"
+          ? "#10B981"
+          : "#fff",
     }),
     timestamp: {
       position: "absolute",
@@ -297,7 +304,7 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
             <Image
               source={{ uri: offer.bidBy.profileImage }}
               style={styles.avatar}
-              resizeMode="cover"
+              resizeMode='cover'
             />
           ) : (
             <View style={styles.avatar}>
@@ -307,23 +314,21 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
             </View>
           )}
           <View style={styles.nameContainer}>
-            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+            <Text style={styles.name} numberOfLines={1} ellipsizeMode='tail'>
               {offer.bidBy?.name || "Unknown User"}
             </Text>
-            <Text style={styles.role} numberOfLines={1} ellipsizeMode="tail">
+            <Text style={styles.role} numberOfLines={1} ellipsizeMode='tail'>
               {offer.bidBy?.userType || "User"}
             </Text>
           </View>
         </View>
         <View style={styles.statusBadge}>
-          <Text style={styles.statusText(offer.status)}>
-            {offer.status}
-          </Text>
+          <Text style={styles.statusText(offer.status)}>{offer.status}</Text>
         </View>
       </View>
 
       <View style={styles.materialContainer}>
-        <View style={styles.materialImage} >
+        <View style={styles.materialImage}>
           <Image
             source={require("../../../assets/images/parcel.png")}
             style={styles.materialImage}
@@ -331,28 +336,37 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
           />
         </View>
         <View style={styles.materialInfo}>
-          <Text style={styles.materialType} numberOfLines={1} ellipsizeMode="tail">
+          <Text
+            style={styles.materialType}
+            numberOfLines={1}
+            ellipsizeMode='tail'>
             {offer.materialType || "Unknown Material"}
           </Text>
           <View style={styles.locationContainer}>
             <MaterialIcons
-              name="circle"
+              name='circle'
               size={normalize(8)}
-              color="#14B8A6"
+              color='#14B8A6'
               style={styles.locationIcon}
             />
-            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
+            <Text
+              style={styles.locationText}
+              numberOfLines={1}
+              ellipsizeMode='tail'>
               {offer.source?.placeName || "Unknown Location"}
             </Text>
           </View>
           <View style={styles.locationContainer}>
             <MaterialIcons
-              name="circle"
+              name='circle'
               size={normalize(8)}
-              color="#F43F5E"
+              color='#F43F5E'
               style={styles.locationIcon}
             />
-            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
+            <Text
+              style={styles.locationText}
+              numberOfLines={1}
+              ellipsizeMode='tail'>
               {offer.destination?.placeName || "Unknown Location"}
             </Text>
           </View>
@@ -367,29 +381,29 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
       <View style={styles.specs}>
         <View style={styles.specItem}>
           <MaterialIcons
-            name="shopping-bag"
+            name='shopping-bag'
             size={normalize(18)}
-            color="#64748B"
+            color='#64748B'
             style={styles.specIcon}
           />
           <Text style={styles.specText}>{offer.weight || 0} Tonnes</Text>
         </View>
         <View style={styles.specItem}>
           <MaterialIcons
-            name="local-shipping"
+            name='local-shipping'
             size={normalize(18)}
-            color="#64748B"
+            color='#64748B'
             style={styles.specIcon}
           />
-          <Text style={styles.specText} numberOfLines={1} ellipsizeMode="tail">
+          <Text style={styles.specText} numberOfLines={1} ellipsizeMode='tail'>
             {offer.truckId?.truckType || "Unknown"}
           </Text>
         </View>
         <View style={styles.specItem}>
           <MaterialIcons
-            name="tire-repair"
+            name='tire-repair'
             size={normalize(18)}
-            color="#64748B"
+            color='#64748B'
             style={styles.specIcon}
           />
           <Text style={styles.specText}>
@@ -399,23 +413,40 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
       </View>
       <View style={styles.horizontalSeperator} />
 
-
       <View style={styles.priceContainer}>
         <View style={styles.priceDetails}>
-          <View style={styles.priceInfo}>
+          <View
+            style={{
+              ...styles.priceInfo,
+              alignItems: "flex-start",
+              textAlign: "left",
+            }}>
             <Text style={styles.priceLabel}>Bidded Amount</Text>
-            <Text style={styles.priceValue}>₹{formatMoneytext(offer.biddedAmount?.total || 0)}</Text>
+
+            <Text style={styles.priceValue}>
+              ₹{formatMoneytext(offer.biddedAmount?.total || 0)}
+            </Text>
             <Text style={styles.priceLabel}>
-              Advance: {formatMoneytext(offer.biddedAmount?.advanceAmount || 0)}</Text>
+              Advance: {formatMoneytext(offer.biddedAmount?.advanceAmount || 0)}
+            </Text>
             <Text style={styles.priceLabel}>
               Diesel: ₹{formatMoneytext(offer.biddedAmount?.dieselAmount || 0)}
             </Text>
           </View>
-          <View style={{...styles.priceInfo, alignItems: 'flex-end'}}>
+          <View
+            style={{
+              ...styles.priceInfo,
+              alignItems: "flex-end",
+              textAlign: "right",
+            }}>
             <Text style={styles.priceLabel}>Your Original Amount</Text>
-            <Text style={styles.priceValue}>₹{formatMoneytext(offer.offeredAmount?.total || 0)}</Text>
+            <Text style={styles.priceValue}>
+              ₹{formatMoneytext(offer.offeredAmount?.total || 0)}
+            </Text>
             <Text style={styles.priceLabel}>
-              Advance: {formatMoneytext(offer.offeredAmount?.advanceAmount || 0)}</Text>
+              Advance:{" "}
+              {formatMoneytext(offer.offeredAmount?.advanceAmount || 0)}
+            </Text>
             <Text style={styles.priceLabel}>
               Diesel: ₹{formatMoneytext(offer.offeredAmount?.dieselAmount || 0)}
             </Text>
@@ -442,8 +473,7 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
             </Text>
           </Pressable>
         </View>
-      ) : offer.status === "REJECTED" ? ( null 
-      ) : offer.status === "ACCEPTED" ? (
+      ) : offer.status === "REJECTED" ? null : offer.status === "ACCEPTED" ? (
         <View style={styles.buttonContainer}>
           <Pressable
             style={[styles.button, styles.chatButton]}
@@ -577,7 +607,7 @@ const Offers = () => {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <View style={[styles.loadingContainer, { backgroundColor: '#fff' }]}>
+        <View style={[styles.loadingContainer, { backgroundColor: "#fff" }]}>
           <Loader />
         </View>
       );
@@ -618,7 +648,10 @@ const Offers = () => {
           style={[styles.tab, activeTab === "all" && styles.activeTab]}
           onPress={() => setActiveTab("all")}>
           <Text
-            style={[styles.tabText, activeTab === "all" && styles.activeTabText]}>
+            style={[
+              styles.tabText,
+              activeTab === "all" && styles.activeTabText,
+            ]}>
             All Offers
           </Text>
         </Pressable>

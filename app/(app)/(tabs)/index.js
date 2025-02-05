@@ -155,7 +155,7 @@ export default function Dashboard() {
           </View>
         </TouchableOpacity>
 
-        <View style={{ marginTop: 20 }}>
+        <View style={{ marginVertical: 24 }}>
           <Text style={styles.title}>Your Loads</Text>
 
           {loads.map((load) => (
@@ -217,7 +217,7 @@ export default function Dashboard() {
           </View>
         </TouchableOpacity>
 
-        <View style={{ marginTop: 20 }}>
+        <View style={{ marginVertical: 20 }}>
           <Text style={styles.title}>Your Trucks</Text>
 
           {trucks.map((truck) => (

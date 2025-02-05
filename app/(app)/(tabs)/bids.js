@@ -416,7 +416,12 @@ const BidCard = ({ bid, onBidClosed }) => {
 
       <View style={styles.priceContainer}>
         <View style={styles.priceDetails}>
-          <View style={styles.priceInfo}>
+          <View
+            style={{
+              ...styles.priceInfo,
+              alignItems: "flex-start",
+              textAlign: "left",
+            }}>
             <Text style={styles.priceLabel}>Your Bid Amount</Text>
             <Text style={styles.priceValue}>
               ₹{bid.biddedAmount?.total || 0}
@@ -428,7 +433,12 @@ const BidCard = ({ bid, onBidClosed }) => {
               Diesel: ₹{bid.biddedAmount?.dieselAmount || 0}
             </Text>
           </View>
-          <View style={{ ...styles.priceInfo, alignItems: "flex-end" }}>
+          <View
+            style={{
+              ...styles.priceInfo,
+              alignItems: "flex-end",
+              textAlign: "right",
+            }}>
             <Text style={styles.priceLabel}>Original Amount</Text>
             <Text style={styles.priceValue}>
               ₹{bid.offeredAmount?.total || 0}
@@ -450,7 +460,7 @@ const BidCard = ({ bid, onBidClosed }) => {
             onPress={handleCloseBid}
             disabled={isClosing || bid.status === "ACCEPTED"}>
             {isClosing ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size='small' color='#fff' />
             ) : (
               <Text style={styles.buttonText("close")}>Close Bid</Text>
             )}
