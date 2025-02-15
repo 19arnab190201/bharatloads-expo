@@ -212,7 +212,7 @@ export default function LoadCard({ data, onLoadUpdated }) {
         <View>
           <Text
             style={
-              whenNeeded === "SCHEDULED" && !isActive
+              whenNeeded === !isActive
                 ? styles.scheduledTimeLeft
                 : new Date(expiresAt) < new Date()
                 ? styles.expiredTimeLeft
@@ -383,7 +383,10 @@ export default function LoadCard({ data, onLoadUpdated }) {
           <Text style={styles.price}>
             ₹{formatMoneytext(offeredAmount.total)}
           </Text>
-          <Text style={styles.advance}>₹{formatMoneytext(advanceAmount)}</Text>
+          <Text style={styles.advance}>
+            ₹{formatMoneytext(advanceAmount)} (
+            {Math.round((advanceAmount / offeredAmount.total) * 100)}%)
+          </Text>
           <Text style={styles.advance}>Advance</Text>
         </View>
       </View>

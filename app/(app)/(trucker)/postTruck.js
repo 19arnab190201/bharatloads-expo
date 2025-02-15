@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
@@ -282,7 +283,30 @@ const StepTwo = ({ formState, setFormState }) => {
     },
   ];
 
-  const truckTyres = [10, 12, 14, 16, "Other"];
+  const truckTyres = [10, 12, 14, 16, 18, 22];
+  const [isAddingCustom, setIsAddingCustom] = useState(false);
+  const [customValue, setCustomValue] = useState("");
+
+  const handleTyreSelection = (tyre) => {
+    if (tyre === "Other") {
+      setIsAddingCustom(true);
+      setCustomValue("");
+    } else {
+      handleFormChange({ truckTyre: tyre });
+    }
+  };
+
+  const handleCustomValueChange = (text) => {
+    // Only allow numbers and validate range
+    if (text === "" || (/^\d+$/.test(text) && parseInt(text) <= 100)) {
+      setCustomValue(text);
+
+      // If it's a valid number, update the form state immediately
+      if (text !== "" && parseInt(text) > 0 && parseInt(text) <= 100) {
+        handleFormChange({ truckTyre: parseInt(text) });
+      }
+    }
+  };
 
   const stepTwoStyles = StyleSheet.create({
     vehicleTypeContainer: {
@@ -324,20 +348,40 @@ const StepTwo = ({ formState, setFormState }) => {
       marginTop: 10,
     },
     tyreButton: {
-      paddingHorizontal: 20,
-      paddingVertical: 10,
+      width: 50,
+      height: 50,
       borderRadius: 25,
       backgroundColor: colour.inputBackground,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: "#E5E5E5",
     },
     tyreButtonSelected: {
-      backgroundColor: "#14B8A6",
+      backgroundColor: "#F5FCFB",
+      borderColor: "#14B8A6",
     },
     tyreText: {
       fontSize: 16,
-      color: "#333",
+      color: "#666",
+      fontWeight: "normal",
     },
     tyreTextSelected: {
-      color: "#fff",
+      color: "#14B8A6",
+      fontWeight: "bold",
+    },
+    otherButton: {
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 25,
+      backgroundColor: "#F0F0F0",
+      alignItems: "center",
+      borderWidth: 0,
+    },
+    otherText: {
+      fontSize: 16,
+      color: "#333",
+      fontWeight: "500",
     },
   });
 
@@ -405,7 +449,7 @@ const StepTwo = ({ formState, setFormState }) => {
               stepTwoStyles.tyreButton,
               formState.truckTyre === tyre && stepTwoStyles.tyreButtonSelected,
             ]}
-            onPress={() => handleFormChange({ truckTyre: tyre })}>
+            onPress={() => handleTyreSelection(tyre)}>
             <Text
               style={[
                 stepTwoStyles.tyreText,
@@ -415,6 +459,58 @@ const StepTwo = ({ formState, setFormState }) => {
             </Text>
           </Pressable>
         ))}
+
+        {/* Custom tyre input circle */}
+        {isAddingCustom && (
+          <Pressable
+            style={[
+              stepTwoStyles.tyreButton,
+              stepTwoStyles.tyreButtonSelected,
+            ]}>
+            <TextInput
+              style={[
+                stepTwoStyles.tyreText,
+                { width: 40, textAlign: "center", color: "#333" },
+              ]}
+              keyboardType='numeric'
+              value={customValue}
+              onChangeText={handleCustomValueChange}
+              onBlur={() => {
+                if (customValue && parseInt(customValue) > 0) {
+                  setIsAddingCustom(false);
+                } else {
+                  // If invalid value, reset
+                  setIsAddingCustom(false);
+                  setCustomValue("");
+                }
+              }}
+              autoFocus
+              maxLength={3}
+            />
+          </Pressable>
+        )}
+
+        {/* Show custom value as a selected circle if it exists */}
+        {!isAddingCustom && formState.truckTyre > 22 && (
+          <Pressable
+            style={[stepTwoStyles.tyreButton, stepTwoStyles.tyreButtonSelected]}
+            onPress={() => {
+              setIsAddingCustom(true);
+              setCustomValue(formState.truckTyre.toString());
+            }}>
+            <Text
+              style={[stepTwoStyles.tyreText, stepTwoStyles.tyreTextSelected]}>
+              {formState.truckTyre}
+            </Text>
+          </Pressable>
+        )}
+
+        {/* Other button */}
+        <Pressable
+          style={stepTwoStyles.otherButton}
+          onPress={() => handleTyreSelection("Other")}>
+          <Text style={stepTwoStyles.otherText}>Other</Text>
+        </Pressable>
       </View>
 
       <FormInput

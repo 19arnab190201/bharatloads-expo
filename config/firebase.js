@@ -9,12 +9,13 @@ import { getAnalytics } from "firebase/analytics";
 const firebaseConfig = {
   apiKey: "AIzaSyAp6aMdPEcAedQPW2hZ_DFCmIVBQe2uXlc",
   authDomain: "bharatloads-e4cbd.firebaseapp.com",
-  databaseURL: "https://bharatloads-e4cbd-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL:
+    "https://bharatloads-e4cbd-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "bharatloads-e4cbd",
   storageBucket: "bharatloads-e4cbd.firebasestorage.app",
   messagingSenderId: "949676261491",
   appId: "1:949676261491:web:d4dd36aedb351031a5aa06",
-  measurementId: "G-HCVD7QQSK9"
+  measurementId: "G-HCVD7QQSK9",
 };
 
 // Initialize Firebase

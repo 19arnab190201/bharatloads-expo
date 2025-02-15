@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -15,9 +15,12 @@ import {
 import { Link, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../../context/AuthProvider";
 import { styles as loginStyles } from "./login";
+import { api } from "../../utils/api";
+import debounce from "lodash/debounce";
 const { width, height } = Dimensions.get("window");
 
 export default function Signup() {
+  const scrollViewRef = useRef(null);
   const { phoneNumber: prefillPhone } = useLocalSearchParams();
   const [form, setForm] = useState({
     name: "",
@@ -29,6 +32,32 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { signup } = useAuth();
+
+  const [locations, setLocations] = useState([]);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationLayout, setLocationLayout] = useState({ y: 0, height: 0 });
+
+  const debouncedLocationSearch = useCallback(
+    debounce(async (query) => {
+      if (query.length < 3) {
+        setLocations([]);
+        return;
+      }
+
+      try {
+        setLocationLoading(true);
+        const response = await api.get(`/locationsearch?query=${query}`);
+        setLocations(response.data.data);
+      } catch (error) {
+        console.error("Location search error:", error);
+        setLocations([]);
+      } finally {
+        setLocationLoading(false);
+      }
+    }, 500),
+    []
+  );
 
   const handleSignup = async () => {
     if (!form.name || !form.phoneNumber) {
@@ -60,14 +89,39 @@ export default function Signup() {
     setForm({ ...form, [name]: value });
   };
 
+  const handleLocationSelect = (location) => {
+    setForm((prev) => ({
+      ...prev,
+      companyLocation: location.name,
+    }));
+    setShowLocationDropdown(false);
+  };
+
+  const handleLocationChange = (text) => {
+    setForm((prev) => ({
+      ...prev,
+      companyLocation: text,
+    }));
+    debouncedLocationSearch(text);
+  };
+
+  const handleLocationLayout = (event) => {
+    const { y, height } = event.nativeEvent.layout;
+    setLocationLayout({ y, height });
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}>
-      <SafeAreaView>
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}>
+      <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
+          ref={scrollViewRef}
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps='handled'
+          keyboardDismissMode='on-drag'>
           <View style={{ ...loginStyles.header, marginTop: 100 }}>
             <Text style={loginStyles.headerText}>Create an account </Text>
             <Text style={loginStyles.subHeaderText}>
@@ -156,18 +210,62 @@ export default function Signup() {
                   />
                 </View>
 
-                {/* Company Location Input */}
-                <View style={styles.inputContainer}>
+                {/* Company Location Input - modified */}
+                <View
+                  style={[styles.inputContainer, { zIndex: 2 }]}
+                  onLayout={handleLocationLayout}>
                   <Text style={styles.inputLabel}>Company Location</Text>
                   <TextInput
                     style={styles.input}
                     placeholder='Enter Your Company Location'
                     value={form.companyLocation}
-                    onChangeText={(value) =>
-                      handleInputChange("companyLocation", value)
-                    }
+                    onChangeText={handleLocationChange}
+                    onFocus={() => {
+                      setShowLocationDropdown(true);
+                      setTimeout(() => {
+                        scrollViewRef.current?.scrollTo({
+                          y: locationLayout.y,
+                          animated: true,
+                        });
+                      }, 100);
+                    }}
                     editable={!loading}
                   />
+
+                  {/* Location Dropdown */}
+                  {showLocationDropdown && locations.length > 0 && (
+                    <View
+                      style={[
+                        styles.dropdownContainer,
+                        {
+                          top: locationLayout.height,
+                          position: "absolute",
+                          left: 0,
+                          right: 0,
+                          zIndex: 1000,
+                        },
+                      ]}>
+                      <ScrollView
+                        nestedScrollEnabled={true}
+                        keyboardShouldPersistTaps='handled'>
+                        {locations.map((location, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={styles.dropdownItem}
+                            onPress={() => handleLocationSelect(location)}>
+                            <Text numberOfLines={1} style={styles.dropdownText}>
+                              {location.name}
+                            </Text>
+                            <Text
+                              numberOfLines={2}
+                              style={styles.dropdownSubText}>
+                              {location.description}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  )}
                 </View>
               </>
             )}
@@ -208,7 +306,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: width * 0.05,
-    paddingBottom: 20,
+    paddingBottom: Platform.OS === "ios" ? 100 : 80,
   },
   formContainer: {
     flex: 1,
@@ -286,5 +384,31 @@ const styles = StyleSheet.create({
     color: "#fe7f4a",
     fontSize: 14,
     fontWeight: "600",
+  },
+  dropdownContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 1000,
+    maxHeight: 200,
+    overflow: "scroll",
+  },
+  dropdownItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "400",
+  },
+  dropdownSubText: {
+    fontSize: 14,
+    color: "#999",
   },
 });

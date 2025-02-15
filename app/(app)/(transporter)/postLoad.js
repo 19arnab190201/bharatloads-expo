@@ -14,6 +14,7 @@ import {
   Alert,
   TouchableOpacity,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 import Edit from "../../../assets/images/icons/Edit";
 import { useAuth } from "../../../context/AuthProvider";
@@ -174,9 +175,12 @@ const styles = StyleSheet.create({
 
 const StepOne = ({ formState, setFormState }) => {
   const [locations, setLocations] = useState([]);
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [activeInput, setActiveInput] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [activeInput, setActiveInput] = useState(null); // 'loading' or 'dropping'
+  const [inputLayout, setInputLayout] = useState({
+    loading: { y: 0, height: 0 },
+    dropping: { y: 0, height: 0 },
+  });
 
   // Debounced function for location search
   const debouncedLocationSearch = useCallback(
@@ -190,7 +194,6 @@ const StepOne = ({ formState, setFormState }) => {
         setLoading(true);
         const response = await api.get(`/locationsearch?query=${query}`);
         setLocations(response.data.data);
-        setShowLocationDropdown(true);
       } catch (error) {
         console.error("Location search error:", error);
         setLocations([]);
@@ -213,7 +216,6 @@ const StepOne = ({ formState, setFormState }) => {
         },
       },
     }));
-    setShowLocationDropdown(false);
     setActiveInput(null);
   };
 
@@ -234,56 +236,100 @@ const StepOne = ({ formState, setFormState }) => {
     setFormState((prev) => ({ ...prev, unit }));
   };
 
+  const handleLayout = (event, inputType) => {
+    const { y, height } = event.nativeEvent.layout;
+    setInputLayout((prev) => ({
+      ...prev,
+      [inputType]: { y, height },
+    }));
+  };
+
   return (
     <View>
-      <View style={{ position: "relative", zIndex: 1000 }}>
-        <FormInput
-          Icon={LoadingPoint}
-          label='Loading Point'
-          placeholder='Search Loading Point'
-          name='loadingPoint'
-          value={formState.source.placeName}
-          onChangeText={(text) => handleLocationChange(text, "loading")}
-          onFocus={() => {
-            setActiveInput("loading");
-            setShowLocationDropdown(true);
-          }}
-        />
+      <View>
+        <View onLayout={(e) => handleLayout(e, "loading")}>
+          <FormInput
+            Icon={LoadingPoint}
+            label='Loading Point'
+            placeholder='Search Loading Point'
+            name='loadingPoint'
+            value={formState.source.placeName}
+            onChangeText={(text) => handleLocationChange(text, "loading")}
+            onFocus={() => setActiveInput("loading")}
+          />
 
-        <FormInput
-          Icon={LoadingPoint}
-          label='Dropping Point'
-          placeholder='Search Dropping Point'
-          name='droppingPoint'
-          value={formState.destination.placeName}
-          onChangeText={(text) => handleLocationChange(text, "dropping")}
-          onFocus={() => {
-            setActiveInput("dropping");
-            setShowLocationDropdown(true);
-          }}
-        />
+          {/* Loading point dropdown */}
+          {activeInput === "loading" && locations.length > 0 && (
+            <View
+              style={[
+                styles.dropdownContainer,
+                {
+                  top: inputLayout.loading.height,
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                },
+              ]}>
+              {locations.map((location, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.dropdownItem}
+                  onPress={() => handleLocationSelect(location)}>
+                  <Text numberOfLines={1} style={styles.dropdownText}>
+                    {location.name}
+                  </Text>
+                  <Text numberOfLines={2} style={styles.dropdownSubText}>
+                    {location.description}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
 
-        {/* Location suggestions dropdown */}
-        {showLocationDropdown && locations.length > 0 && (
-          <View style={styles.dropdownContainer}>
-            {locations.map((location, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.dropdownItem}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  handleLocationSelect(location);
-                }}>
-                <Text numberOfLines={1} style={styles.dropdownText}>
-                  {location.name}
-                </Text>
-                <Text numberOfLines={2} style={styles.dropdownSubText}>
-                  {location.description}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+        <View
+          onLayout={(e) => handleLayout(e, "dropping")}
+          style={{ marginTop: 16 }}>
+          <FormInput
+            Icon={LoadingPoint}
+            label='Dropping Point'
+            placeholder='Search Dropping Point'
+            name='droppingPoint'
+            value={formState.destination.placeName}
+            onChangeText={(text) => handleLocationChange(text, "dropping")}
+            onFocus={() => setActiveInput("dropping")}
+          />
+
+          {/* Dropping point dropdown */}
+          {activeInput === "dropping" && locations.length > 0 && (
+            <View
+              style={[
+                styles.dropdownContainer,
+                {
+                  top: inputLayout.dropping.height,
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                },
+              ]}>
+              {locations.map((location, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.dropdownItem}
+                  onPress={() => handleLocationSelect(location)}>
+                  <Text numberOfLines={1} style={styles.dropdownText}>
+                    {location.name}
+                  </Text>
+                  <Text numberOfLines={2} style={styles.dropdownSubText}>
+                    {location.description}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
       </View>
 
       <FormInput
@@ -292,7 +338,7 @@ const StepOne = ({ formState, setFormState }) => {
         name='materialType'
         value={formState.materialType}
         type='select'
-        disabled={showLocationDropdown}
+        disabled={activeInput !== null}
         onChange={(field) => setFormState((prev) => ({ ...prev, ...field }))}
         options={materialTypes.map((material) => ({
           label: material,
@@ -389,7 +435,30 @@ const StepTwo = ({ formState, setFormState, setStep }) => {
     },
   ];
 
-  const truckTyres = [10, 12, 14, 16, 18];
+  const truckTyres = [10, 12, 14, 16, 18, 22];
+  const [isAddingCustom, setIsAddingCustom] = useState(false);
+  const [customValue, setCustomValue] = useState("");
+
+  const handleTyreSelection = (tyre) => {
+    if (tyre === "Other") {
+      setIsAddingCustom(true);
+      setCustomValue("");
+    } else {
+      handleFormChange({ numTires: tyre });
+    }
+  };
+
+  const handleCustomValueChange = (text) => {
+    // Only allow numbers and validate range
+    if (text === "" || (/^\d+$/.test(text) && parseInt(text) <= 100)) {
+      setCustomValue(text);
+
+      // If it's a valid number, update the form state immediately
+      if (text !== "" && parseInt(text) > 0 && parseInt(text) <= 100) {
+        handleFormChange({ numTires: parseInt(text) });
+      }
+    }
+  };
 
   const stepTwoStyles = StyleSheet.create({
     detailsCard: {
@@ -443,27 +512,40 @@ const StepTwo = ({ formState, setFormState, setStep }) => {
       marginTop: 10,
     },
     tyreButton: {
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: 25,
       width: 50,
       height: 50,
+      borderRadius: 25,
       backgroundColor: colour.inputBackground,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: "#E5E5E5",
     },
     tyreButtonSelected: {
       backgroundColor: "#F5FCFB",
-      borderWidth: 2,
       borderColor: "#14B8A6",
-      color: "#757575",
     },
     tyreText: {
       fontSize: 16,
-      color: "#757575",
-      fontWeight: "bold",
+      color: "#666",
+      fontWeight: "normal",
     },
     tyreTextSelected: {
-      color: "#757575",
+      color: "#14B8A6",
       fontWeight: "bold",
+    },
+    otherButton: {
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 25,
+      backgroundColor: "#F0F0F0",
+      alignItems: "center",
+      borderWidth: 0, // Explicitly remove border for Other button
+    },
+    otherText: {
+      fontSize: 16,
+      color: "#333",
+      fontWeight: "500",
     },
     boxSkeletonContainer: {
       position: "absolute",
@@ -617,7 +699,7 @@ const StepTwo = ({ formState, setFormState, setStep }) => {
               stepTwoStyles.tyreButton,
               formState.numTires === tyre && stepTwoStyles.tyreButtonSelected,
             ]}
-            onPress={() => handleFormChange({ numTires: tyre })}>
+            onPress={() => handleTyreSelection(tyre)}>
             <Text
               style={[
                 stepTwoStyles.tyreText,
@@ -627,6 +709,58 @@ const StepTwo = ({ formState, setFormState, setStep }) => {
             </Text>
           </Pressable>
         ))}
+
+        {/* Custom tyre input circle */}
+        {isAddingCustom && (
+          <Pressable
+            style={[
+              stepTwoStyles.tyreButton,
+              stepTwoStyles.tyreButtonSelected,
+            ]}>
+            <TextInput
+              style={[
+                stepTwoStyles.tyreText,
+                { width: 40, textAlign: "center", color: "#333" },
+              ]}
+              keyboardType='numeric'
+              value={customValue}
+              onChangeText={handleCustomValueChange}
+              onBlur={() => {
+                if (customValue && parseInt(customValue) > 0) {
+                  setIsAddingCustom(false);
+                } else {
+                  // If invalid value, reset
+                  setIsAddingCustom(false);
+                  setCustomValue("");
+                }
+              }}
+              autoFocus
+              maxLength={3}
+            />
+          </Pressable>
+        )}
+
+        {/* Show custom value as a selected circle if it exists */}
+        {!isAddingCustom && formState.numTires > 22 && (
+          <Pressable
+            style={[stepTwoStyles.tyreButton, stepTwoStyles.tyreButtonSelected]}
+            onPress={() => {
+              setIsAddingCustom(true);
+              setCustomValue(formState.numTires.toString());
+            }}>
+            <Text
+              style={[stepTwoStyles.tyreText, stepTwoStyles.tyreTextSelected]}>
+              {formState.numTires}
+            </Text>
+          </Pressable>
+        )}
+
+        {/* Other button */}
+        <Pressable
+          style={stepTwoStyles.otherButton}
+          onPress={() => handleTyreSelection("Other")}>
+          <Text style={stepTwoStyles.otherText}>Other</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -930,27 +1064,39 @@ const StepThree = ({
       marginTop: 10,
     },
     tyreButton: {
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: 25,
       width: 50,
       height: 50,
+      borderRadius: 25,
       backgroundColor: colour.inputBackground,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: "transparent",
     },
     tyreButtonSelected: {
       backgroundColor: "#F5FCFB",
-      borderWidth: 2,
       borderColor: "#14B8A6",
-      color: "#757575",
     },
     tyreText: {
       fontSize: 16,
-      color: "#757575",
-      fontWeight: "bold",
+      color: "#666",
+      fontWeight: "normal",
     },
     tyreTextSelected: {
-      color: "#757575",
-      fontWeight: "bold",
+      color: "#14B8A6",
+    },
+    otherButton: {
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 25,
+      backgroundColor: "#F0F0F0",
+      alignItems: "center",
+      borderWidth: 0, // Explicitly remove border for Other button
+    },
+    otherText: {
+      fontSize: 16,
+      color: "#333",
+      fontWeight: "500",
     },
     boxSkeletonContainer: {
       position: "absolute",
