@@ -140,13 +140,8 @@ export default function TruckCard({
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
-      borderTopEndRadius: normalize(12),
-      borderTopStartRadius: normalize(12),
-      padding: normalize(16),
       alignItems: "center",
       marginBottom: normalize(12),
-      borderColor: "#ff0000",
-      backgroundColor: "#FFF9F0",
     },
     userInfo: {
       flexDirection: "row",
@@ -192,6 +187,15 @@ export default function TruckCard({
     expiredTimeLeft: {
       backgroundColor: colour.expired,
       color: colour.expiredText,
+      borderRadius: normalize(12),
+      padding: normalize(5),
+      paddingHorizontal: normalize(10),
+      fontSize: normalize(12),
+      fontWeight: "600",
+    },
+    scheduledTimeLeft: {
+      backgroundColor: "#FFF3E0",
+      color: "#FB8C00",
       borderRadius: normalize(12),
       padding: normalize(5),
       paddingHorizontal: normalize(10),
@@ -406,66 +410,81 @@ export default function TruckCard({
           : handleBidButtonPress
       }>
       {/* Owner Header Section */}
-      {showOwner ? (
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
-            {data.truckOwner?.profileImage ? (
-              <Image
-                source={{ uri: data.truckOwner.profileImage }}
-                style={styles.avatar}
-                resizeMode='cover'
-              />
-            ) : (
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {data.truckOwner?.name?.charAt(0)?.toUpperCase()}
+      <View style={styles.header}>
+        {showOwner ? (
+          <>
+            <View style={styles.userInfo}>
+              {data.truckOwner?.profileImage ? (
+                <Image
+                  source={{ uri: data.truckOwner.profileImage }}
+                  style={styles.avatar}
+                  resizeMode='cover'
+                />
+              ) : (
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>
+                    {data.truckOwner?.name?.charAt(0)?.toUpperCase()}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.nameContainer}>
+                <Text
+                  style={styles.name}
+                  numberOfLines={1}
+                  ellipsizeMode='tail'>
+                  {data.truckOwner?.name || "Unknown User"}
+                </Text>
+                <Text
+                  style={styles.role}
+                  numberOfLines={1}
+                  ellipsizeMode='tail'>
+                  {data.truckOwner?.userType === "transporter"
+                    ? "Transporter"
+                    : "Trucker"}
                 </Text>
               </View>
-            )}
-          
-            <View style={styles.nameContainer}>
-              <Text style={styles.name} numberOfLines={1} ellipsizeMode='tail'>
-                {data.truckOwner?.name || "Unknown User"}
-              </Text>
-              <Text style={styles.role} numberOfLines={1} ellipsizeMode='tail'>
-                {data.truckOwner?.userType === "transporter"
-                  ? "Transporter"
-                  : "Trucker"}
-              </Text>
             </View>
-          </View>
+          </>
+        ) : null}
+
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            width: "100%",
+          }}>
           <Text
             style={
-              new Date(expiresAt) < new Date()
+              data.isActive === false
+                ? styles.scheduledTimeLeft
+                : new Date(expiresAt) < new Date()
                 ? styles.expiredTimeLeft
                 : styles.timeLeft
             }>
             {getTimeLeft(expiresAt)}
           </Text>
+          {truckOwner === user._id && (
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => setShowInfoDrawer(true)}>
+              <MaterialIcons
+                name='more-vert'
+                size={24}
+                color={colour.iconColor}
+              />
+            </TouchableOpacity>
+          )}
         </View>
-      ): 
-      <View style={
-        {
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }
-      }>
-        {/* SHOW TiME LEFT */}
-        <Text style={styles.timeLeft}>
-          {getTimeLeft(expiresAt)}
-        </Text>
       </View>
-      
-      }
-
-
 
       {/* Main Content */}
       <View style={styles.content}>
         <View style={styles.materialSection}>
           <Image
-            source={vehicleTypes.find(label => label.label === truckType)?.icon}
+            source={
+              vehicleTypes.find((label) => label.label === truckType)?.icon
+            }
             style={styles.materialImage}
           />
           <View style={styles.materialSubSection}>

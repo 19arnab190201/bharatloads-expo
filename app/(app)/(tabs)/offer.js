@@ -15,8 +15,9 @@ import { normalize, formatMoneytext } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
 import Loader from "../../../components/Loader";
 import { useRouter } from "expo-router";
+import RejectionDrawer from "../../../components/RejectionDrawer";
 
-const OfferCard = ({ offer, onOfferStatusChange }) => {
+const OfferCard = ({ offer, onOfferStatusChange, onReject }) => {
   const { colour, token } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
@@ -62,43 +63,7 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
   };
 
   const handleRejectOffer = () => {
-    Alert.alert("Reject Offer", "Are you sure you want to reject this offer?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Reject",
-        style: "destructive",
-        onPress: async () => {
-          setIsProcessing(true);
-          try {
-            await api.put(
-              `/bid/${offer._id}/status`,
-              { status: "REJECTED" },
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-            Alert.alert("Success", "Offer rejected successfully");
-            if (typeof onOfferStatusChange === "function") {
-              onOfferStatusChange(offer._id, "REJECTED");
-            }
-          } catch (error) {
-            console.error("Error rejecting offer:", error);
-            Alert.alert(
-              "Error",
-              error.response?.data?.message || "Failed to reject offer"
-            );
-          } finally {
-            setIsProcessing(false);
-          }
-        },
-      },
-    ]);
+    onReject(offer);
   };
 
   const handleChat = () => {
@@ -297,200 +262,204 @@ const OfferCard = ({ offer, onOfferStatusChange }) => {
   });
 
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <View style={styles.userInfo}>
-          {offer.bidBy?.profileImage ? (
-            <Image
-              source={{ uri: offer.bidBy.profileImage }}
-              style={styles.avatar}
-              resizeMode='cover'
-            />
-          ) : (
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {offer.bidBy?.name?.charAt(0)?.toUpperCase()}
+    <View style={{ position: "relative" }}>
+      <View style={styles.card}>
+        <View style={styles.header}>
+          <View style={styles.userInfo}>
+            {offer.bidBy?.profileImage ? (
+              <Image
+                source={{ uri: offer.bidBy.profileImage }}
+                style={styles.avatar}
+                resizeMode='cover'
+              />
+            ) : (
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>
+                  {offer.bidBy?.name?.charAt(0)?.toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <View style={styles.nameContainer}>
+              <Text style={styles.name} numberOfLines={1} ellipsizeMode='tail'>
+                {offer.bidBy?.name || "Unknown User"}
+              </Text>
+              <Text style={styles.role} numberOfLines={1} ellipsizeMode='tail'>
+                {offer.bidBy?.userType || "User"}
               </Text>
             </View>
-          )}
-          <View style={styles.nameContainer}>
-            <Text style={styles.name} numberOfLines={1} ellipsizeMode='tail'>
-              {offer.bidBy?.name || "Unknown User"}
-            </Text>
-            <Text style={styles.role} numberOfLines={1} ellipsizeMode='tail'>
-              {offer.bidBy?.userType || "User"}
-            </Text>
+          </View>
+          <View style={styles.statusBadge}>
+            <Text style={styles.statusText(offer.status)}>{offer.status}</Text>
           </View>
         </View>
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusText(offer.status)}>{offer.status}</Text>
-        </View>
-      </View>
 
-      <View style={styles.materialContainer}>
-        <View style={styles.materialImage}>
-          <Image
-            source={require("../../../assets/images/parcel.png")}
-            style={styles.materialImage}
-            resizeMode='contain'
-          />
-        </View>
-        <View style={styles.materialInfo}>
-          <Text
-            style={styles.materialType}
-            numberOfLines={1}
-            ellipsizeMode='tail'>
-            {offer.materialType || "Unknown Material"}
-          </Text>
-          <View style={styles.locationContainer}>
-            <MaterialIcons
-              name='circle'
-              size={normalize(8)}
-              color='#14B8A6'
-              style={styles.locationIcon}
+        <View style={styles.materialContainer}>
+          <View style={styles.materialImage}>
+            <Image
+              source={require("../../../assets/images/parcel.png")}
+              style={styles.materialImage}
+              resizeMode='contain'
             />
+          </View>
+          <View style={styles.materialInfo}>
             <Text
-              style={styles.locationText}
+              style={styles.materialType}
               numberOfLines={1}
               ellipsizeMode='tail'>
-              {offer.source?.placeName || "Unknown Location"}
+              {offer.materialType || "Unknown Material"}
+            </Text>
+            <View style={styles.locationContainer}>
+              <MaterialIcons
+                name='circle'
+                size={normalize(8)}
+                color='#14B8A6'
+                style={styles.locationIcon}
+              />
+              <Text
+                style={styles.locationText}
+                numberOfLines={1}
+                ellipsizeMode='tail'>
+                {offer.source?.placeName || "Unknown Location"}
+              </Text>
+            </View>
+            <View style={styles.locationContainer}>
+              <MaterialIcons
+                name='circle'
+                size={normalize(8)}
+                color='#F43F5E'
+                style={styles.locationIcon}
+              />
+              <Text
+                style={styles.locationText}
+                numberOfLines={1}
+                ellipsizeMode='tail'>
+                {offer.destination?.placeName || "Unknown Location"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.timestamp}>
+            <Text style={styles.timestampText}>
+              {new Date(offer.createdAt).toLocaleString()}
             </Text>
           </View>
-          <View style={styles.locationContainer}>
+        </View>
+        <View style={styles.horizontalSeperator} />
+        <View style={styles.specs}>
+          <View style={styles.specItem}>
             <MaterialIcons
-              name='circle'
-              size={normalize(8)}
-              color='#F43F5E'
-              style={styles.locationIcon}
+              name='shopping-bag'
+              size={normalize(18)}
+              color='#64748B'
+              style={styles.specIcon}
+            />
+            <Text style={styles.specText}>{offer.weight || 0} Tonnes</Text>
+          </View>
+          <View style={styles.specItem}>
+            <MaterialIcons
+              name='local-shipping'
+              size={normalize(18)}
+              color='#64748B'
+              style={styles.specIcon}
             />
             <Text
-              style={styles.locationText}
+              style={styles.specText}
               numberOfLines={1}
               ellipsizeMode='tail'>
-              {offer.destination?.placeName || "Unknown Location"}
+              {offer.truckId?.truckType || "Unknown"}
+            </Text>
+          </View>
+          <View style={styles.specItem}>
+            <MaterialIcons
+              name='tire-repair'
+              size={normalize(18)}
+              color='#64748B'
+              style={styles.specIcon}
+            />
+            <Text style={styles.specText}>
+              {offer.truckId?.truckTyre || 0} Wheels
             </Text>
           </View>
         </View>
-        <View style={styles.timestamp}>
-          <Text style={styles.timestampText}>
-            {new Date(offer.createdAt).toLocaleString()}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.horizontalSeperator} />
-      <View style={styles.specs}>
-        <View style={styles.specItem}>
-          <MaterialIcons
-            name='shopping-bag'
-            size={normalize(18)}
-            color='#64748B'
-            style={styles.specIcon}
-          />
-          <Text style={styles.specText}>{offer.weight || 0} Tonnes</Text>
-        </View>
-        <View style={styles.specItem}>
-          <MaterialIcons
-            name='local-shipping'
-            size={normalize(18)}
-            color='#64748B'
-            style={styles.specIcon}
-          />
-          <Text style={styles.specText} numberOfLines={1} ellipsizeMode='tail'>
-            {offer.truckId?.truckType || "Unknown"}
-          </Text>
-        </View>
-        <View style={styles.specItem}>
-          <MaterialIcons
-            name='tire-repair'
-            size={normalize(18)}
-            color='#64748B'
-            style={styles.specIcon}
-          />
-          <Text style={styles.specText}>
-            {offer.truckId?.truckTyre || 0} Wheels
-          </Text>
-        </View>
-      </View>
-      <View style={styles.horizontalSeperator} />
+        <View style={styles.horizontalSeperator} />
 
-      <View style={styles.priceContainer}>
-        <View style={styles.priceDetails}>
-          <View
-            style={{
-              ...styles.priceInfo,
-              alignItems: "flex-start",
-              textAlign: "left",
-            }}>
-            <Text style={styles.priceLabel}>Bidded Amount</Text>
+        <View style={styles.priceContainer}>
+          <View style={styles.priceDetails}>
+            <View
+              style={{
+                ...styles.priceInfo,
+                alignItems: "flex-start",
+                textAlign: "left",
+              }}>
+              <Text style={styles.priceLabel}>Bidded Amount</Text>
 
-            <Text style={styles.priceValue}>
-              ₹{formatMoneytext(offer.biddedAmount?.total || 0)}
-            </Text>
-            <Text style={styles.priceLabel}>
-              Advance: {formatMoneytext(offer.biddedAmount?.advanceAmount || 0)}
-            </Text>
-            <Text style={styles.priceLabel}>
-              Diesel: ₹{formatMoneytext(offer.biddedAmount?.dieselAmount || 0)}
-            </Text>
-          </View>
-          <View
-            style={{
-              ...styles.priceInfo,
-              alignItems: "flex-end",
-              textAlign: "right",
-            }}>
-            <Text style={styles.priceLabel}>Your Original Amount</Text>
-            <Text style={styles.priceValue}>
-              ₹{formatMoneytext(offer.offeredAmount?.total || 0)}
-            </Text>
-            <Text style={styles.priceLabel}>
-              Advance:{" "}
-              {formatMoneytext(offer.offeredAmount?.advanceAmount || 0)}
-            </Text>
-            <Text style={styles.priceLabel}>
-              Diesel: ₹{formatMoneytext(offer.offeredAmount?.dieselAmount || 0)}
-            </Text>
+              <Text style={styles.priceValue}>
+                ₹{formatMoneytext(offer.biddedAmount?.total || 0)}
+              </Text>
+              <Text style={styles.priceLabel}>
+                Advance:{" "}
+                {formatMoneytext(offer.biddedAmount?.advanceAmount || 0)}
+              </Text>
+              <Text style={styles.priceLabel}>
+                Diesel: ₹
+                {formatMoneytext(offer.biddedAmount?.dieselAmount || 0)}
+              </Text>
+            </View>
+            <View
+              style={{
+                ...styles.priceInfo,
+                alignItems: "flex-end",
+                textAlign: "right",
+              }}>
+              <Text style={styles.priceLabel}>Your Original Amount</Text>
+              <Text style={styles.priceValue}>
+                ₹{formatMoneytext(offer.offeredAmount?.total || 0)}
+              </Text>
+              <Text style={styles.priceLabel}>
+                Advance:{" "}
+                {formatMoneytext(offer.offeredAmount?.advanceAmount || 0)}
+              </Text>
+              <Text style={styles.priceLabel}>
+                Diesel: ₹
+                {formatMoneytext(offer.offeredAmount?.dieselAmount || 0)}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      {offer.status === "PENDING" ? (
-        <View style={styles.buttonContainer}>
-          <Pressable
-            style={[styles.button, styles.rejectButton]}
-            onPress={handleRejectOffer}
-            disabled={isProcessing}>
-            <Text style={styles.buttonText("reject")}>
-              {isProcessing ? "Processing..." : "Reject"}
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[styles.button, styles.acceptButton]}
-            onPress={handleAcceptOffer}
-            disabled={isProcessing}>
-            <Text style={styles.buttonText("accept")}>
-              {isProcessing ? "Processing..." : "Accept"}
-            </Text>
-          </Pressable>
-        </View>
-      ) : offer.status === "REJECTED" ? null : offer.status === "ACCEPTED" ? (
-        <View style={styles.buttonContainer}>
-          <Pressable
-            style={[styles.button, styles.chatButton]}
-            onPress={handleChat}>
-            <Text style={styles.buttonText("chat")}>Chat</Text>
-          </Pressable>
-        </View>
-      ) : null}
+        {offer.status === "PENDING" ? (
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={[styles.button, styles.rejectButton]}
+              onPress={handleRejectOffer}>
+              <Text style={styles.buttonText("reject")}>Reject</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.acceptButton]}
+              onPress={handleAcceptOffer}>
+              <Text style={styles.buttonText("accept")}>Accept</Text>
+            </Pressable>
+          </View>
+        ) : offer.status === "REJECTED" ? null : offer.status === "ACCEPTED" ? (
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={[styles.button, styles.chatButton]}
+              onPress={handleChat}>
+              <Text style={styles.buttonText("chat")}>Chat</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
     </View>
   );
 };
 
 const Offers = () => {
-  const { colour } = useAuth();
+  const { colour, token } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
   const [offers, setOffers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showRejectionDrawer, setShowRejectionDrawer] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState(null);
 
   const handleOfferStatusChange = (offerId, newStatus) => {
     setOffers((prevOffers) =>
@@ -531,6 +500,42 @@ const Offers = () => {
         return offers;
     }
   }, [offers, activeTab]);
+
+  const handleRejectOffer = (offer) => {
+    setSelectedOffer(offer);
+    setShowRejectionDrawer(true);
+  };
+
+  const handleRejectionSubmit = async ({ rejectionReason, rejectionNote }) => {
+    console.log(selectedOffer, rejectionReason, rejectionNote);
+    try {
+      await api.put(
+        `/bid/${selectedOffer._id}/status`,
+        {
+          status: "REJECTED",
+          rejectionReason,
+          rejectionNote,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      Alert.alert("Success", "Offer rejected successfully");
+      handleOfferStatusChange(selectedOffer._id, "REJECTED");
+    } catch (error) {
+      console.error("Error rejecting offer:", error);
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to reject offer"
+      );
+    } finally {
+      setShowRejectionDrawer(false);
+      setSelectedOffer(null);
+    }
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -635,6 +640,7 @@ const Offers = () => {
             key={offer._id}
             offer={offer}
             onOfferStatusChange={handleOfferStatusChange}
+            onReject={handleRejectOffer}
           />
         ))}
       </ScrollView>
@@ -680,6 +686,16 @@ const Offers = () => {
       </View>
 
       {renderContent()}
+
+      <RejectionDrawer
+        isVisible={showRejectionDrawer}
+        onClose={() => {
+          setShowRejectionDrawer(false);
+          setSelectedOffer(null);
+        }}
+        onSubmit={handleRejectionSubmit}
+        colour={colour}
+      />
     </View>
   );
 };

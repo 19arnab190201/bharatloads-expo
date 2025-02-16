@@ -13,7 +13,7 @@ export const getTimeLeft = (expiresAt, scheduleDate, whenNeeded) => {
 
     if (hours >= 24) {
       const days = Math.floor(hours / 24);
-      return `Posting in ${days}d`;
+      return `Posting in ${days} Days`;
     }
     if (hours > 0) {
       return `Posting in ${hours}h ${minutes}m`;

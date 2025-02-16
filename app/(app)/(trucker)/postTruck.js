@@ -16,7 +16,9 @@ import {
 } from "react-native";
 import { useAuth } from "../../../context/AuthProvider";
 import FormInput from "../../../components/FormInput";
-import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
+import LocationIcon2 from "../../../assets/images/icons/LocationIcon2";
+import Loads from "../../../assets/images/icons/Loads";
+import Truck from "../../../assets/images/icons/Truck";
 import { api } from "../../../utils/api";
 import { useRouter } from "expo-router";
 import debounce from "lodash/debounce";
@@ -64,6 +66,7 @@ const FormStepHeader = ({ totalSteps = 2, currentStep = 1, setSteps }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style='dark' />
       {Array.from({ length: totalSteps }, (_, index) => {
         const stepIndex = index + 1;
         const isActive = stepIndex <= currentStep;
@@ -186,7 +189,7 @@ const StepOne = ({ formState, setFormState }) => {
   return (
     <View>
       <FormInput
-        Icon={LoadingPoint}
+        Icon={Truck}
         label='Vehicle Number'
         placeholder='Enter Vehicle Number'
         name='truckNumber'
@@ -197,7 +200,7 @@ const StepOne = ({ formState, setFormState }) => {
 
       <View style={{ position: "relative", zIndex: 1000 }}>
         <FormInput
-          Icon={LoadingPoint}
+          Icon={LocationIcon2}
           label='Vehicle Location'
           placeholder='Enter Vehicle Location'
           name='truckLocation'
@@ -425,6 +428,7 @@ const StepTwo = ({ formState, setFormState }) => {
       />
 
       <FormInput
+        Icon={Loads}
         label='Vehicle Capacity'
         placeholder='Enter Vehicle Capacity (in tonnes)'
         name='truckCapacity'
@@ -511,15 +515,15 @@ const StepTwo = ({ formState, setFormState }) => {
           onPress={() => handleTyreSelection("Other")}>
           <Text style={stepTwoStyles.otherText}>Other</Text>
         </Pressable>
-      </View>
 
-      <FormInput
-        label='RC Document'
-        placeholder='Upload RC Document'
-        name='RCImage'
-        type='file'
-        onChange={handleFormChange}
-      />
+        <FormInput
+          label='RC Document'
+          placeholder='Upload RC Document'
+          name='RCImage'
+          type='file'
+          onChange={handleFormChange}
+        />
+      </View>
     </View>
   );
 };

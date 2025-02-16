@@ -117,7 +117,8 @@ const FormInput = ({
       zIndex: 1,
       left: 10,
       top: "50%",
-      transform: [{ translateY: -12 }],
+      borderWidth: 2,
+      transform: [{ translateY: -10 }],
     },
     input: {
       borderRadius: 12,
@@ -171,12 +172,14 @@ const FormInput = ({
       {label && <Text style={styles.label}>{label}</Text>}
       <View style={styles.inputContainer}>
         {type === "select"
-          ? Icon && <Icon style={styles.icon} />
-          : Icon && <Icon style={styles.icon} />}
+          ? Icon && <Icon style={styles.icon} fill={"#475569"} />
+          : Icon && <Icon style={styles.icon} fill={"#475569"} />}
 
         {type === "text" || type === "number" ? (
           <TextInput
-            style={styles.input}
+            style={{
+              ...styles.input,
+            }}
             placeholder={placeholder}
             keyboardType={type === "number" ? "numeric" : "default"}
             value={value}

@@ -33,6 +33,10 @@ import Popup from "../../../components/Popup";
 import DetailLocationIcon from "../../../assets/images/icons/DetailLocationIcon";
 import WeightIcon from "../../../assets/images/icons/WeightIcon";
 import DateTimePicker from "../../../components/DateTimePicker";
+import DropIcon from "../../../assets/images/icons/DropIcon";
+import Loads from "../../../assets/images/icons/Loads";
+import MoneyIcon from "../../../assets/images/icons/MoneyIcon";
+import CalanderIcon from "../../../assets/images/icons/CalanderIcon";
 
 const FormStepHeader = ({ totalSteps = 3, currentStep = 1, setSteps }) => {
   const { colour } = useAuth();
@@ -292,7 +296,7 @@ const StepOne = ({ formState, setFormState }) => {
           onLayout={(e) => handleLayout(e, "dropping")}
           style={{ marginTop: 16 }}>
           <FormInput
-            Icon={LoadingPoint}
+            Icon={DropIcon}
             label='Dropping Point'
             placeholder='Search Dropping Point'
             name='droppingPoint'
@@ -354,7 +358,7 @@ const StepOne = ({ formState, setFormState }) => {
         }}>
         <View style={{ flex: 1, marginRight: 10 }}>
           <FormInput
-            Icon={LoadingPoint}
+            Icon={Loads}
             label='Quantity'
             placeholder='Qty'
             name='quantity'
@@ -1258,7 +1262,7 @@ const StepThree = ({
 
       {/* Total Offered Amount */}
       <FormInput
-        Icon={LoadingPoint}
+        Icon={MoneyIcon}
         label='Total Offered Amount'
         placeholder='Enter Offered Amount'
         name='totalOfferedAmount'
@@ -1281,7 +1285,7 @@ const StepThree = ({
 
       {/* Advance Amount Selection */}
       <FormInput
-        Icon={LoadingPoint}
+        Icon={MoneyIcon}
         label='How much advance would you like to pay ?'
         placeholder='Enter Advance Amount'
         name='advanceAmount'
@@ -1333,7 +1337,7 @@ const StepThree = ({
       <View style={stepThreeStyles.advanceInputContainer}>
         <View style={stepThreeStyles.halfWidth}>
           <FormInput
-            Icon={LoadingPoint}
+            Icon={MoneyIcon}
             placeholder='Cash'
             name='advanceCash'
             type='number'
@@ -1372,7 +1376,7 @@ const StepThree = ({
         </View>
         <View style={stepThreeStyles.halfWidth}>
           <FormInput
-            Icon={LoadingPoint}
+            Icon={MoneyIcon}
             placeholder='Diesel Amount'
             name='advanceDiesel'
             type='number'
@@ -1467,7 +1471,7 @@ const StepThree = ({
         <View style={stepThreeStyles.dateTimeContainer}>
           <View style={stepThreeStyles.halfWidth}>
             <DateTimePicker
-              Icon={LoadingPoint}
+              Icon={CalanderIcon}
               label='Date'
               placeholder='Select Date'
               mode='date'
@@ -1489,7 +1493,7 @@ const StepThree = ({
           </View>
           <View style={stepThreeStyles.halfWidth}>
             <DateTimePicker
-              Icon={LoadingPoint}
+              Icon={CalanderIcon}
               label='Time'
               placeholder='Select Time'
               mode='time'
@@ -1515,13 +1519,13 @@ const StepThree = ({
         </View>
       )}
 
-      {/* Additional Notes */}
+      {/* Additional Notes
       <View
         style={{
           marginTop: 20,
         }}>
         <FormInput
-          Icon={LoadingPoint}
+          Icon={Edit}
           label='Additional Notes'
           placeholder='Type Here...'
           name='additionalNotes'
@@ -1531,7 +1535,7 @@ const StepThree = ({
             marginTop: 10,
           }}
         />
-      </View>
+      </View> */}
 
       {/* Submit Button */}
       <View

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
+  TouchableOpacity,
+  TextInput,
 } from "react-native";
 import { useAuth } from "../context/AuthProvider";
 import { api } from "../utils/api";
@@ -32,27 +34,87 @@ export default function TruckInfoDrawer({
   const router = useRouter();
   const isExpired = new Date(data?.expiresAt) < new Date();
   const [isLoading, setIsLoading] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locations, setLocations] = useState([]);
+  const [locationSearch, setLocationSearch] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Location search without debounce package
+  const searchTimeout = React.useRef(null);
+
+  const searchLocations = async (query) => {
+    if (query.length < 3) {
+      setLocations([]);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      const response = await api.get(`/locationsearch?query=${query}`);
+      setLocations(response.data.data);
+    } catch (error) {
+      console.error("Location search error:", error);
+      setLocations([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleLocationSearch = (text) => {
+    setLocationSearch(text);
+
+    // Clear previous timeout
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
+    }
+
+    // Set new timeout
+    searchTimeout.current = setTimeout(() => {
+      searchLocations(text);
+    }, 500);
+  };
+
+  const handleLocationSelect = (location) => {
+    setSelectedLocation(location);
+    setLocationSearch(location.name);
+    setLocations([]);
+  };
 
   const handleRepost = async () => {
+    if (!selectedLocation) {
+      setShowLocationModal(true);
+      onClose();
+      return;
+    }
+
     setIsLoading(true);
     try {
       const endpoint = type === "truck" ? "/truck/repost" : "/load/repost";
       const idField = type === "truck" ? "truckId" : "loadId";
 
-      await api.post(
-        endpoint,
-        {
-          [idField]: data._id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      // Ensure coordinates are numbers and include required GeoJSON type
+      const payload = {
+        [idField]: data._id,
+        truckLocation: {
+          type: "Point",
+          placeName: selectedLocation.name,
+          coordinates: {
+            latitude: Number(selectedLocation.coordinates.lat),
+            longitude: Number(selectedLocation.coordinates.lng),
           },
-        }
-      );
+        },
+      };
+
+      const response = await api.post(endpoint, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (onRepost) onRepost();
-      onClose();
+      setShowLocationModal(false);
+      Alert.alert("Success", "Truck reposted successfully!");
     } catch (error) {
       console.error("Error reposting:", error);
       Alert.alert("Error", `Failed to repost ${type}. Please try again.`);
@@ -266,178 +328,291 @@ export default function TruckInfoDrawer({
       backgroundColor: "#E5E5E5",
       marginVertical: 10,
     },
+    locationModal: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "flex-end",
+    },
+    locationContent: {
+      backgroundColor: "#fff",
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 20,
+      maxHeight: "80%",
+    },
+    locationHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    searchInput: {
+      backgroundColor: colour.inputBackground,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+      fontSize: 16,
+    },
+    locationItem: {
+      padding: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: "#eee",
+    },
+    locationName: {
+      fontSize: 16,
+      color: "#333",
+      fontWeight: "400",
+    },
+    locationDescription: {
+      fontSize: 14,
+      color: "#999",
+    },
+    confirmButton: {
+      backgroundColor: colour.primaryColor,
+      padding: 16,
+      borderRadius: 8,
+      alignItems: "center",
+      marginTop: 20,
+    },
+    confirmButtonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "600",
+    },
   });
 
   return (
-    <Modal
-      visible={visible}
-      animationType='slide'
-      transparent
-      onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Text style={styles.title}>
-              {type === "truck" ? "Truck Details" : "Load Details"}
-            </Text>
-            <Pressable style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeText}>Close</Text>
+    <>
+      <Modal
+        visible={visible}
+        animationType='slide'
+        transparent
+        onRequestClose={onClose}>
+        <View style={styles.modalContainer}>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <Text style={styles.title}>
+                {type === "truck" ? "Truck Details" : "Load Details"}
+              </Text>
+              <Pressable style={styles.closeButton} onPress={onClose}>
+                <Text style={styles.closeText}>Close</Text>
+              </Pressable>
+            </View>
+
+            <ScrollView>
+              <View style={styles.detailsContainer}>
+                {type === "truck" ? (
+                  <>
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Truck Number</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.truckNumber}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Truck Type</Text>
+                      <Text style={styles.detailValue}>{data?.truckType}</Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Location</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.truckLocation?.placeName}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Capacity</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.truckCapacity} Tonnes
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Body Type</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.vehicleBodyType === "OPEN_BODY"
+                          ? "Open Body"
+                          : "Closed Body"}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Wheels</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.truckTyre} Wheels
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Permit Type</Text>
+                      <Text style={styles.detailValue}>
+                        {formatText(data?.truckPermit)}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+                  </>
+                ) : (
+                  <>
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Material Type</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.materialType}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Source</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.source?.placeName}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Destination</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.destination?.placeName}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Weight</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.weight} Tonnes
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Vehicle Type</Text>
+                      <Text style={styles.detailValue}>
+                        {formatText(data?.vehicleType)}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Body Type</Text>
+                      <Text style={styles.detailValue}>
+                        {formatText(data?.vehicleBodyType)}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Wheels</Text>
+                      <Text style={styles.detailValue}>
+                        {data?.numberOfWheels} Wheels
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Total Amount</Text>
+                      <Text style={styles.detailValue}>
+                        ₹{formatMoneytext(data?.offeredAmount?.total)}
+                      </Text>
+                    </View>
+                    <View style={styles.divider} />
+                  </>
+                )}
+              </View>
+
+              <View style={styles.actionButtonsContainer}>
+                {/* <Pressable
+                  style={[styles.actionButton, styles.editButton]}
+                  onPress={handleEdit}>
+                  <Text style={styles.buttonText}>Edit</Text>
+                </Pressable> */}
+
+                <Pressable
+                  style={[styles.actionButton, styles.pauseButton]}
+                  onPress={isExpired ? handleRepost : handlePause}
+                  disabled={isLoading}>
+                  <Text style={styles.buttonText}>
+                    {isLoading ? "Loading..." : isExpired ? "Repost" : "Pause"}
+                  </Text>
+                </Pressable>
+
+                {/* <Pressable
+                  style={[styles.actionButton, styles.deleteButton]}
+                  onPress={handlePause}
+                  disabled={isLoading}>
+                  <Text style={styles.buttonText}>
+                    {isLoading ? "Loading..." : "Delete"}
+                  </Text>
+                </Pressable> */}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showLocationModal}
+        animationType='slide'
+        transparent
+        onRequestClose={() => setShowLocationModal(false)}>
+        <View style={styles.locationModal}>
+          <View style={styles.locationContent}>
+            <View style={styles.locationHeader}>
+              <Text style={styles.title}>Update Location</Text>
+              <Pressable
+                style={styles.closeButton}
+                onPress={() => setShowLocationModal(false)}>
+                <Text style={styles.closeText}>Close</Text>
+              </Pressable>
+            </View>
+
+            <TextInput
+              style={styles.searchInput}
+              placeholder='Search location...'
+              value={locationSearch}
+              onChangeText={handleLocationSearch}
+            />
+
+            {isSearching && (
+              <ActivityIndicator size='small' color={colour.primaryColor} />
+            )}
+
+            <ScrollView>
+              {locations.map((location, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.locationItem}
+                  onPress={() => handleLocationSelect(location)}>
+                  <Text style={styles.locationName}>{location.name}</Text>
+                  <Text style={styles.locationDescription}>
+                    {location.description}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <Pressable
+              style={[
+                styles.confirmButton,
+                (!selectedLocation || isLoading) && { opacity: 0.7 },
+              ]}
+              onPress={handleRepost}
+              disabled={!selectedLocation || isLoading}>
+              <Text style={styles.confirmButtonText}>
+                {isLoading ? "Reposting..." : "Confirm & Repost"}
+              </Text>
             </Pressable>
           </View>
-
-          <ScrollView>
-            <View style={styles.detailsContainer}>
-              {type === "truck" ? (
-                <>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Truck Number</Text>
-                    <Text style={styles.detailValue}>{data?.truckNumber}</Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Truck Type</Text>
-                    <Text style={styles.detailValue}>{data?.truckType}</Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Location</Text>
-                    <Text style={styles.detailValue}>
-                      {data?.truckLocation?.placeName}
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Capacity</Text>
-                    <Text style={styles.detailValue}>
-                      {data?.truckCapacity} Tonnes
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Body Type</Text>
-                    <Text style={styles.detailValue}>
-                      {data?.vehicleBodyType === "OPEN_BODY"
-                        ? "Open Body"
-                        : "Closed Body"}
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Wheels</Text>
-                    <Text style={styles.detailValue}>
-                      {data?.truckTyre} Wheels
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Permit Type</Text>
-                    <Text style={styles.detailValue}>
-                      {formatText(data?.truckPermit)}
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-                </>
-              ) : (
-                <>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Material Type</Text>
-                    <Text style={styles.detailValue}>{data?.materialType}</Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Source</Text>
-                    <Text style={styles.detailValue}>
-                      {data?.source?.placeName}
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Destination</Text>
-                    <Text style={styles.detailValue}>
-                      {data?.destination?.placeName}
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Weight</Text>
-                    <Text style={styles.detailValue}>
-                      {data?.weight} Tonnes
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Vehicle Type</Text>
-                    <Text style={styles.detailValue}>
-                      {formatText(data?.vehicleType)}
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Body Type</Text>
-                    <Text style={styles.detailValue}>
-                      {formatText(data?.vehicleBodyType)}
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Wheels</Text>
-                    <Text style={styles.detailValue}>
-                      {data?.numberOfWheels} Wheels
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Total Amount</Text>
-                    <Text style={styles.detailValue}>
-                      ₹{formatMoneytext(data?.offeredAmount?.total)}
-                    </Text>
-                  </View>
-                  <View style={styles.divider} />
-                </>
-              )}
-            </View>
-
-            <View style={styles.actionButtonsContainer}>
-              {/* <Pressable
-                style={[styles.actionButton, styles.editButton]}
-                onPress={handleEdit}>
-                <Text style={styles.buttonText}>Edit</Text>
-              </Pressable> */}
-
-              <Pressable
-                style={[styles.actionButton, styles.pauseButton]}
-                onPress={isExpired ? handleRepost : handlePause}
-                disabled={isLoading}>
-                <Text style={styles.buttonText}>
-                  {isLoading ? "Loading..." : isExpired ? "Repost" : "Pause"}
-                </Text>
-              </Pressable>
-
-              {/* <Pressable
-                style={[styles.actionButton, styles.deleteButton]}
-                onPress={handlePause}
-                disabled={isLoading}>
-                <Text style={styles.buttonText}>
-                  {isLoading ? "Loading..." : "Delete"}
-                </Text>
-              </Pressable> */}
-            </View>
-          </ScrollView>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+    </>
   );
 }
