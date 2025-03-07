@@ -16,6 +16,25 @@ import { normalize } from "../../../utils/functions";
 import { useFocusEffect } from "@react-navigation/native";
 import Loader from "../../../components/Loader";
 import { useRouter } from "expo-router";
+
+const vehicleTypes = [
+  {
+    id: "trailer",
+    label: "TRAILER",
+    icon: require("../../../assets/images/trucktype/trailer.png"),
+  },
+  {
+    id: "hyva",
+    label: "HYVA",
+    icon: require("../../../assets/images/trucktype/hyva.png"),
+  },
+  {
+    id: "truck",
+    label: "TRUCK",
+    icon: require("../../../assets/images/trucktype/truck.png"),
+  },
+];
+
 const BidCard = ({ bid, onBidClosed }) => {
   const router = useRouter();
   const { colour, user, token } = useAuth();
@@ -330,11 +349,25 @@ const BidCard = ({ bid, onBidClosed }) => {
       </View>
 
       <View style={styles.materialContainer}>
-        <Image
-          source={require("../../../assets/images/parcel.png")}
-          style={styles.materialImage}
-          resizeMode='contain'
-        />
+        <View style={styles.materialImage}>
+          {user?.userType?.toLowerCase() === "transporter" ? (
+            <Image
+              source={
+                vehicleTypes.find(
+                  (v) => v.id === bid.truckId?.truckType?.toLowerCase()
+                )?.icon || vehicleTypes[2].icon
+              }
+              style={{ width: normalize(56), height: normalize(56) }}
+              resizeMode='contain'
+            />
+          ) : (
+            <Image
+              source={require("../../../assets/images/parcel.png")}
+              style={{ width: normalize(56), height: normalize(56) }}
+              resizeMode='contain'
+            />
+          )}
+        </View>
         <View style={styles.materialInfo}>
           <Text
             style={styles.materialType}
@@ -342,6 +375,13 @@ const BidCard = ({ bid, onBidClosed }) => {
             ellipsizeMode='tail'>
             {bid.materialType || "Unknown Material"}
           </Text>
+          <Text
+            style={[styles.locationText, { marginBottom: normalize(4) }]}
+            numberOfLines={1}
+            ellipsizeMode='tail'>
+            {bid.truckId?.truckNumber || "NA"}
+          </Text>
+
           <View style={styles.locationContainer}>
             <MaterialIcons
               name='circle'

@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Pressable,
   Linking,
-  Alert
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -22,9 +22,12 @@ import { Ionicons } from "@expo/vector-icons";
 import Loader from "../../../components/Loader";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const BidCard = ({ bid }) => {
+const BidCard = ({ bid, type }) => {
   const { colour } = useAuth();
-  
+
+  // Debug log to see the complete bid data
+  console.log("BidCard Props:", { type, bid });
+
   const styles = StyleSheet.create({
     bidCard: {
       backgroundColor: "#fff",
@@ -49,7 +52,7 @@ const BidCard = ({ bid }) => {
     bidTitle: {
       fontSize: normalize(18),
       fontWeight: "600",
-      color: colour.primaryColor,
+      color: type === "BID_REJECTED" ? "#EF4444" : colour.primaryColor,
       marginLeft: 8,
     },
     bidDetails: {
@@ -79,55 +82,147 @@ const BidCard = ({ bid }) => {
     bidAmountValue: {
       fontSize: normalize(18),
       fontWeight: "600",
-      color: colour.primaryColor,
+      color: type === "BID_REJECTED" ? "#EF4444" : colour.primaryColor,
     },
     bidAmountDetail: {
       fontSize: normalize(12),
       color: "#666",
       marginTop: 4,
-    }
+    },
+    rejectionReason: {
+      marginTop: 12,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: "#eee",
+    },
+    rejectionReasonLabel: {
+      fontSize: normalize(14),
+      color: "#666",
+      marginBottom: 4,
+    },
+    rejectionReasonText: {
+      fontSize: normalize(14),
+      color: "#EF4444",
+      fontWeight: "500",
+    },
+    rejectionNote: {
+      fontSize: normalize(12),
+      color: "#666",
+      marginTop: 4,
+      fontStyle: "italic",
+    },
   });
+
+  // Early return with debug info if bid is not properly structured
+  if (!bid || (!bid.truckId && !bid.materialType)) {
+    console.log("Invalid bid data:", bid);
+    return (
+      <View style={[styles.bidCard, { alignItems: "center" }]}>
+        <View style={styles.bidHeader}>
+          <MaterialIcons
+            name={type === "BID_REJECTED" ? "cancel" : "handshake"}
+            size={24}
+            color={type === "BID_REJECTED" ? "#EF4444" : colour.primaryColor}
+          />
+          <Text style={styles.bidTitle}>
+            {type === "BID_REJECTED" ? "Bid Rejected" : "Bid Accepted"}
+          </Text>
+        </View>
+        <Text style={{ color: "#666", marginTop: 8 }}>
+          Bid details unavailable
+        </Text>
+      </View>
+    );
+  }
+
+  const getRejectionReasonText = (reason) => {
+    switch (reason?.toUpperCase()) {
+      case "PRICE_TOO_HIGH":
+        return "Price is too high";
+      case "TRUCK_UNAVAILABLE":
+        return "Truck is not available";
+      case "ROUTE_ISSUE":
+        return "Route/Location issues";
+      case "TIMING_ISSUE":
+        return "Timing/Schedule conflict";
+      case "OTHER":
+        return "Other reasons";
+      default:
+        return "No specific reason provided";
+    }
+  };
 
   return (
     <View style={styles.bidCard}>
       <View style={styles.bidHeader}>
-        <MaterialIcons name="handshake" size={24} color={colour.primaryColor} />
-        <Text style={styles.bidTitle}>Bid Accepted</Text>
+        <MaterialIcons
+          name={type === "BID_REJECTED" ? "cancel" : "handshake"}
+          size={24}
+          color={type === "BID_REJECTED" ? "#EF4444" : colour.primaryColor}
+        />
+        <Text style={styles.bidTitle}>
+          {type === "BID_REJECTED" ? "Bid Rejected" : "Bid Accepted"}
+        </Text>
       </View>
-      
+
       <View style={styles.bidDetails}>
+        {bid.truckId && (
+          <View style={styles.bidRow}>
+            <MaterialIcons name='local-shipping' size={20} color='#666' />
+            <Text style={styles.bidText}>
+              {bid.truckId.truckType || "N/A"} -{" "}
+              {bid.truckId.truckNumber || "N/A"}
+            </Text>
+          </View>
+        )}
+
         <View style={styles.bidRow}>
-          <MaterialIcons name="local-shipping" size={20} color="#666" />
+          <MaterialIcons name='inventory' size={20} color='#666' />
           <Text style={styles.bidText}>
-            {bid.truckId.truckType} - {bid.truckId.truckNumber}
-          </Text>
-        </View>
-        
-        <View style={styles.bidRow}>
-          <MaterialIcons name="inventory" size={20} color="#666" />
-          <Text style={styles.bidText}>
-            {bid.materialType} • {bid.weight} Tonnes
+            {bid.materialType || "N/A"} • {bid.weight || "N/A"} Tonnes
           </Text>
         </View>
 
-        <View style={styles.bidRow}>
-          <MaterialIcons name="place" size={20} color="#14B8A6" />
-          <Text style={styles.bidText}>{bid.source.placeName}</Text>
-        </View>
+        {bid.source && (
+          <View style={styles.bidRow}>
+            <MaterialIcons name='place' size={20} color='#14B8A6' />
+            <Text style={styles.bidText}>{bid.source.placeName || "N/A"}</Text>
+          </View>
+        )}
 
-        <View style={styles.bidRow}>
-          <MaterialIcons name="place" size={20} color="#F43F5E" />
-          <Text style={styles.bidText}> {bid.destination.placeName}</Text>
-        </View>
+        {bid.destination && (
+          <View style={styles.bidRow}>
+            <MaterialIcons name='place' size={20} color='#F43F5E' />
+            <Text style={styles.bidText}>
+              {bid.destination.placeName || "N/A"}
+            </Text>
+          </View>
+        )}
 
-        <View style={styles.bidAmount}>
-          <Text style={styles.bidAmountLabel}>Amount</Text>
-          <Text style={styles.bidAmountValue}>₹{bid.biddedAmount.total}</Text>
-          <Text style={styles.bidAmountDetail}>
-            Advance: ₹{bid.biddedAmount.advanceAmount} • 
-            Diesel: ₹{bid.biddedAmount.dieselAmount}
-          </Text>
-        </View>
+        {bid.biddedAmount && (
+          <View style={styles.bidAmount}>
+            <Text style={styles.bidAmountLabel}>Amount</Text>
+            <Text style={styles.bidAmountValue}>
+              ₹{bid.biddedAmount.total || 0}
+            </Text>
+            <Text style={styles.bidAmountDetail}>
+              Advance: ₹{bid.biddedAmount.advanceAmount || 0} • Diesel: ₹
+              {bid.biddedAmount.dieselAmount || 0}
+            </Text>
+          </View>
+        )}
+
+        {type === "BID_REJECTED" && (
+          <View style={styles.rejectionReason}>
+            <Text style={styles.rejectionReasonLabel}>Rejection Reason</Text>
+            <Text style={styles.rejectionReasonText}>
+              {getRejectionReasonText(bid.rejectionReason)}
+            </Text>
+            {bid.rejectionNote && (
+              <Text style={styles.rejectionNote}>{bid.rejectionNote}</Text>
+            )}
+          </View>
+        )}
       </View>
     </View>
   );
@@ -175,14 +270,23 @@ const Message = ({ message, isOwnMessage }) => {
       color: "#999",
       marginTop: 4,
       alignSelf: "flex-end",
-    }
+    },
   });
 
   const isSystem = message.messageType === "SYSTEM";
   const isBidAccepted = message.messageType === "BID_ACCEPTED";
+  const isBidRejected = message.messageType === "BID_REJECTED";
 
-  if (isBidAccepted) {
-    return <BidCard bid={message.bidData} />;
+  // Debug log for bid messages
+  if (isBidAccepted || isBidRejected) {
+    console.log("Bid Message Data:", {
+      messageType: message.messageType,
+      bidData: message.bidData,
+    });
+  }
+
+  if (isBidAccepted || isBidRejected) {
+    return <BidCard bid={message?.bidData} type={message.messageType} />;
   }
 
   return (
@@ -299,7 +403,7 @@ export default function ChatScreen() {
       color: "#fff",
       fontSize: normalize(16),
       fontWeight: "600",
-    }
+    },
   });
 
   const fetchChat = async () => {
@@ -307,13 +411,22 @@ export default function ChatScreen() {
       setError(null);
       const response = await api.get(`/chats/${id}`);
       const chatData = response.data.data;
-      
+
       if (!chatData || !chatData.participants) {
         throw new Error("Invalid chat data received");
       }
-      
+
+      // Debug log for chat data
+      console.log("Chat Data:", {
+        messageCount: chatData.messages.length,
+        bidMessages: chatData.messages.filter(
+          (m) =>
+            m.messageType === "BID_ACCEPTED" || m.messageType === "BID_REJECTED"
+        ),
+      });
+
       setChat(chatData);
-      
+
       if (chatData.messages.length > 0) {
         lastMessageTimeRef.current = new Date(
           chatData.messages[chatData.messages.length - 1].timestamp
@@ -413,63 +526,65 @@ export default function ChatScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colour.background }]}>
-
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={[styles.container, { backgroundColor: colour.background }]}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={[styles.headerName, { color: colour.text }]}>
-            {otherParticipant.name}
-          </Text>
-          <Text style={styles.headerCompany}>{otherParticipant.companyName}</Text>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colour.background }]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={[styles.container, { backgroundColor: colour.background }]}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={[styles.headerName, { color: colour.text }]}>
+              {otherParticipant.name}
+            </Text>
+            <Text style={styles.headerCompany}>
+              {otherParticipant.companyName}
+            </Text>
+          </View>
+          <Pressable
+            onPress={() =>
+              Linking.openURL(`tel:${otherParticipant.mobile.phone}`)
+            }>
+            <Ionicons name='call' size={24} color={colour.primaryColor} />
+          </Pressable>
         </View>
-        <Pressable onPress={() => Linking.openURL(`tel:${otherParticipant.mobile.phone}`)}>
-          <Ionicons name="call" size={24} color={colour.primaryColor} />
-        </Pressable>
-      </View>
 
-      <FlatList
-        ref={flatListRef}
-        data={chat.messages}
-        keyExtractor={(item, index) => item._id || index.toString()}
-        renderItem={({ item }) => (
-          <Message
-          message={item}
-          isOwnMessage={item.sender === user._id}
-          />
-        )}
-        contentContainerStyle={styles.messagesList}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-        onLayout={() => flatListRef.current?.scrollToEnd()}
+        <FlatList
+          ref={flatListRef}
+          data={chat.messages}
+          keyExtractor={(item, index) => item._id || index.toString()}
+          renderItem={({ item }) => (
+            <Message message={item} isOwnMessage={item.sender === user._id} />
+          )}
+          contentContainerStyle={styles.messagesList}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+          onLayout={() => flatListRef.current?.scrollToEnd()}
         />
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: colour.inputBackground, color: colour.text },
-          ]}
-          value={message}
-          onChangeText={setMessage}
-          placeholder="Type a message..."
-          placeholderTextColor="#999"
-          multiline
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={[
+              styles.input,
+              { backgroundColor: colour.inputBackground, color: colour.text },
+            ]}
+            value={message}
+            onChangeText={setMessage}
+            placeholder='Type a message...'
+            placeholderTextColor='#999'
+            multiline
           />
-        <TouchableOpacity
-          style={[styles.sendButton, { opacity: isSending ? 0.7 : 1 }]}
-          onPress={sendMessage}
-          disabled={isSending}>
-          {isSending ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <Ionicons name="send" size={24} color="#fff" />
-          )}
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
-          </SafeAreaView>
+          <TouchableOpacity
+            style={[styles.sendButton, { opacity: isSending ? 0.7 : 1 }]}
+            onPress={sendMessage}
+            disabled={isSending}>
+            {isSending ? (
+              <ActivityIndicator color='#fff' size='small' />
+            ) : (
+              <Ionicons name='send' size={24} color='#fff' />
+            )}
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

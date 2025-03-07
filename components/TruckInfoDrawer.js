@@ -82,29 +82,32 @@ export default function TruckInfoDrawer({
   };
 
   const handleRepost = async () => {
-    if (!selectedLocation) {
-      setShowLocationModal(true);
-      onClose();
-      return;
-    }
-
     setIsLoading(true);
     try {
       const endpoint = type === "truck" ? "/truck/repost" : "/load/repost";
       const idField = type === "truck" ? "truckId" : "loadId";
 
-      // Ensure coordinates are numbers and include required GeoJSON type
-      const payload = {
+      let payload = {
         [idField]: data._id,
-        truckLocation: {
+      };
+
+      // Only include location update for trucks
+      if (type === "truck") {
+        if (!selectedLocation) {
+          setShowLocationModal(true);
+          onClose();
+          return;
+        }
+
+        payload.truckLocation = {
           type: "Point",
           placeName: selectedLocation.name,
           coordinates: {
             latitude: Number(selectedLocation.coordinates.lat),
             longitude: Number(selectedLocation.coordinates.lng),
           },
-        },
-      };
+        };
+      }
 
       const response = await api.post(endpoint, payload, {
         headers: {
@@ -113,8 +116,12 @@ export default function TruckInfoDrawer({
       });
 
       if (onRepost) onRepost();
-      setShowLocationModal(false);
-      Alert.alert("Success", "Truck reposted successfully!");
+      if (showLocationModal) setShowLocationModal(false);
+      Alert.alert(
+        "Success",
+        `${type.charAt(0).toUpperCase() + type.slice(1)} reposted successfully!`
+      );
+      onClose();
     } catch (error) {
       console.error("Error reposting:", error);
       Alert.alert("Error", `Failed to repost ${type}. Please try again.`);
@@ -558,61 +565,63 @@ export default function TruckInfoDrawer({
         </View>
       </Modal>
 
-      <Modal
-        visible={showLocationModal}
-        animationType='slide'
-        transparent
-        onRequestClose={() => setShowLocationModal(false)}>
-        <View style={styles.locationModal}>
-          <View style={styles.locationContent}>
-            <View style={styles.locationHeader}>
-              <Text style={styles.title}>Update Location</Text>
+      {type === "truck" && (
+        <Modal
+          visible={showLocationModal}
+          animationType='slide'
+          transparent
+          onRequestClose={() => setShowLocationModal(false)}>
+          <View style={styles.locationModal}>
+            <View style={styles.locationContent}>
+              <View style={styles.locationHeader}>
+                <Text style={styles.title}>Update Location</Text>
+                <Pressable
+                  style={styles.closeButton}
+                  onPress={() => setShowLocationModal(false)}>
+                  <Text style={styles.closeText}>Close</Text>
+                </Pressable>
+              </View>
+
+              <TextInput
+                style={styles.searchInput}
+                placeholder='Search location...'
+                value={locationSearch}
+                onChangeText={handleLocationSearch}
+              />
+
+              {isSearching && (
+                <ActivityIndicator size='small' color={colour.primaryColor} />
+              )}
+
+              <ScrollView>
+                {locations.map((location, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.locationItem}
+                    onPress={() => handleLocationSelect(location)}>
+                    <Text style={styles.locationName}>{location.name}</Text>
+                    <Text style={styles.locationDescription}>
+                      {location.description}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
               <Pressable
-                style={styles.closeButton}
-                onPress={() => setShowLocationModal(false)}>
-                <Text style={styles.closeText}>Close</Text>
+                style={[
+                  styles.confirmButton,
+                  (!selectedLocation || isLoading) && { opacity: 0.7 },
+                ]}
+                onPress={handleRepost}
+                disabled={!selectedLocation || isLoading}>
+                <Text style={styles.confirmButtonText}>
+                  {isLoading ? "Reposting..." : "Confirm & Repost"}
+                </Text>
               </Pressable>
             </View>
-
-            <TextInput
-              style={styles.searchInput}
-              placeholder='Search location...'
-              value={locationSearch}
-              onChangeText={handleLocationSearch}
-            />
-
-            {isSearching && (
-              <ActivityIndicator size='small' color={colour.primaryColor} />
-            )}
-
-            <ScrollView>
-              {locations.map((location, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.locationItem}
-                  onPress={() => handleLocationSelect(location)}>
-                  <Text style={styles.locationName}>{location.name}</Text>
-                  <Text style={styles.locationDescription}>
-                    {location.description}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            <Pressable
-              style={[
-                styles.confirmButton,
-                (!selectedLocation || isLoading) && { opacity: 0.7 },
-              ]}
-              onPress={handleRepost}
-              disabled={!selectedLocation || isLoading}>
-              <Text style={styles.confirmButtonText}>
-                {isLoading ? "Reposting..." : "Confirm & Repost"}
-              </Text>
-            </Pressable>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
     </>
   );
 }

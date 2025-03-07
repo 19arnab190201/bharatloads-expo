@@ -17,8 +17,26 @@ import Loader from "../../../components/Loader";
 import { useRouter } from "expo-router";
 import RejectionDrawer from "../../../components/RejectionDrawer";
 
+const vehicleTypes = [
+  {
+    id: "trailer",
+    label: "TRAILER",
+    icon: require("../../../assets/images/trucktype/trailer.png"),
+  },
+  {
+    id: "hyva",
+    label: "HYVA",
+    icon: require("../../../assets/images/trucktype/hyva.png"),
+  },
+  {
+    id: "truck",
+    label: "TRUCK",
+    icon: require("../../../assets/images/trucktype/truck.png"),
+  },
+];
+
 const OfferCard = ({ offer, onOfferStatusChange, onReject }) => {
-  const { colour, token } = useAuth();
+  const { colour, token, user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
 
@@ -295,11 +313,23 @@ const OfferCard = ({ offer, onOfferStatusChange, onReject }) => {
 
         <View style={styles.materialContainer}>
           <View style={styles.materialImage}>
-            <Image
-              source={require("../../../assets/images/parcel.png")}
-              style={styles.materialImage}
-              resizeMode='contain'
-            />
+            {user?.userType?.toLowerCase() === "trucker" ? (
+              <Image
+                source={
+                  vehicleTypes.find(
+                    (v) => v.id === offer.truckId?.truckType?.toLowerCase()
+                  )?.icon || vehicleTypes[2].icon
+                }
+                style={{ width: normalize(56), height: normalize(56) }}
+                resizeMode='contain'
+              />
+            ) : (
+              <Image
+                source={require("../../../assets/images/parcel.png")}
+                style={{ width: normalize(56), height: normalize(56) }}
+                resizeMode='contain'
+              />
+            )}
           </View>
           <View style={styles.materialInfo}>
             <Text
@@ -308,6 +338,20 @@ const OfferCard = ({ offer, onOfferStatusChange, onReject }) => {
               ellipsizeMode='tail'>
               {offer.materialType || "Unknown Material"}
             </Text>
+            <Text
+              style={styles.materialType}
+              numberOfLines={1}
+              ellipsizeMode='tail'>
+              {offer.truckId?.truckNumber || "Unknown"}
+            </Text>
+            {user?.userType?.toLowerCase() === "transporter" && (
+              <Text
+                style={[styles.locationText, { marginBottom: normalize(4) }]}
+                numberOfLines={1}
+                ellipsizeMode='tail'>
+                Reg No: {offer.truckId?.toString() || "NA"}
+              </Text>
+            )}
             <View style={styles.locationContainer}>
               <MaterialIcons
                 name='circle'

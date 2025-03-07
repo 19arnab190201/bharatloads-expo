@@ -71,12 +71,16 @@ export default function TabLayout() {
             <View style={{ alignItems: "center" }}>
               {focused ? (
                 <View style={styles.tabButtonInner}>
-                  {isTrucker ? <Truck /> : <Loads fill={"#fff"} />}
+                  {isTrucker ? (
+                    <Truck fill={"#fff"} />
+                  ) : (
+                    <Loads fill={"#fff"} />
+                  )}
 
                   <View style={styles.tabButtonActiveChip}></View>
                 </View>
               ) : isTrucker ? (
-                <Truck />
+                <Truck fill={"#fff"} />
               ) : (
                 <Loads fill={"#fff"} />
               )}
