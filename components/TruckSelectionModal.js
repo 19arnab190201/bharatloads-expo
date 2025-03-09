@@ -1,41 +1,47 @@
-import React from 'react';
-import { 
-  Modal, 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
+import React from "react";
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
   ScrollView,
-  ActivityIndicator
-} from 'react-native';
+  ActivityIndicator,
+} from "react-native";
 import { normalize } from "../utils/functions";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { useAuth } from "../context/AuthProvider";
+import { router } from "expo-router";
 
-const TruckSelectionModal = ({ 
-  visible, 
-  onClose, 
-  trucks, 
+const TruckSelectionModal = ({
+  visible,
+  onClose,
+  trucks,
   onSelect,
-  loading 
+  loading,
 }) => {
+  const { colour } = useAuth();
   return (
     <Modal
-      animationType="slide"
+      animationType='slide'
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.header}>
             <Text style={styles.modalTitle}>Select Your Truck</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <FontAwesome6 name="xmark" size={normalize(20)} color="#666" />
+              <FontAwesome6 name='xmark' size={normalize(20)} color='#666' />
             </TouchableOpacity>
           </View>
 
           {loading ? (
-            <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
+            <ActivityIndicator
+              size='large'
+              color='#007AFF'
+              style={styles.loader}
+            />
           ) : trucks.length === 0 ? (
             <Text style={styles.noTrucksText}>No trucks available</Text>
           ) : (
@@ -44,8 +50,7 @@ const TruckSelectionModal = ({
                 <TouchableOpacity
                   key={truck._id}
                   style={styles.truckItem}
-                  onPress={() => onSelect(truck)}
-                >
+                  onPress={() => onSelect(truck)}>
                   <View style={styles.truckInfo}>
                     <Text style={styles.truckNumber}>{truck.truckNumber}</Text>
                     <View style={styles.truckDetails}>
@@ -57,9 +62,40 @@ const TruckSelectionModal = ({
                       </Text>
                     </View>
                   </View>
-                  <FontAwesome6 name="chevron-right" size={normalize(16)} color="#666" />
+                  <FontAwesome6
+                    name='chevron-right'
+                    size={normalize(16)}
+                    color='#666'
+                  />
                 </TouchableOpacity>
               ))}
+
+              <TouchableOpacity
+                key={"NEW_TRUCK_ID"}
+                style={{ ...styles.truckItem, paddingVertical: 20 }}
+                onPress={() => {
+                  router.push("(app)/(trucker)/postTruck");
+                }}>
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingHorizontal: 20,
+                    paddingVertical: 16,
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderColor: colour.primaryColor,
+                  }}>
+                  <Text
+                    style={{
+                      fontWeight: 600,
+                      color: colour.primaryColor,
+                    }}>
+                    Add New Truck
+                  </Text>
+                </View>
+              </TouchableOpacity>
             </ScrollView>
           )}
         </View>
@@ -71,27 +107,27 @@ const TruckSelectionModal = ({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderTopLeftRadius: normalize(20),
     borderTopRightRadius: normalize(20),
     paddingTop: normalize(20),
-    maxHeight: '80%',
+    maxHeight: "80%",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: normalize(20),
     marginBottom: normalize(15),
   },
   modalTitle: {
     fontSize: normalize(18),
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   closeButton: {
     padding: normalize(5),
@@ -100,29 +136,29 @@ const styles = StyleSheet.create({
     padding: normalize(30),
   },
   noTrucksText: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: normalize(16),
-    color: '#666',
+    color: "#666",
     padding: normalize(30),
   },
   truckList: {
     paddingHorizontal: normalize(20),
   },
   truckItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: normalize(15),
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   truckInfo: {
     flex: 1,
   },
   truckNumber: {
     fontSize: normalize(16),
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: normalize(4),
   },
   truckDetails: {
@@ -130,12 +166,12 @@ const styles = StyleSheet.create({
   },
   truckType: {
     fontSize: normalize(14),
-    color: '#666',
+    color: "#666",
   },
   truckCapacity: {
     fontSize: normalize(14),
-    color: '#666',
+    color: "#666",
   },
 });
 
-export default TruckSelectionModal; 
+export default TruckSelectionModal;

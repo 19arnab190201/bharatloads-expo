@@ -54,11 +54,11 @@ const FormInput = ({
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      // If image is larger than 1MB, compress it
-      if (fileInfo.size > 1024 * 1024) {
+      // If image is larger than 5MB, compress it
+      if (fileInfo.size > 1024 * 1024 * 3) {
         // Implement compression logic here if needed
         // For now, we'll just alert the user
-        alert("Image size should be less than 1MB");
+        alert("Image size should be less than 3MB");
         return null;
       }
 
@@ -73,10 +73,12 @@ const FormInput = ({
     try {
       setIsProcessing(true);
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.5,
+        mediaTypes: ["images"], // Use array instead of deprecated option
+        allowsEditing: true, // Enables built-in editor
+        quality: 1, // Maximum quality
+        base64: true, // Return base64 for preview
+        exif: true, // Include EXIF metadata
+        selectionLimit: 1, // Allow multiple images
       });
 
       if (!result.canceled) {
@@ -89,7 +91,7 @@ const FormInput = ({
         }
       }
     } catch (error) {
-      console.error("Error picking image:", error);
+      console.error("Error  image picker:", error);
       alert("Error picking image. Please try again.");
     } finally {
       setIsProcessing(false);

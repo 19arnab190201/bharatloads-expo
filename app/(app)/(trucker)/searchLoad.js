@@ -20,6 +20,7 @@ import { normalize } from "../../../utils/functions";
 import * as Location from "expo-location";
 import SearchLoadCard from "../../../components/SearchLoadCard";
 import TruckSelectionModal from "../../../components/TruckSelectionModal";
+import { router } from "expo-router";
 
 const FILTER_OPTIONS = {
   materialType: {
@@ -385,13 +386,7 @@ const SearchLoad = () => {
 
       Alert.alert("Success", "Bid placed successfully!");
       setShowBidModal(false);
-      if (selectedSource) {
-        fetchLoads({
-          sourceCoords: selectedSource,
-        });
-      } else if (userLocation) {
-        fetchLoads({ coordinates: userLocation });
-      }
+      router.push("/(app)/(tabs)/bids");
     } catch (error) {
       console.error("Place bid error:", error);
       Alert.alert(

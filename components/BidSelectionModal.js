@@ -11,8 +11,15 @@ import {
 import { useAuth } from "../context/AuthProvider";
 import BidSelectionCard from "./BidSelectionCard";
 import { normalize } from "../utils/functions";
+import { router } from "expo-router";
 
-export default function BidSelectionModal({ visible, onClose, loads, onLoadSelect, loading }) {
+export default function BidSelectionModal({
+  visible,
+  onClose,
+  loads,
+  onLoadSelect,
+  loading,
+}) {
   const { colour } = useAuth();
   const [selectedLoad, setSelectedLoad] = useState(null);
 
@@ -79,16 +86,15 @@ export default function BidSelectionModal({ visible, onClose, loads, onLoadSelec
       fontSize: 16,
       color: "#666",
       padding: 20,
-    }
+    },
   });
 
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType='slide'
       transparent
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.content}>
           <View style={styles.header}>
@@ -100,7 +106,7 @@ export default function BidSelectionModal({ visible, onClose, loads, onLoadSelec
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colour.primaryColor} />
+              <ActivityIndicator size='large' color={colour.primaryColor} />
             </View>
           ) : loads.length === 0 ? (
             <Text style={styles.noLoadsText}>No loads available</Text>
@@ -114,20 +120,43 @@ export default function BidSelectionModal({ visible, onClose, loads, onLoadSelec
                   isSelected={selectedLoad?._id === load._id}
                 />
               ))}
+              <Pressable
+                key={"NEW_TRUCK_ID"}
+                style={{ ...styles.truckItem, paddingVertical: 20 }}
+                onPress={() => {
+                  router.push("(app)/(transporter)/postLoad");
+                }}>
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingHorizontal: 20,
+                    paddingVertical: 16,
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderColor: colour.primaryColor,
+                  }}>
+                  <Text
+                    style={{
+                      fontWeight: 600,
+                      color: colour.primaryColor,
+                    }}>
+                    Add Load
+                  </Text>
+                </View>
+              </Pressable>
             </ScrollView>
           )}
 
           <Pressable
             style={styles.nextButton}
             onPress={handleNext}
-            disabled={!selectedLoad}
-          >
-            <Text style={styles.nextButtonText}>
-              Next
-            </Text>
+            disabled={!selectedLoad}>
+            <Text style={styles.nextButtonText}>Next</Text>
           </Pressable>
         </View>
       </View>
     </Modal>
   );
-} 
+}

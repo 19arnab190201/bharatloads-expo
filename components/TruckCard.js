@@ -142,6 +142,7 @@ export default function TruckCard({
       justifyContent: "space-between",
       alignItems: "center",
       marginBottom: normalize(12),
+      width: "100%",
     },
     userInfo: {
       flexDirection: "row",
@@ -452,7 +453,7 @@ export default function TruckCard({
             flexDirection: "row",
             alignItems: "center",
             gap: 8,
-            width: "100%",
+            justifyContent: "flex-end",
           }}>
           <Text
             style={
