@@ -26,7 +26,11 @@ const BidCard = ({ bid, type }) => {
   const { colour } = useAuth();
 
   // Debug log to see the complete bid data
+  console.log("============================================================");
+
   console.log("BidCard Props:", { type, bid });
+
+  console.log("============================================================");
 
   const styles = StyleSheet.create({
     bidCard: {
@@ -231,6 +235,8 @@ const BidCard = ({ bid, type }) => {
 const Message = ({ message, isOwnMessage }) => {
   const { colour } = useAuth();
 
+  console.log("MESSAGE   =>> ", message);
+
   const styles = StyleSheet.create({
     messageContainer: {
       maxWidth: "80%",
@@ -272,6 +278,11 @@ const Message = ({ message, isOwnMessage }) => {
       alignSelf: "flex-end",
     },
   });
+
+  console.log(
+    "-------------------------message.messageType---------------",
+    message
+  );
 
   const isSystem = message.messageType === "SYSTEM";
   const isBidAccepted = message.messageType === "BID_ACCEPTED";
@@ -516,7 +527,7 @@ export default function ChatScreen() {
 
   const otherParticipant = chat.participants.find((p) => p._id !== user._id);
 
-  console.log("otherParticipant", otherParticipant);
+  console.log("otherParticipant 22", otherParticipant);
   if (!otherParticipant) {
     return (
       <View style={[styles.container, styles.centerContent]}>

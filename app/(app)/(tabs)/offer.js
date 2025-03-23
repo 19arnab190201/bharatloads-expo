@@ -344,14 +344,7 @@ const OfferCard = ({ offer, onOfferStatusChange, onReject }) => {
               ellipsizeMode='tail'>
               {offer.truckId?.truckNumber || "Unknown"}
             </Text>
-            {user?.userType?.toLowerCase() === "transporter" && (
-              <Text
-                style={[styles.locationText, { marginBottom: normalize(4) }]}
-                numberOfLines={1}
-                ellipsizeMode='tail'>
-                Reg No: {offer.truckId?.toString() || "NA"}
-              </Text>
-            )}
+
             <View style={styles.locationContainer}>
               <MaterialIcons
                 name='circle'

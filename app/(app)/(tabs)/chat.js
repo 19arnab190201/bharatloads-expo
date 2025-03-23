@@ -18,9 +18,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const ChatItem = ({ chat, onPress }) => {
   const { user, colour } = useAuth();
-  const otherParticipant = chat.participants.find(
-    (p) => p._id !== user._id
-  );
+  const otherParticipant = chat.participants.find((p) => p._id !== user._id);
 
   const lastMessage = chat.messages[chat.messages.length - 1];
   const isBidMessage = lastMessage?.messageType === "BID_ACCEPTED";
@@ -125,7 +123,7 @@ const ChatItem = ({ chat, onPress }) => {
             {isBidMessage ? (
               <View style={styles.bidMessageContainer}>
                 <MaterialIcons
-                  name="local-offer"
+                  name='local-offer'
                   size={normalize(18)}
                   color={colour.primaryColor}
                   style={styles.bidIcon}
@@ -240,14 +238,15 @@ export default function Chat() {
         {chats.length === 0 ? (
           <View style={styles.emptyContainer}>
             <MaterialIcons
-              name="chat-bubble-outline"
+              name='chat-bubble-outline'
               size={normalize(64)}
               color={colour.iconColor}
               style={styles.emptyIcon}
             />
             <Text style={styles.emptyTitle}>No Messages Yet</Text>
             <Text style={styles.emptyText}>
-              Your messages will appear here once you start chatting with transporters or truckers after accepting bids.
+              Your messages will appear here once you start chatting with
+              transporters or truckers after accepting bids.
             </Text>
           </View>
         ) : (

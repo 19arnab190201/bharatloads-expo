@@ -1375,6 +1375,7 @@ const StepThree = ({
           />
         </View>
         <View style={stepThreeStyles.halfWidth}>
+          <Text>Diseal Amount (Advance - Cash)</Text>
           <FormInput
             Icon={MoneyIcon}
             placeholder='Diesel Amount'
