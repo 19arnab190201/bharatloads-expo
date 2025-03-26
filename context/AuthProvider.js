@@ -71,7 +71,6 @@ export function AuthProvider({ children }) {
       });
 
       if (response.status === 200) {
-        console.log("Token is valid");
         // Token is valid, user is authenticated
         setIsAuthenticated(true);
         setUser(response.data.user);  

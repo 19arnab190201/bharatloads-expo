@@ -453,7 +453,8 @@ export default function TruckCard({
             flexDirection: "row",
             alignItems: "center",
             gap: 8,
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
+            width: "100%",
           }}>
           <Text
             style={

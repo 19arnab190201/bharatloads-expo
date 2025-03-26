@@ -21,7 +21,9 @@ const ChatItem = ({ chat, onPress }) => {
   const otherParticipant = chat.participants.find((p) => p._id !== user._id);
 
   const lastMessage = chat.messages[chat.messages.length - 1];
-  const isBidMessage = lastMessage?.messageType === "BID_ACCEPTED";
+  const isBidMessage =
+    lastMessage?.messageType === "BID_ACCEPTED" ||
+    lastMessage?.messageType === "BID_REJECTED";
 
   const styles = StyleSheet.create({
     chatItem: {
@@ -80,20 +82,40 @@ const ChatItem = ({ chat, onPress }) => {
       color: colour.iconText,
     },
     bidMessageContainer: {
+      borderRadius: normalize(8),
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    bidIcon: {
+      marginRight: normalize(8),
+    },
+   
+    acceptedBidMessage: {
+      color: colour.primaryColor,
+      fontWeight: "500",
+      fontSize: normalize(14),
+    },
+    rejectedBidMessage: {
+      color: "#EF4444",
+      fontWeight: "500",
+      fontSize: normalize(14),
+    },
+    acceptedBidMessageContainer: {
       backgroundColor: "#E6F7F5",
       padding: normalize(8),
       borderRadius: normalize(8),
       flexDirection: "row",
       alignItems: "center",
       marginTop: normalize(4),
+      
     },
-    bidIcon: {
-      marginRight: normalize(8),
-    },
-    bidMessage: {
-      color: colour.primaryColor,
-      fontWeight: "500",
-      fontSize: normalize(14),
+    rejectedBidMessageContainer: {
+      backgroundColor: "#FEE6E6",
+      padding: normalize(8),
+      borderRadius: normalize(8),
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: normalize(4),
     },
   });
 
@@ -122,15 +144,31 @@ const ChatItem = ({ chat, onPress }) => {
           <View style={styles.messageContainer}>
             {isBidMessage ? (
               <View style={styles.bidMessageContainer}>
-                <MaterialIcons
-                  name='local-offer'
-                  size={normalize(18)}
-                  color={colour.primaryColor}
-                  style={styles.bidIcon}
-                />
-                <Text style={styles.bidMessage}>
-                  Bid Accepted - Let's start the journey!
-                </Text>
+                {lastMessage.messageType === "BID_ACCEPTED" ? (
+                  <View style={styles.acceptedBidMessageContainer}>
+                  <MaterialIcons
+                    name='local-offer'
+                    size={normalize(18)}
+                    color={colour.primaryColor}
+                    style={styles.bidIcon}
+                    />
+                <Text style={styles.acceptedBidMessage}>
+                    Bid Accepted 
+                  </Text>
+                  </View>
+                ) : (
+                  <View style={styles.rejectedBidMessageContainer}>
+                  <MaterialIcons
+                    name='local-offer'
+                    size={normalize(18)}
+                    color={'#EF4444'}
+                    style={styles.bidIcon}
+                  />
+                <Text style={styles.rejectedBidMessage}>
+                    Bid Rejected 
+                  </Text>
+                  </View>
+                )}
               </View>
             ) : (
               <Text style={styles.regularMessage} numberOfLines={1}>

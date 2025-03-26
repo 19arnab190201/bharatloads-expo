@@ -22,15 +22,35 @@ import { Ionicons } from "@expo/vector-icons";
 import Loader from "../../../components/Loader";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const BidCard = ({ bid, type }) => {
+const BidCard = ({ message }) => {
   const { colour } = useAuth();
+  const type = message.messageType;
+  
+  // Parse bid details from message content
+  const parseMessageContent = (content) => {
+    const lines = content.split('\n\n');
+    const details = {};
+    
+    // Parse each line after the first line (which contains the status)
+    if (lines[1]) {
+      const detailLines = lines[1].split('\n');
+      detailLines.forEach(line => {
+        if (line.includes('📦')) details.materialType = line.replace('📦 ', '');
+        if (line.includes('⚖️')) details.weight = line.replace('⚖️ ', '');
+        if (line.includes('🚛')) {
+          const truckInfo = line.replace('🚛 ', '').split(' - ');
+          details.truckType = truckInfo[0];
+          details.truckNumber = truckInfo[1];
+        }
+        if (line.includes('💰')) details.amount = line.replace('💰 ₹', '');
+        if (line.includes('📍')) details.source = line.replace('📍 From: ', '');
+        if (line.includes('🎯')) details.destination = line.replace('🎯 To: ', '');
+      });
+    }
+    return details;
+  };
 
-  // Debug log to see the complete bid data
-  console.log("============================================================");
-
-  console.log("BidCard Props:", { type, bid });
-
-  console.log("============================================================");
+  const bidDetails = parseMessageContent(message.content);
 
   const styles = StyleSheet.create({
     bidCard: {
@@ -40,10 +60,7 @@ const BidCard = ({ bid, type }) => {
       marginVertical: 8,
       marginHorizontal: 16,
       shadowColor: "#3d3d3d",
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
+      shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 3,
@@ -78,83 +95,12 @@ const BidCard = ({ bid, type }) => {
       borderTopWidth: 1,
       borderTopColor: "#eee",
     },
-    bidAmountLabel: {
-      fontSize: normalize(14),
-      color: "#666",
-      marginBottom: 4,
-    },
     bidAmountValue: {
       fontSize: normalize(18),
       fontWeight: "600",
       color: type === "BID_REJECTED" ? "#EF4444" : colour.primaryColor,
     },
-    bidAmountDetail: {
-      fontSize: normalize(12),
-      color: "#666",
-      marginTop: 4,
-    },
-    rejectionReason: {
-      marginTop: 12,
-      paddingTop: 12,
-      borderTopWidth: 1,
-      borderTopColor: "#eee",
-    },
-    rejectionReasonLabel: {
-      fontSize: normalize(14),
-      color: "#666",
-      marginBottom: 4,
-    },
-    rejectionReasonText: {
-      fontSize: normalize(14),
-      color: "#EF4444",
-      fontWeight: "500",
-    },
-    rejectionNote: {
-      fontSize: normalize(12),
-      color: "#666",
-      marginTop: 4,
-      fontStyle: "italic",
-    },
   });
-
-  // Early return with debug info if bid is not properly structured
-  if (!bid || (!bid.truckId && !bid.materialType)) {
-    console.log("Invalid bid data:", bid);
-    return (
-      <View style={[styles.bidCard, { alignItems: "center" }]}>
-        <View style={styles.bidHeader}>
-          <MaterialIcons
-            name={type === "BID_REJECTED" ? "cancel" : "handshake"}
-            size={24}
-            color={type === "BID_REJECTED" ? "#EF4444" : colour.primaryColor}
-          />
-          <Text style={styles.bidTitle}>
-            {type === "BID_REJECTED" ? "Bid Rejected" : "Bid Accepted"}
-          </Text>
-        </View>
-        <Text style={{ color: "#666", marginTop: 8 }}>
-          Bid details unavailable
-        </Text>
-      </View>
-    );
-  }
-
-  const getRejectionReasonText = (reason) => {
-    switch (reason?.toUpperCase()) {
-      case "PRICE_TOO_HIGH":
-        return "Price is too high";
-      case "TRUCK_UNAVAILABLE":
-        return "Truck is not available";
-      case "ROUTE_ISSUE":
-        return "Route/Location issues";
-      case "TIMING_ISSUE":
-        return "Timing/Schedule conflict";
-      case "OTHER":
-        return "Other reasons";
-      default:
-        return "No specific reason provided";
-    }
-  };
 
   return (
     <View style={styles.bidCard}>
@@ -170,61 +116,39 @@ const BidCard = ({ bid, type }) => {
       </View>
 
       <View style={styles.bidDetails}>
-        {bid.truckId && (
+        {bidDetails.truckType && (
           <View style={styles.bidRow}>
-            <MaterialIcons name='local-shipping' size={20} color='#666' />
+            <MaterialIcons name="local-shipping" size={20} color="#666" />
             <Text style={styles.bidText}>
-              {bid.truckId.truckType || "N/A"} -{" "}
-              {bid.truckId.truckNumber || "N/A"}
+              {bidDetails.truckType} {bidDetails.truckNumber ? `- ${bidDetails.truckNumber}` : ''}
             </Text>
           </View>
         )}
 
         <View style={styles.bidRow}>
-          <MaterialIcons name='inventory' size={20} color='#666' />
+          <MaterialIcons name="inventory" size={20} color="#666" />
           <Text style={styles.bidText}>
-            {bid.materialType || "N/A"} • {bid.weight || "N/A"} Tonnes
+            {bidDetails.materialType} • {bidDetails.weight}
           </Text>
         </View>
 
-        {bid.source && (
+        {bidDetails.source && (
           <View style={styles.bidRow}>
-            <MaterialIcons name='place' size={20} color='#14B8A6' />
-            <Text style={styles.bidText}>{bid.source.placeName || "N/A"}</Text>
+            <MaterialIcons name="place" size={20} color="#14B8A6" />
+            <Text style={styles.bidText}>{bidDetails.source}</Text>
           </View>
         )}
 
-        {bid.destination && (
+        {bidDetails.destination && (
           <View style={styles.bidRow}>
-            <MaterialIcons name='place' size={20} color='#F43F5E' />
-            <Text style={styles.bidText}>
-              {bid.destination.placeName || "N/A"}
-            </Text>
+            <MaterialIcons name="place" size={20} color="#F43F5E" />
+            <Text style={styles.bidText}>{bidDetails.destination}</Text>
           </View>
         )}
 
-        {bid.biddedAmount && (
+        {bidDetails.amount && (
           <View style={styles.bidAmount}>
-            <Text style={styles.bidAmountLabel}>Amount</Text>
-            <Text style={styles.bidAmountValue}>
-              ₹{bid.biddedAmount.total || 0}
-            </Text>
-            <Text style={styles.bidAmountDetail}>
-              Advance: ₹{bid.biddedAmount.advanceAmount || 0} • Diesel: ₹
-              {bid.biddedAmount.dieselAmount || 0}
-            </Text>
-          </View>
-        )}
-
-        {type === "BID_REJECTED" && (
-          <View style={styles.rejectionReason}>
-            <Text style={styles.rejectionReasonLabel}>Rejection Reason</Text>
-            <Text style={styles.rejectionReasonText}>
-              {getRejectionReasonText(bid.rejectionReason)}
-            </Text>
-            {bid.rejectionNote && (
-              <Text style={styles.rejectionNote}>{bid.rejectionNote}</Text>
-            )}
+            <Text style={styles.bidAmountValue}>₹{bidDetails.amount}</Text>
           </View>
         )}
       </View>
@@ -279,11 +203,6 @@ const Message = ({ message, isOwnMessage }) => {
     },
   });
 
-  console.log(
-    "-------------------------message.messageType---------------",
-    message
-  );
-
   const isSystem = message.messageType === "SYSTEM";
   const isBidAccepted = message.messageType === "BID_ACCEPTED";
   const isBidRejected = message.messageType === "BID_REJECTED";
@@ -293,11 +212,12 @@ const Message = ({ message, isOwnMessage }) => {
     console.log("Bid Message Data:", {
       messageType: message.messageType,
       bidData: message.bidData,
+      completeData: message
     });
   }
 
   if (isBidAccepted || isBidRejected) {
-    return <BidCard bid={message?.bidData} type={message.messageType} />;
+    return <BidCard message={message} />;
   }
 
   return (

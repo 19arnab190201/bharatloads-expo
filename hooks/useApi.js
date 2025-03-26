@@ -9,9 +9,7 @@ const useApi = () => {
 
   const request = async (url, method = "get", body = null, ...rest) => {
     setLoading(true);
-    console.log("url", url);
 
-    console.log("token", token);
     try {
       const response = await axios(
         {
