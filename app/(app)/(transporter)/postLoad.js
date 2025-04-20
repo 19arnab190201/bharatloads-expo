@@ -1325,15 +1325,18 @@ const StepThree = ({
       />
 
       {/* Advance Amount Details */}
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: "bold",
-          marginVertical: 10,
-          color: "#333",
-        }}>
-        Advance Amount
-      </Text>
+      <View>
+        <View style={stepThreeStyles.advanceInputContainer}></View>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "bold",
+            marginVertical: 10,
+            color: "#333",
+          }}>
+          Advance Amount
+        </Text>
+      </View>
       <View style={stepThreeStyles.advanceInputContainer}>
         <View style={stepThreeStyles.halfWidth}>
           <FormInput
@@ -1375,7 +1378,16 @@ const StepThree = ({
           />
         </View>
         <View style={stepThreeStyles.halfWidth}>
-          <Text>Diseal Amount </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "bold",
+              marginTop: -38,
+              marginBottom: 22,
+              color: "#333",
+            }}>
+            Diseal Amount{" "}
+          </Text>
           <FormInput
             Icon={MoneyIcon}
             placeholder='Diesel Amount'
