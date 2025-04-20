@@ -25,32 +25,39 @@ import { MaterialIcons } from "@expo/vector-icons";
 const BidCard = ({ message }) => {
   const { colour } = useAuth();
   const type = message.messageType;
-  
+
   // Parse bid details from message content
   const parseMessageContent = (content) => {
-    const lines = content.split('\n\n');
+    const lines = content.split("\n");
     const details = {};
-    
-    // Parse each line after the first line (which contains the status)
-    if (lines[1]) {
-      const detailLines = lines[1].split('\n');
-      detailLines.forEach(line => {
-        if (line.includes('📦')) details.materialType = line.replace('📦 ', '');
-        if (line.includes('⚖️')) details.weight = line.replace('⚖️ ', '');
-        if (line.includes('🚛')) {
-          const truckInfo = line.replace('🚛 ', '').split(' - ');
-          details.truckType = truckInfo[0];
-          details.truckNumber = truckInfo[1];
-        }
-        if (line.includes('💰')) details.amount = line.replace('💰 ₹', '');
-        if (line.includes('📍')) details.source = line.replace('📍 From: ', '');
-        if (line.includes('🎯')) details.destination = line.replace('🎯 To: ', '');
-      });
+
+    // Check if there's a reason line
+    if (lines[2] && lines[2].includes("⚠️ REASON:")) {
+      details.reason = lines[2].replace("⚠️ REASON: ", "");
+      console.log("Reason found:", details.reason);
     }
+
+    // Parse each line
+    lines.forEach((line) => {
+      if (line.includes("📦")) details.materialType = line.replace("📦 ", "");
+      if (line.includes("⚖️")) details.weight = line.replace("⚖️ ", "");
+      if (line.includes("🚛")) {
+        const truckInfo = line.replace("🚛 ", "").split(" - ");
+        details.truckType = truckInfo[0];
+        details.truckNumber = truckInfo[1];
+      }
+      if (line.includes("💰")) details.amount = line.replace("💰 ₹", "");
+      if (line.includes("📍")) details.source = line.replace("📍 From: ", "");
+      if (line.includes("🎯"))
+        details.destination = line.replace("🎯 To: ", "");
+    });
+
     return details;
   };
 
   const bidDetails = parseMessageContent(message.content);
+
+  console.log("Bid Details:", bidDetails);
 
   const styles = StyleSheet.create({
     bidCard: {
@@ -114,19 +121,25 @@ const BidCard = ({ message }) => {
           {type === "BID_REJECTED" ? "Bid Rejected" : "Bid Accepted"}
         </Text>
       </View>
+      <View
+        style={{ ...styles.bidRow, marginBottom: bidDetails.reason ? 12 : 0 }}>
+        <MaterialIcons name='warning' size={20} color='#666' />
+        <Text style={styles.bidText}>{bidDetails.reason}</Text>
+      </View>
 
       <View style={styles.bidDetails}>
         {bidDetails.truckType && (
           <View style={styles.bidRow}>
-            <MaterialIcons name="local-shipping" size={20} color="#666" />
+            <MaterialIcons name='local-shipping' size={20} color='#666' />
             <Text style={styles.bidText}>
-              {bidDetails.truckType} {bidDetails.truckNumber ? `- ${bidDetails.truckNumber}` : ''}
+              {bidDetails.truckType}{" "}
+              {bidDetails.truckNumber ? `- ${bidDetails.truckNumber}` : ""}
             </Text>
           </View>
         )}
 
         <View style={styles.bidRow}>
-          <MaterialIcons name="inventory" size={20} color="#666" />
+          <MaterialIcons name='inventory' size={20} color='#666' />
           <Text style={styles.bidText}>
             {bidDetails.materialType} • {bidDetails.weight}
           </Text>
@@ -134,14 +147,14 @@ const BidCard = ({ message }) => {
 
         {bidDetails.source && (
           <View style={styles.bidRow}>
-            <MaterialIcons name="place" size={20} color="#14B8A6" />
+            <MaterialIcons name='place' size={20} color='#14B8A6' />
             <Text style={styles.bidText}>{bidDetails.source}</Text>
           </View>
         )}
 
         {bidDetails.destination && (
           <View style={styles.bidRow}>
-            <MaterialIcons name="place" size={20} color="#F43F5E" />
+            <MaterialIcons name='place' size={20} color='#F43F5E' />
             <Text style={styles.bidText}>{bidDetails.destination}</Text>
           </View>
         )}
@@ -159,7 +172,7 @@ const BidCard = ({ message }) => {
 const Message = ({ message, isOwnMessage }) => {
   const { colour } = useAuth();
 
-  console.log("MESSAGE   =>> ", message);
+  // console.log("MESSAGE   =>> ", message);
 
   const styles = StyleSheet.create({
     messageContainer: {
@@ -206,15 +219,6 @@ const Message = ({ message, isOwnMessage }) => {
   const isSystem = message.messageType === "SYSTEM";
   const isBidAccepted = message.messageType === "BID_ACCEPTED";
   const isBidRejected = message.messageType === "BID_REJECTED";
-
-  // Debug log for bid messages
-  if (isBidAccepted || isBidRejected) {
-    console.log("Bid Message Data:", {
-      messageType: message.messageType,
-      bidData: message.bidData,
-      completeData: message
-    });
-  }
 
   if (isBidAccepted || isBidRejected) {
     return <BidCard message={message} />;
@@ -348,13 +352,13 @@ export default function ChatScreen() {
       }
 
       // Debug log for chat data
-      console.log("Chat Data:", {
-        messageCount: chatData.messages.length,
-        bidMessages: chatData.messages.filter(
-          (m) =>
-            m.messageType === "BID_ACCEPTED" || m.messageType === "BID_REJECTED"
-        ),
-      });
+      // console.log("Chat Data:", {
+      //   messageCount: chatData.messages.length,
+      //   bidMessages: chatData.messages.filter(
+      //     (m) =>
+      //       m.messageType === "BID_ACCEPTED" || m.messageType === "BID_REJECTED"
+      //   ),
+      // });
 
       setChat(chatData);
 
@@ -447,7 +451,7 @@ export default function ChatScreen() {
 
   const otherParticipant = chat.participants.find((p) => p._id !== user._id);
 
-  console.log("otherParticipant 22", otherParticipant);
+  // console.log("otherParticipant 22", otherParticipant);
   if (!otherParticipant) {
     return (
       <View style={[styles.container, styles.centerContent]}>
