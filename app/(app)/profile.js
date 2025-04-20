@@ -166,6 +166,22 @@ const Profile = () => {
               style={styles.optionItem}>
               <Text>Help & Support</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.optionItem2}
+              onPress={() =>
+                Linking.openURL("https://www.bharatloads.com/tnc.html")
+              }>
+              <Text>Terms & Condition</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.optionItem2}
+              onPress={() =>
+                Linking.openURL(
+                  "https://www.bharatloads.com/privacypolicy.html"
+                )
+              }>
+              <Text>Privacy Policy</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.optionItem} onPress={handleLogout}>
               <Text style={styles.logoutText}>Log out</Text>
@@ -258,6 +274,14 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   optionItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  optionItem2: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

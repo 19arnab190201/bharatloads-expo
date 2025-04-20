@@ -6,19 +6,16 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
-  Pressable,
 } from "react-native";
 import { useCallback } from "react";
-import { useAPI } from "../../../utils/api";
 import { useAuth } from "../../../context/AuthProvider";
 import { useNavigation } from "expo-router";
-import { useLayoutEffect, useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import Header from "../../../components/Header";
 import Banner from "../../../components/Banner";
 import LoadCard from "../../../components/LoadCard";
 import { api } from "../../../utils/api";
-import FormInput from "../../../components/FormInput";
 import LoadingPoint from "../../../assets/images/icons/LoadingPoint";
 import SearchIcon from "../../../assets/images/icons/Search";
 import TruckCard from "../../../components/TruckCard";
@@ -36,8 +33,6 @@ export default function Dashboard() {
   const [loads, setLoads] = useState([]);
   const [trucks, setTrucks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const coins = loads.coins || 0;
-  console.log("coinrfhrfhurys", coins);
 
   const styles = StyleSheet.create({
     container: {

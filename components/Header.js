@@ -1,7 +1,7 @@
 import React from "react";
-import { StyleSheet, View, Text, Pressable } from "react-native";
+import { StyleSheet, View, Text, Pressable, Linking } from "react-native";
 import Coins from "./Coins";
-
+import Feather from "@expo/vector-icons/Feather";
 import { useAuth } from "../context/AuthProvider";
 import { useNavigation } from "expo-router";
 import { normalize } from "../utils/functions";
@@ -64,7 +64,12 @@ const Header = () => {
       textTransform: "capitalize",
       color: colour.secondaryColor,
     },
-    headerRight: {},
+    headerRight: {
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
   });
 
   return (
@@ -79,6 +84,10 @@ const Header = () => {
         </View>
       </View>
       <View style={styles.headerRight}>
+        <Pressable
+          onPress={() => Linking.openURL("https://wa.me/+919942588783")}>
+          <Feather name='headphones' size={24} color='black' />
+        </Pressable>
         <Coins coins={user?.BlCoins || 0} />
       </View>
     </View>
