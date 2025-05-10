@@ -55,10 +55,10 @@ const FormInput = ({
       });
 
       // If image is larger than 5MB, compress it
-      if (fileInfo.size > 1024 * 1024 * 3) {
+      if (fileInfo.size > 1024 * 1024 * 10) {
         // Implement compression logic here if needed
         // For now, we'll just alert the user
-        alert("Image size should be less than 3MB");
+        alert("Image size should be less than 10MB");
         return null;
       }
 
@@ -73,25 +73,27 @@ const FormInput = ({
     try {
       setIsProcessing(true);
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"], // Use array instead of deprecated option
-        allowsEditing: true, // Enables built-in editor
-        quality: 1, // Maximum quality
-        base64: true, // Return base64 for preview
-        exif: true, // Include EXIF metadata
-        selectionLimit: 1, // Allow multiple images
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+        exif: true,
+        selectionLimit: 1,
       });
 
       if (!result.canceled) {
-        const processedImage = await processImage(result.assets[0].uri);
-        if (processedImage) {
-          setImagePreview(result.assets[0].uri);
-          onChange({
-            [name]: processedImage,
-          });
-        }
+        const file = {
+          uri: result.assets[0].uri,
+          type: "image/jpeg",
+          name: "RCImage.jpg",
+        };
+
+        setImagePreview(result.assets[0].uri);
+        onChange({
+          [name]: file,
+        });
       }
     } catch (error) {
-      console.error("Error  image picker:", error);
+      console.error("Error in image picker:", error);
       alert("Error picking image. Please try again.");
     } finally {
       setIsProcessing(false);

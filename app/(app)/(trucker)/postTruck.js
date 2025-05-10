@@ -599,21 +599,32 @@ const PostTruck = () => {
       }
 
       setIsSubmitting(true);
-      const payload = {
-        truckNumber: formatVehicle(formState.truckNumber),
-        truckLocation: formState.truckLocation,
-        truckPermit: formState.truckPermit,
-        vehicleBodyType: formState.vehicleBodyType,
-        truckType: formState.truckType,
-        truckBodyType: formState.truckBodyType,
-        truckCapacity: formState.truckCapacity,
-        truckTyre: formState.truckTyre,
-        RCImage: formState.RCImage,
-      };
 
-      const response = await api.post("/truck", payload, {
+      // Create FormData object
+      const formData = new FormData();
+
+      // Add all text fields
+      formData.append("truckNumber", formatVehicle(formState.truckNumber));
+      formData.append("truckLocation", JSON.stringify(formState.truckLocation));
+      formData.append("truckPermit", formState.truckPermit);
+      formData.append("vehicleBodyType", formState.vehicleBodyType);
+      formData.append("truckType", formState.truckType);
+      formData.append("truckBodyType", formState.truckBodyType);
+      formData.append("truckCapacity", formState.truckCapacity);
+      formData.append("truckTyre", formState.truckTyre);
+
+      // Add RC Image file
+      if (formState.RCImage) {
+        formData.append("RCImage", {
+          uri: formState.RCImage.uri,
+          type: formState.RCImage.type,
+          name: formState.RCImage.name,
+        });
+      }
+
+      const response = await api.post("/truck", formData, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
         },
       });
